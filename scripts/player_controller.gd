@@ -16,6 +16,10 @@ var _is_grappling: bool = false
 var _grapple_point: Vector2 = Vector2.ZERO
 var _current_nail: Node2D = null
 
+# === ONREADY VARIABLES ===
+@onready var pickaxe: Node2D = $Pickaxe
+@onready var pickaxe_sprite: Sprite2D = $Pickaxe/Sprite2D if has_node("Pickaxe/Sprite2D") else null
+
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	_connect_to_nails()
@@ -31,14 +35,56 @@ func _physics_process(delta: float) -> void:
 		_handle_movement(delta)
 
 	move_and_slide()
-	queue_redraw()  # For drawing rope
+	_update_pickaxe_visual()
 
-func _draw() -> void:
+func _update_pickaxe_visual() -> void:
+	if not pickaxe or not pickaxe_sprite:
+		return
+
 	if _is_grappling and _current_nail:
-		# Draw rope from player to nail
-		var rope_start: Vector2 = Vector2.ZERO  # Local position (player center)
-		var rope_end: Vector2 = _grapple_point - global_position  # Nail position relative to player
-		draw_line(rope_start, rope_end, Color.BROWN, 2.0)# === PRIVATE METHODS ===
+		# Show pickaxe as rope stretching from player to nail
+		pickaxe.visible = true
+
+		# Get center points (explicit start and end)
+		var player_center: Vector2 = global_position  # Start point
+		var nail_center: Vector2 = _current_nail.global_position  # End point
+
+		# Calculate rope vector (from player center to nail center)
+		var rope_vector: Vector2 = nail_center - player_center
+		var rope_distance: float = rope_vector.length()
+		var rope_angle: float = rope_vector.angle()
+
+		# Get original sprite dimensions
+		var texture_size: Vector2 = pickaxe_sprite.texture.get_size()
+		var original_length: float = texture_size.y  # Sprite height (vertical)
+
+		# Calculate midpoint between player and nail (center of scaling)
+		var midpoint: Vector2 = player_center + rope_vector * 0.5
+
+		# Position pickaxe at midpoint (it will scale from this center)
+		pickaxe.global_position = midpoint
+
+		# Rotate to align with rope direction (pointing from player to nail)
+		# Adding PI/2 because sprite's "up" is the direction we want to point
+		pickaxe.rotation = rope_angle + PI / 2.0
+
+		# Scale to stretch from player center to nail center
+		var y_scale: float = rope_distance / original_length
+		pickaxe.scale = Vector2(1.0, y_scale)
+
+		# Keep sprite centered (scales from middle)
+		pickaxe_sprite.centered = true
+		pickaxe_sprite.offset = Vector2.ZERO
+	else:
+		# Normal pickaxe position (in hand)
+		pickaxe.visible = true
+		pickaxe_sprite.centered = true
+		pickaxe_sprite.offset = Vector2.ZERO
+		pickaxe.position = Vector2(32, 0)
+		pickaxe.rotation = -0.785398  # -45 degrees
+		pickaxe.scale = Vector2(1.0, 1.0)
+
+# === PRIVATE METHODS ===
 func _handle_gravity(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
