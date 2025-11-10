@@ -1,0 +1,31 @@
+stages:
+  - export
+  - deploy
+
+export-web:
+  stage: export
+  image: barichello/godot-ci:4.5.1
+  script:
+    - mkdir -p build/web
+    - godot --headless --verbose --export-release "Web" build/web/index.html
+  artifacts:
+    paths:
+      - build/web
+    expire_in: 1 day
+
+pages:
+  stage: deploy
+  image: alpine
+  dependencies:
+    - export-web
+  script: |
+    mkdir -p public
+    cp -r build/web/* public/
+    echo '/*' > public/_headers
+    echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
+    echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
