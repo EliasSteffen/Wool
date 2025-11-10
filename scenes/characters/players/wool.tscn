@@ -1,5 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=5 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_wpmjv"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_00gp6"]
+[ext_resource type="PackedScene" uid="uid://dq8jk3n5napxa" path="res://scenes/tools/pickaxe.tscn" id="3_pickaxe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eoutm"]
+atlas = ExtResource("2_00gp6")
+region = Rect2(256, 4416, 64, 64)
 
 [node name="Node2D" instance=ExtResource("1_wpmjv")]
+
+[node name="Sprite2D" parent="." index="0"]
+texture = SubResource("AtlasTexture_eoutm")
+
+[node name="Pickaxe" parent="." index="2" instance=ExtResource("3_pickaxe")]
+position = Vector2(32, 0)
+rotation = -0.785398

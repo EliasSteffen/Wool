@@ -1,5 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://fhce3iot1cba"]
+[gd_scene load_steps=4 format=3 uid="uid://fhce3iot1cba"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_k8i86"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_1qgi1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ypkhq"]
+atlas = ExtResource("2_1qgi1")
+region = Rect2(192, 3072, 64, 64)
 
 [node name="CharacterBody2D" instance=ExtResource("1_k8i86")]
+
+[node name="Sprite2D" parent="." index="0"]
+texture = SubResource("AtlasTexture_ypkhq")
