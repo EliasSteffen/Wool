@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://b6ta6xfdcfr3h"]
+
+[ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_wpmjv"]
+
+[node name="Node2D" instance=ExtResource("1_wpmjv")]
