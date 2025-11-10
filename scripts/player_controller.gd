@@ -71,8 +71,9 @@ func _handle_movement(delta: float) -> void:
 		# Accelerate
 		velocity.x = move_toward(velocity.x, _direction * SPEED, ACCELERATION * delta)
 	else:
-		# Apply friction
-		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
+		# Apply friction ONLY when on ground (not in air)
+		if is_on_floor():
+			velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
 
 func _connect_to_nails() -> void:
 	# Connect to all nails in the scene
