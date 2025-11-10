@@ -15,7 +15,6 @@ var _direction: float = 0.0
 var _is_grappling: bool = false
 var _grapple_point: Vector2 = Vector2.ZERO
 var _current_nail: Node2D = null
-var _swing_velocity: float = 0.0
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -101,8 +100,10 @@ func _start_grappling() -> void:
 
 func _stop_grappling() -> void:
 	print("=== STOPPED GRAPPLING ===")
+	print("Velocity beim Loslassen: ", velocity)
 	_is_grappling = false
-	_swing_velocity = 0.0
+	# DON'T reset velocity - keep momentum!
+	# velocity wird NICHT zurückgesetzt, damit Schwung erhalten bleibt
 	if _current_nail and _current_nail.has_method("set_connected"):
 		_current_nail.set_connected(false)
 
@@ -127,31 +128,27 @@ func _handle_grappling(delta: float) -> void:
 	# Apply gravity
 	velocity += get_gravity() * delta
 
-	# Always pull towards nail if too far
+	# Allow horizontal movement while swinging
+	_direction = Input.get_axis("ui_left", "ui_right")
+	if _direction != 0.0:
+		velocity.x += _direction * ACCELERATION * delta * 0.3
+
+	# Rope constraint physics
 	if distance > ROPE_LENGTH:
-		# Strong pull towards nail
-		var pull_force: Vector2 = rope_direction * GRAPPLE_SPEED
-		velocity = velocity.lerp(pull_force, 0.1)
-	else:
-		# Swinging physics when at rope length
-		# Allow horizontal movement while swinging
-		_direction = Input.get_axis("ui_left", "ui_right")
-		if _direction != 0.0:
-			velocity.x += _direction * ACCELERATION * delta * 0.3
+		# Pull towards nail only to maintain rope length (not to center)
+		var velocity_along_rope: float = velocity.dot(rope_direction)
 
-		# Keep player exactly at rope length (circular constraint)
-		if distance > ROPE_LENGTH * 0.95:  # Small threshold to avoid jitter
-			# Project velocity to be tangent to the circle
-			var velocity_along_rope: float = velocity.dot(rope_direction)
-			if velocity_along_rope < 0:
-				# Remove velocity component pulling away from nail
-				velocity -= rope_direction * velocity_along_rope
+		# Remove velocity component pulling away from nail
+		if velocity_along_rope < 0:
+			velocity -= rope_direction * velocity_along_rope
 
-			# Hard constraint: keep at exact distance
-			global_position = _grapple_point - rope_direction * ROPE_LENGTH
+		# Gently pull back to rope length (spring-like)
+		var excess_distance: float = distance - ROPE_LENGTH
+		var pull_strength: float = excess_distance * 15.0  # Spring constant
+		velocity += rope_direction * pull_strength * delta
 
-		# Apply swing damping
-		velocity.x *= SWING_DAMPING
+	# Apply swing damping (loses energy over time)
+	velocity.x *= SWING_DAMPING
 
 # === SIGNAL CALLBACKS ===
 func _on_nail_in_range(nail: Node2D) -> void:

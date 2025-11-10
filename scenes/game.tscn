@@ -25,7 +25,7 @@ region_enabled = true
 region_rect = Rect2(0, 0, 800, 64)
 
 [node name="NailInAir" parent="." instance=ExtResource("2_nail")]
-position = Vector2(600, 200)
+position = Vector2(384, 320)
 
 [node name="Player" parent="." instance=ExtResource("1_wool")]
 position = Vector2(100, 400)
