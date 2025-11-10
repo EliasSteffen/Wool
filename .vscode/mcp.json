@@ -1,0 +1,10 @@
+{
+	"servers": {
+		"godot-mcp": {
+			"command": "node",
+			"args": [
+				"~/godot/godot-mcp/build/index.js"
+			]
+		}
+	},
+}
