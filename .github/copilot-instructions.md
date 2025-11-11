@@ -19,7 +19,17 @@ All Commit messages MUST follow this structure
 7. Use the body to explain what and why vs. how
 
 **ADD-ONS**:
-Use emoticons for better readability (e.g., ✨ for new features, 🐛 for bug fixes)
+Use emojis for better readability
+- ✨ `feat:` for new features
+- 🐛 `fix:` for bug fixes
+- ♻️ `refactor:` for code changes that neither fix a bug nor add a feature
+- 📝 `docs:` for documentation changes
+- 🎨 `style:` for code style changes (formatting, missing semi-colons, etc)
+- ⚡ `perf:` for performance improvements
+- ✅ `test:` for adding or updating tests
+- 🔧 `ci:` for changes to CI configuration files and scripts
+
+Emojis are written after the type, e.g., `feat: ✨ Add new enemy type`
 
 **LANGUAGE**:
 The commit messages must be written in **English**.
