@@ -4,6 +4,26 @@
 
 Dieses Projekt ist ein 2D-Spiel entwickelt mit **Godot Engine 4.5.1** und **GDScript**. Es nutzt eine node-basierte Architektur mit Vererbungshierarchien für Characters (Players/Enemies).
 
+## Git Commit Messages
+
+**REQUIRED FORMAT**:
+All Commit messages MUST follow this structure
+
+**RULES**:
+1. Separate subject from the body with a blank line
+2. Limit the subject line to 50 characters
+3. Capitalize the subject line
+4. Do not end the subject line with a period
+5. Use the imperative mood in the subject line (e.g., "Add feature" not "Added feature" or "Adds feature")
+6. Wrap the body at 72 characters
+7. Use the body to explain what and why vs. how
+
+**ADD-ONS**:
+Use emoticons for better readability (e.g., ✨ for new features, 🐛 for bug fixes)
+
+**LANGUAGE**:
+The commit messages must be written in **English**.
+
 ## Godot-Spezifische Konventionen
 
 ### Naming Conventions
