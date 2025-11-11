@@ -9,9 +9,6 @@ size = Vector2(800, 64)
 
 [node name="Node2D" type="Node2D"]
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(576, 328)
-
 [node name="Ground" type="StaticBody2D" parent="."]
 position = Vector2(400, 568)
 
@@ -27,5 +24,10 @@ region_rect = Rect2(0, 0, 800, 64)
 [node name="NailInAir" parent="." instance=ExtResource("2_nail")]
 position = Vector2(384, 320)
 
+[node name="NailInAir2" parent="." instance=ExtResource("2_nail")]
+position = Vector2(768, 320)
+
 [node name="Player" parent="." instance=ExtResource("1_wool")]
-position = Vector2(100, 400)
+position = Vector2(96, 424)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]

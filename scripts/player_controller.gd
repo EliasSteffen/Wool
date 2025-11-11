@@ -23,6 +23,9 @@ var _current_nail: Node2D = null
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	_connect_to_nails()
+	# Set pickaxe z_index to be behind player (-1)
+	if pickaxe:
+		pickaxe.z_index = -1
 
 func _physics_process(delta: float) -> void:
 	# Always handle input (especially to detect release)
@@ -43,36 +46,56 @@ func _update_pickaxe_visual() -> void:
 
 	if _is_grappling and _current_nail:
 		# Show pickaxe as rope stretching from player to nail
+
+		"""
+		Die pickaxe wird so skaliert, positioniert und rotiert, dass sie wie ein Seil zwischen dem Spieler und dem Nagel aussieht. Sie ist zentriert zwischen dem nail und dem Spieler.
+
+		a---b
+		|   |
+		c---d
+
+		Dabei soll c auf dem Spieler liegen und b auf dem Nagel.
+
+		Es soll also folgendes passieren:
+
+		c_player = center player
+		c_nail = center nail
+
+		die pickaxe wird nun auf dem mittelpunkt zwischen c_player und c_nail positioniert.
+		sie wird so rotiert, dass c in richtung c_player zeigt und b in richtung c_nail zeigt.
+		sie wird so skaliert, dass die punkte c und b genau auf den Punkten c_player und c_nail liegen. Hier könnte sich anbieten, einfach die pickaxe so zu skalieren, dass die diagonale von c zu b die gleiche länge hat wie der abstand zwischen c_player und c_nail.
+		"""
 		pickaxe.visible = true
 
-		# Get center points (explicit start and end)
-		var player_center: Vector2 = global_position  # Start point
-		var nail_center: Vector2 = _current_nail.global_position  # End point
+		# c_player und c_nail definieren
+		var c_player: Vector2 = global_position
+		var c_nail: Vector2 = _current_nail.global_position
 
-		# Calculate rope vector (from player center to nail center)
-		var rope_vector: Vector2 = nail_center - player_center
+		# Vektor und Distanz zwischen den Punkten
+		var rope_vector: Vector2 = c_nail - c_player
 		var rope_distance: float = rope_vector.length()
 		var rope_angle: float = rope_vector.angle()
 
-		# Get original sprite dimensions
+		# Original Sprite-Dimensionen
 		var texture_size: Vector2 = pickaxe_sprite.texture.get_size()
-		var original_length: float = texture_size.y  # Sprite height (vertical)
+		# Diagonale von c zu b im unskaliertem Sprite (von links-unten zu rechts-oben)
+		var original_diagonal: float = Vector2(texture_size.x, texture_size.y).length()
 
-		# Calculate midpoint between player and nail (center of scaling)
-		var midpoint: Vector2 = player_center + rope_vector * 0.5
+		# Skalierung so berechnen, dass Diagonale c->b = rope_distance
+		var scale_factor: float = rope_distance / original_diagonal
+		pickaxe.scale = Vector2(scale_factor, scale_factor)
 
-		# Position pickaxe at midpoint (it will scale from this center)
+		# Pickaxe auf Mittelpunkt zwischen c_player und c_nail positionieren
+		var midpoint: Vector2 = c_player + rope_vector * 0.5
 		pickaxe.global_position = midpoint
 
-		# Rotate to align with rope direction (pointing from player to nail)
-		# Adding PI/2 because sprite's "up" is the direction we want to point
-		pickaxe.rotation = rope_angle + PI / 2.0
+		# Rotation: c zeigt zu c_player, b zeigt zu c_nail
+		# Die Diagonale c->b entspricht dem Vektor (texture_width, texture_height) im Sprite
+		# Wir müssen also so rotieren, dass dieser Vektor mit rope_vector übereinstimmt
+		var diagonal_angle: float = atan2(texture_size.y, texture_size.x)
+		pickaxe.rotation = rope_angle - diagonal_angle + PI / 2.0
 
-		# Scale to stretch from player center to nail center
-		var y_scale: float = rope_distance / original_length
-		pickaxe.scale = Vector2(1.0, y_scale)
-
-		# Keep sprite centered (scales from middle)
+		# Sprite zentriert zeichnen
 		pickaxe_sprite.centered = true
 		pickaxe_sprite.offset = Vector2.ZERO
 	else:
