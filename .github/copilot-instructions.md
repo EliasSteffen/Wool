@@ -4,6 +4,10 @@
 
 Dieses Projekt ist ein 2D-Spiel entwickelt mit **Godot Engine 4.5.1** und **GDScript**. Es nutzt eine node-basierte Architektur mit Vererbungshierarchien für Characters (Players/Enemies).
 
+## Documentation
+
+NEVER EVER create documentation files!!
+
 ## Git Commit Messages
 
 **REQUIRED FORMAT**:

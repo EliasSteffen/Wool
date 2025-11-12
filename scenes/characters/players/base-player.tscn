@@ -1,7 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://c6ppvptn4thyd"]
 
-[ext_resource type="PackedScene" uid="uid://bgv204hx8vot8" path="res://scenes/characters/base-character.tscn" id="1_gq3eh"]
-[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_script"]
+[ext_resource type="PackedScene" uid="uid://bgv204hx8vot8" path="res://scenes/characters/base-character.tscn" id="1_base_character"]
+[ext_resource type="Script" path="res://scripts/characters/base_player.gd" id="2_base_player"]
 
-[node name="Node2D" instance=ExtResource("1_gq3eh")]
-script = ExtResource("2_script")
+[node name="BasePlayer" instance=ExtResource("1_base_character")]
+script = ExtResource("2_base_player")
+
+[node name="Camera2D" type="Camera2D" parent="." index="3"]

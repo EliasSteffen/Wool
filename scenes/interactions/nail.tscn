@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://dyc68xp3u5p3y"]
+
+[ext_resource type="Script" uid="uid://bdllnt34naubf" path="res://scripts/interactions/nail.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
+radius = 150.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4aftr"]
+atlas = ExtResource("2_texture")
+region = Rect2(640, 8576, 64, 64)
+
+[node name="Nail" type="Area2D"]
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_detection")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.5, 0.5, 0.5, 1)
+texture = SubResource("AtlasTexture_4aftr")
+
+[node name="GrapplePoint" type="Marker2D" parent="."]

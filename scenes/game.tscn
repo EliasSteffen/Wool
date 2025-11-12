@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://d0rt473ciy7a4"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="1_wool"]
-[ext_resource type="PackedScene" uid="uid://btjptxtfa7cgt" path="res://scenes/map/nail.tscn" id="2_nail"]
+[ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="2_nail"]
 [ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="3_tileset"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
@@ -29,5 +29,3 @@ position = Vector2(768, 320)
 
 [node name="Player" parent="." instance=ExtResource("1_wool")]
 position = Vector2(96, 424)
-
-[node name="Camera2D" type="Camera2D" parent="Player"]

@@ -1,12 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://bgv204hx8vot8"]
+[gd_scene load_steps=4 format=3 uid="uid://bgv204hx8vot8"]
+
+[ext_resource type="Script" path="res://scripts/characters/base_character.gd" id="1_base_character"]
+[ext_resource type="Script" path="res://scripts/skin/skin.gd" id="2_skin"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_character"]
 radius = 16.0
 height = 48.0
 
-[node name="CharacterBody2D" type="CharacterBody2D"]
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="BaseCharacter" type="CharacterBody2D"]
+script = ExtResource("1_base_character")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_character")
+
+[node name="Skin" type="Node2D" parent="."]
+script = ExtResource("2_skin")
+
+[node name="Features" type="Node" parent="."]
