@@ -7,7 +7,13 @@ Dieses Projekt ist ein 2D-Spiel entwickelt mit **Godot Engine 4.5.1** und **GDSc
 ## Git Commit Messages
 
 **REQUIRED FORMAT**:
-All Commit messages MUST follow this structure
+All Commit messages MUST follow this structure:
+
+```
+<type>: <emoji> <subject>
+
+<body>
+```
 
 **RULES**:
 1. Separate subject from the body with a blank line
@@ -18,18 +24,15 @@ All Commit messages MUST follow this structure
 6. Wrap the body at 72 characters
 7. Use the body to explain what and why vs. how
 
-**ADD-ONS**:
-Use emojis for better readability
-- ✨ `feat:` for new features
-- 🐛 `fix:` for bug fixes
-- ♻️ `refactor:` for code changes that neither fix a bug nor add a feature
-- 📝 `docs:` for documentation changes
-- 🎨 `style:` for code style changes (formatting, missing semi-colons, etc)
-- ⚡ `perf:` for performance improvements
-- ✅ `test:` for adding or updating tests
-- 🔧 `ci:` for changes to CI configuration files and scripts
-
-Emojis are written after the type, e.g., `feat: ✨ Add new enemy type`
+**EMOJIS**:
+- Features: ✨
+- Bug Fixes: 🐛
+- Refactoring: ♻️
+- Documentation: 📝
+- Style Changes: 🎨
+- Performance Improvements: ⚡
+- Tests: ✅
+- CI/CD: 👷
 
 **LANGUAGE**:
 The commit messages must be written in **English**.
