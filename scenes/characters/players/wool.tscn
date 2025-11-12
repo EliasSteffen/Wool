@@ -2,15 +2,12 @@
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
+[ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Script" uid="uid://0ml5k838ehjd" path="res://scripts/features/push_feature.gd" id="5_push"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
 size = Vector2(64, 64)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_wool"]
-atlas = ExtResource("2_texture")
-region = Rect2(256, 4416, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wtfnr"]
 atlas = ExtResource("2_texture")
@@ -23,7 +20,9 @@ can_control = true
 shape = SubResource("RectangleShape2D_cmxwk")
 
 [node name="Body" type="Sprite2D" parent="Skin" index="0"]
-texture = SubResource("AtlasTexture_wool")
+position = Vector2(3.8146973e-06, -7.6293945e-06)
+scale = Vector2(0.025420342, 0.02542034)
+texture = ExtResource("2_wtfnr")
 
 [node name="GrapplingFeature" type="Node" parent="Features" index="0"]
 script = ExtResource("4_grappling")
@@ -32,6 +31,5 @@ script = ExtResource("4_grappling")
 script = ExtResource("5_push")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="4"]
-position = Vector2(40, 0)
-rotation = -0.785398
+z_index = -1
 texture = SubResource("AtlasTexture_wtfnr")
