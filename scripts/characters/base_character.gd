@@ -58,7 +58,7 @@ func _physics_process(delta: float) -> void:
 	var movement_factor: Vector2 = _calculate_all_movement_factors(delta)
 	velocity += movement_factor
 
-	# Apply terrain damping (handled by terrain itself)
+ 	# Apply terrain damping (handled by terrain itself)
 	if current_terrain:
 		current_terrain.apply_damping(self, delta)
 
@@ -176,13 +176,17 @@ func _setup_default_air_terrain() -> void:
 	current_terrain = _default_air_terrain
 
 ## Setup all features in the Features container
+## Note: Features with auto_register=true will register themselves in their _ready()
+## This method is kept for backward compatibility with features that don't auto-register
 func _setup_features() -> void:
 	if not features_container:
 		return
 
 	for child in features_container.get_children():
 		if child is Feature:
-			add_feature(child)
+			# Check if feature is already registered (via auto_register)
+			if child not in _features:
+				add_feature(child)
 
 ## Connect to all interactions in the scene
 func _connect_to_interactions() -> void:
@@ -224,10 +228,10 @@ func _on_interaction_exited(character: CharacterBody2D, interaction: Interaction
 func _calculate_gravity(delta: float) -> float:
 	var gravity: float = GRAVITY
 
-	# Check for features that modify gravity (e.g., wings)
+	# Apply gravity multipliers from all active features
 	for feature in _features:
-		if feature is WingsFeature and feature.is_active():
-			gravity *= feature.get_fall_speed_multiplier()
+		if feature.is_active():
+			gravity *= feature.get_gravity_multiplier()
 
 	return gravity * delta
 

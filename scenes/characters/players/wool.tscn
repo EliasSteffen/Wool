@@ -1,10 +1,13 @@
-[gd_scene load_steps=8 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=11 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Script" uid="uid://0ml5k838ehjd" path="res://scripts/features/push_feature.gd" id="5_push"]
+[ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
+[ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
+[ext_resource type="Script" uid="uid://dhog5ngqpqtbh" path="res://scripts/features/wings_feature.gd" id="8_wings"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
 size = Vector2(64, 64)
@@ -29,6 +32,21 @@ script = ExtResource("4_grappling")
 
 [node name="PushFeature" type="Node" parent="Features" index="1"]
 script = ExtResource("5_push")
+
+[node name="DoubleJumpFeature" type="Node" parent="Features" index="2"]
+script = ExtResource("6_double_jump")
+max_air_jumps = 1
+air_jump_power_multiplier = 0.9
+
+[node name="GlideFeature" type="Node" parent="Features" index="3"]
+script = ExtResource("7_glide")
+glide_fall_multiplier = 0.3
+
+[node name="WingsFeature" type="Node" parent="Features" index="4"]
+script = ExtResource("8_wings")
+enabled = false
+jump_boost_multiplier = 1.5
+fall_speed_multiplier = 0.6
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="4"]
 z_index = -1

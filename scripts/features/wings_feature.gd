@@ -34,6 +34,10 @@ func get_fall_speed_multiplier() -> float:
 		return fall_speed_multiplier
 	return 1.0
 
+## Get gravity multiplier (implements Feature base method)
+func get_gravity_multiplier() -> float:
+	return get_fall_speed_multiplier()
+
 ## Check if character is gliding
 func is_gliding() -> bool:
 	return _is_gliding

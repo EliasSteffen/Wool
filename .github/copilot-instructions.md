@@ -6,7 +6,8 @@ Dieses Projekt ist ein 2D-Spiel entwickelt mit **Godot Engine 4.5.1** und **GDSc
 
 ## Documentation
 
-NEVER EVER create documentation files!!
+- NEVER EVER create documentation files!
+- DO NOT create .md files to document code or project structure!
 
 ## Git Commit Messages
 

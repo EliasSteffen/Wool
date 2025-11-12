@@ -19,6 +19,8 @@ const JUMP_VELOCITY: float = -400.0
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
+var _debug_key_pressed: Dictionary = {}  # Track key state for debouncing
+var _debug_label: Label = null  # Debug UI label for feature status
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
@@ -27,17 +29,23 @@ var _direction: float = 0.0
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
 @onready var push_feature: PushFeature = get_feature_by_type(PushFeature)
 @onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
+@onready var double_jump_feature: DoubleJumpFeature = get_feature_by_type(DoubleJumpFeature)
+@onready var glide_feature: GlideFeature = get_feature_by_type(GlideFeature)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	super._ready()
 	# Get features after they're setup
 	call_deferred("_get_features")
+	# Setup debug UI
+	call_deferred("_setup_debug_ui")
 
 func _get_features() -> void:
 	grappling_feature = get_feature_by_type(GrapplingFeature)
 	push_feature = get_feature_by_type(PushFeature)
 	wings_feature = get_feature_by_type(WingsFeature)
+	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
+	glide_feature = get_feature_by_type(GlideFeature)
 
 	# Setup pickaxe sprite if it's directly a Sprite2D
 	if pickaxe is Sprite2D and not pickaxe_sprite:
@@ -45,6 +53,7 @@ func _get_features() -> void:
 
 func _process(delta: float) -> void:
 	_update_pickaxe_visual()
+	_update_debug_ui()
 
 # === OVERRIDDEN METHODS ===
 
@@ -53,6 +62,7 @@ func _process_physics(delta: float) -> void:
 		return
 
 	_handle_input()
+	_handle_feature_inputs()
 	_handle_grappling_input()
 	_handle_push_input()
 	_handle_movement(delta)
@@ -65,6 +75,48 @@ func _handle_input() -> void:
 	# Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		_jump()
+
+	# Debug: Toggle features with number keys
+	_handle_debug_feature_toggle()
+
+func _handle_debug_feature_toggle() -> void:
+	# Helper function to toggle a feature with debouncing
+	var toggle_feature = func(key: int, feature_ref: Feature, feature_name: String) -> void:
+		if Input.is_physical_key_pressed(key):
+			if not _debug_key_pressed.get(key, false):
+				_debug_key_pressed[key] = true
+				if feature_ref:
+					feature_ref.enabled = not feature_ref.enabled
+					# Reactivate wings if re-enabled
+					if feature_ref is WingsFeature:
+						if feature_ref.enabled:
+							feature_ref.activate()
+						else:
+							feature_ref.deactivate()
+					print("%s: %s" % [feature_name, "ON" if feature_ref.enabled else "OFF"])
+					_update_debug_ui()
+				else:
+					print("%s: NOT FOUND (add to Features container)" % feature_name)
+		else:
+			_debug_key_pressed[key] = false
+
+	# 1 = DoubleJump
+	toggle_feature.call(KEY_1, double_jump_feature, "DoubleJump")
+
+	# 2 = Glide
+	toggle_feature.call(KEY_2, glide_feature, "Glide")
+
+	# 3 = Grappling
+	toggle_feature.call(KEY_3, grappling_feature, "Grappling")
+
+	# 4 = Wings
+	toggle_feature.call(KEY_4, wings_feature, "Wings")
+
+func _handle_feature_inputs() -> void:
+	# Let all features handle their own input
+	for feature in get_features():
+		if feature.enabled:
+			feature.handle_input(self)
 
 func _handle_grappling_input() -> void:
 	if not grappling_feature:
@@ -204,3 +256,68 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.position = Vector2(32, 0)
 		pickaxe.rotation = -0.785398  # -45 degrees
 		pickaxe.scale = Vector2(1.0, 1.0)
+
+## Setup debug UI to show active features
+func _setup_debug_ui() -> void:
+	# Create a CanvasLayer for UI (so it's always on top)
+	var canvas_layer: CanvasLayer = CanvasLayer.new()
+	canvas_layer.name = "DebugUI"
+	canvas_layer.layer = 100  # Make sure it's on top
+	add_child(canvas_layer)
+
+	# Create label
+	_debug_label = Label.new()
+	_debug_label.position = Vector2(10, 10)
+	_debug_label.z_index = 1000
+	_debug_label.add_theme_font_size_override("font_size", 20)
+	_debug_label.add_theme_color_override("font_color", Color.WHITE)
+	_debug_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_debug_label.add_theme_constant_override("outline_size", 2)
+	canvas_layer.add_child(_debug_label)
+
+## Update debug UI text
+func _update_debug_ui() -> void:
+	if not _debug_label:
+		return
+
+	var text: String = "=== FEATURES ===\n"
+
+	# Add feature status directly (no lambda - they don't capture outer variables properly)
+	# 1. DoubleJump
+	if double_jump_feature:
+		var status: String = "OFF"
+		if double_jump_feature.enabled:
+			status = "ON"
+		text += "[1] %s: %s\n" % [double_jump_feature.feature_name, status]
+	else:
+		text += "[1] NOT FOUND\n"
+
+	# 2. Glide
+	if glide_feature:
+		var status: String = "OFF"
+		if glide_feature.enabled:
+			status = "ON"
+		text += "[2] %s: %s\n" % [glide_feature.feature_name, status]
+	else:
+		text += "[2] NOT FOUND\n"
+
+	# 3. Grappling
+	if grappling_feature:
+		var status: String = "OFF"
+		if grappling_feature.enabled:
+			status = "ON"
+
+		text += "[3] %s: %s\n" % [grappling_feature.feature_name, status]
+	else:
+		text += "[3] NOT FOUND\n"
+
+	# 4. Wings
+	if wings_feature:
+		var status: String = "OFF"
+		if wings_feature.enabled:
+			status = "ON"
+		text += "[4] %s: %s\n" % [wings_feature.feature_name, status]
+	else:
+		text += "[4] NOT FOUND\n"
+
+	_debug_label.text = text
