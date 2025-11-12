@@ -62,6 +62,17 @@ func _calculate_terrain_effect(delta: float, character_position: Vector2) -> Vec
 func get_damping_factor() -> float:
 	return 1.0  # No damping by default
 
+## Apply terrain-specific damping to a character (override in child classes)
+## @param character: The character to apply damping to
+## @param delta: The physics delta time
+func apply_damping(character: CharacterBody2D, delta: float) -> void:
+	var damping_factor: float = get_damping_factor()
+	if damping_factor < 1.0:
+		# Apply damping: velocity = velocity * damping^(delta * 60)
+		# This creates exponential decay (realistic energy loss)
+		var damping_per_frame: float = pow(damping_factor, delta * 60.0)
+		character.velocity *= damping_per_frame
+
 ## Called when a character enters this terrain
 func _on_character_entered(character: CharacterBody2D) -> void:
 	pass

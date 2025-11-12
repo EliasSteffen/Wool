@@ -12,14 +12,14 @@ extends Terrain
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	terrain_name = "Air"
+	affects_movement = true
 
 # === OVERRIDDEN METHODS ===
 
-func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
-	# Air resistance doesn't add movement, it reduces it
-	# This is handled in BaseCharacter by applying damping to velocity
+func _calculate_terrain_effect(delta: float, character_position: Vector2) -> Vector2:
+	# Air resistance doesn't add force, it reduces velocity (via damping)
 	return Vector2.ZERO
 
-## Get the damping factor for this terrain
+## Get the damping factor for air resistance
 func get_damping_factor() -> float:
 	return air_resistance

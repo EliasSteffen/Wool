@@ -58,8 +58,9 @@ func _physics_process(delta: float) -> void:
 	var movement_factor: Vector2 = _calculate_all_movement_factors(delta)
 	velocity += movement_factor
 
-	# Apply terrain damping (energy loss)
-	_apply_terrain_damping(delta)
+	# Apply terrain damping (handled by terrain itself)
+	if current_terrain:
+		current_terrain.apply_damping(self, delta)
 
 	# Custom physics processing (override in child classes)
 	_process_physics(delta)
@@ -245,20 +246,6 @@ func _calculate_all_movement_factors(delta: float) -> Vector2:
 		total_factor += current_terrain.get_movement_factor(delta, global_position)
 
 	return total_factor
-
-## Apply terrain damping (energy loss over time)
-func _apply_terrain_damping(delta: float) -> void:
-	# Default air resistance if no terrain
-	var damping_factor: float = 0.99  # 1% energy loss per second in air
-
-	# Use terrain's damping if available
-	if current_terrain and current_terrain.has_method("get_damping_factor"):
-		damping_factor = current_terrain.get_damping_factor()
-
-	# Apply damping: velocity = velocity * damping^delta
-	# This creates exponential decay (realistic energy loss)
-	var damping_per_frame: float = pow(damping_factor, delta * 60.0)  # Convert to per-frame
-	velocity *= damping_per_frame
 
 ## Apply rope constraint when grappling (prevents going beyond rope length)
 func _apply_grapple_constraint() -> void:
