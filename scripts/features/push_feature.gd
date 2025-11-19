@@ -11,8 +11,11 @@ signal push_started(box: Interaction)
 signal push_ended()
 
 # === EXPORTED VARIABLES ===
-@export var push_slowdown_factor: float = 0.5  # Character moves at 50% speed when pushing
-@export var push_force_multiplier: float = 1.0
+# Removed exports in favor of Tweakables
+
+# === PUBLIC VARIABLES ===
+var push_slowdown_factor: float
+var push_force_multiplier: float
 
 # === PRIVATE VARIABLES ===
 var _pushing_box: Interaction = null
@@ -21,6 +24,18 @@ var _is_pushing: bool = false
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	feature_name = "Push"
+	_setup_tweakables()
+
+func _setup_tweakables() -> void:
+	push_slowdown_factor = FeatureConstants.get_value("Push", "push_slowdown_factor")
+	push_force_multiplier = FeatureConstants.get_value("Push", "push_force_multiplier")
+	FeatureConstants.value_changed.connect(_on_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Push":
+		match key:
+			"push_slowdown_factor": push_slowdown_factor = float(value)
+			"push_force_multiplier": push_force_multiplier = float(value)
 
 # === PUBLIC METHODS ===
 

@@ -16,7 +16,15 @@ var _being_pushed_by: CharacterBody2D = null
 
 func _setup_interaction() -> void:
 	interaction_name = "Box"
-	# Box-specific setup
+	_setup_tweakables()
+
+func _setup_tweakables() -> void:
+	weight = InteractionConstants.get_value("Box", "weight")
+	InteractionConstants.value_changed.connect(_on_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Box" and key == "weight":
+		weight = float(value)
 
 func _on_character_entered(character: CharacterBody2D) -> void:
 	# Character is near box and can potentially push it

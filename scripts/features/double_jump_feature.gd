@@ -6,9 +6,11 @@ class_name DoubleJumpFeature
 extends Feature
 
 # === EXPORTED VARIABLES ===
-@export var max_air_jumps: int = 1  # Number of extra jumps in air (1 = double jump, 2 = triple jump)
-@export var air_jump_power_multiplier: float = 0.9  # Air jumps are 90% as strong as ground jump
 @export var jump_input_action: String = "jump"
+
+# === PUBLIC VARIABLES ===
+var max_air_jumps: int
+var air_jump_power_multiplier: float
 
 # === PRIVATE VARIABLES ===
 var _jumps_remaining: int = 0
@@ -18,7 +20,19 @@ var _was_on_floor: bool = false
 func _ready() -> void:
 	feature_name = "DoubleJump"
 	enabled = true
+	_setup_tweakables()
 	activate()
+
+func _setup_tweakables() -> void:
+	max_air_jumps = int(FeatureConstants.get_value("DoubleJump", "max_air_jumps"))
+	air_jump_power_multiplier = FeatureConstants.get_value("DoubleJump", "air_jump_power_multiplier")
+	FeatureConstants.value_changed.connect(_on_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "DoubleJump":
+		match key:
+			"max_air_jumps": max_air_jumps = int(value)
+			"air_jump_power_multiplier": air_jump_power_multiplier = float(value)
 
 # === PUBLIC METHODS ===
 

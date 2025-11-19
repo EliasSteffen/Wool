@@ -1,0 +1,105 @@
+extends CanvasLayer
+
+@onready var container: VBoxContainer = $Panel/ScrollContainer/VBoxContainer
+@onready var close_button: Button = $Panel/Header/CloseButton
+
+func _ready() -> void:
+	close_button.pressed.connect(close)
+
+	# Make panel less transparent (more opaque)
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.1, 0.1, 0.95) # Dark grey, almost opaque
+	$Panel.add_theme_stylebox_override("panel", style)
+
+	_build_ui()
+
+func _build_ui() -> void:
+	# Clear existing
+	for child in container.get_children():
+		child.queue_free()
+
+	# Build new from all registries
+	for registry in Tweakables.registries:
+		for category in registry.settings:
+			_add_category_header(category)
+			for key in registry.settings[category]:
+				_add_setting_row(registry, category, key, registry.settings[category][key])
+
+func _add_category_header(text: String) -> void:
+	var label = Label.new()
+	label.text = "--- " + text + " ---"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", Color.YELLOW)
+	container.add_child(label)
+
+func _add_setting_row(registry: BaseConstants, category: String, key: String, data: Dictionary) -> void:
+	var hbox = HBoxContainer.new()
+
+	var label = Label.new()
+	label.text = key
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(label)
+
+	var value = data["value"]
+	var type = data.get("type", "")
+
+	if type == "bool" or typeof(value) == TYPE_BOOL:
+		var check = CheckBox.new()
+		check.button_pressed = value
+		check.toggled.connect(func(toggled):
+			registry.set_value(category, key, toggled)
+		)
+		hbox.add_child(check)
+
+	elif type == "color" or typeof(value) == TYPE_COLOR:
+		var picker = ColorPickerButton.new()
+		picker.color = value
+		picker.custom_minimum_size.x = 50
+		picker.color_changed.connect(func(col):
+			registry.set_value(category, key, col)
+		)
+		hbox.add_child(picker)
+
+	elif typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
+		var slider = HSlider.new()
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.min_value = data.get("min", 0.0)
+		slider.max_value = data.get("max", 1000.0)
+		slider.step = data.get("step", 1.0)
+		slider.value = value
+
+		var spinbox = SpinBox.new()
+		spinbox.min_value = data.get("min", 0.0)
+		spinbox.max_value = data.get("max", 1000.0)
+		spinbox.step = data.get("step", 1.0)
+		spinbox.value = value
+		spinbox.custom_minimum_size.x = 80
+
+		# Sync Slider -> SpinBox & Registry
+		slider.value_changed.connect(func(new_val):
+			if spinbox.value != new_val:
+				spinbox.value = new_val
+			registry.set_value(category, key, new_val)
+		)
+
+		# Sync SpinBox -> Slider & Registry
+		spinbox.value_changed.connect(func(new_val):
+			if slider.value != new_val:
+				slider.value = new_val
+			registry.set_value(category, key, new_val)
+		)
+
+		hbox.add_child(slider)
+		hbox.add_child(spinbox)
+
+	container.add_child(hbox)
+
+func open() -> void:
+	show()
+	get_tree().paused = true
+
+func close() -> void:
+	hide()
+	# Unpause if we are not in the PAUSED state (i.e. unpause for MENU and PLAYING)
+	if GameManager.current_state != GameManager.GameState.PAUSED:
+		get_tree().paused = false

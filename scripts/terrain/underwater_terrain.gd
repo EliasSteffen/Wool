@@ -15,6 +15,20 @@ func _ready() -> void:
 	super._ready()
 	terrain_name = "UnderWater"
 	affects_movement = true
+	_setup_tweakables()
+
+func _setup_tweakables() -> void:
+	slowdown_factor = TerrainConstants.get_value("Water", "slowdown_factor")
+	buoyancy_force = TerrainConstants.get_value("Water", "buoyancy_force")
+	water_resistance = TerrainConstants.get_value("Water", "water_resistance")
+	TerrainConstants.value_changed.connect(_on_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Water":
+		match key:
+			"slowdown_factor": slowdown_factor = float(value)
+			"buoyancy_force": buoyancy_force = float(value)
+			"water_resistance": water_resistance = float(value)
 
 # === OVERRIDDEN METHODS ===
 

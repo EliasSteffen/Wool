@@ -6,8 +6,10 @@ class_name GlideFeature
 extends Feature
 
 # === EXPORTED VARIABLES ===
-@export var glide_fall_multiplier: float = 0.3  # Fall at 30% speed while gliding
 @export var glide_input_action: String = "jump"  # Input action to trigger gliding
+
+# === PUBLIC VARIABLES ===
+var glide_fall_multiplier: float
 
 # === PRIVATE VARIABLES ===
 var _is_gliding: bool = false
@@ -16,8 +18,17 @@ var _is_gliding: bool = false
 func _ready() -> void:
 	feature_name = "Glide"
 	enabled = true
+	_setup_tweakables()
 	# Glide activates/deactivates based on input and air state
 	activate()
+
+func _setup_tweakables() -> void:
+	glide_fall_multiplier = FeatureConstants.get_value("Glide", "glide_fall_multiplier")
+	FeatureConstants.value_changed.connect(_on_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Glide" and key == "glide_fall_multiplier":
+		glide_fall_multiplier = float(value)
 
 # === PUBLIC METHODS ===
 

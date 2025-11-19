@@ -20,14 +20,15 @@ signal terrain_entered(terrain: Terrain)
 signal terrain_exited(terrain: Terrain)
 
 # === CONSTANTS ===
-const GRAVITY: float = 980.0
+# Removed GRAVITY constant in favor of Tweakables
 
 # === EXPORTED VARIABLES ===
-@export var max_health: int = 100
-@export var move_speed: float = 200.0
 @export var skin_resource: CharacterSkin
 
 # === PUBLIC VARIABLES ===
+var max_health: int
+var move_speed: float
+var gravity: float = 980.0
 var current_health: int = 100
 var nearby_interactions: Array[Interaction] = []
 var current_terrain: Terrain = null
@@ -44,6 +45,7 @@ var _default_air_terrain: AirTerrain = null  # Default terrain for air resistanc
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	_setup_tweakables()
 	current_health = max_health
 	_setup_default_air_terrain()
 	_setup_features()
@@ -74,6 +76,29 @@ func _physics_process(delta: float) -> void:
 	_apply_grapple_constraint()
 
 # === PUBLIC METHODS ===
+
+## Setup tweakable values from Autoload
+func _setup_tweakables() -> void:
+	# Initial load
+	move_speed = CharacterConstants.get_value("Player", "move_speed")
+	max_health = int(CharacterConstants.get_value("Player", "max_health"))
+	gravity = WorldConstants.get_value("Physics", "gravity")
+
+	# Listen for changes
+	CharacterConstants.value_changed.connect(_on_tweakable_changed)
+	WorldConstants.value_changed.connect(_on_world_tweakable_changed)
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Player":
+		match key:
+			"move_speed":
+				move_speed = float(value)
+			"max_health":
+				max_health = int(value)
+
+func _on_world_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Physics" and key == "gravity":
+		gravity = float(value)
 
 ## Add a feature to this character
 func add_feature(feature: Feature) -> void:
@@ -233,14 +258,14 @@ func _on_interaction_exited(character: CharacterBody2D, interaction: Interaction
 
 ## Calculate gravity with feature modifications
 func _calculate_gravity(delta: float) -> float:
-	var gravity: float = GRAVITY
+	var applied_gravity: float = gravity
 
 	# Apply gravity multipliers from all active features
 	for feature in _features:
 		if feature.is_active():
-			gravity *= feature.get_gravity_multiplier()
+			applied_gravity *= feature.get_gravity_multiplier()
 
-	return gravity * delta
+	return applied_gravity * delta
 
 ## Calculate combined movement factor from all PhysicsChangers
 ## This is the core of the architecture!

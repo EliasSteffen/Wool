@@ -16,11 +16,14 @@ signal attack_started()
 signal attack_ended()
 
 # === EXPORTED VARIABLES ===
-@export var attack_damage: int = 10
-@export var attack_range: float = 50.0
-@export var detection_range: float = 200.0
-@export var patrol_speed: float = 100.0
-@export var chase_speed: float = 150.0
+# Removed exports in favor of Tweakables
+
+# === PUBLIC VARIABLES ===
+var attack_damage: int
+var attack_range: float
+var detection_range: float
+var patrol_speed: float
+var chase_speed: float
 
 # === PRIVATE VARIABLES ===
 var _current_target: Node2D = null
@@ -41,6 +44,27 @@ enum AIState {
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	super._ready()
+	_setup_enemy_tweakables()
+
+func _setup_enemy_tweakables() -> void:
+	attack_damage = int(CharacterConstants.get_value("Enemy", "attack_damage"))
+	attack_range = CharacterConstants.get_value("Enemy", "attack_range")
+	detection_range = CharacterConstants.get_value("Enemy", "detection_range")
+	patrol_speed = CharacterConstants.get_value("Enemy", "patrol_speed")
+	chase_speed = CharacterConstants.get_value("Enemy", "chase_speed")
+
+	CharacterConstants.value_changed.connect(_on_enemy_tweakable_changed)
+
+func _on_enemy_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Enemy":
+		match key:
+			"attack_damage": attack_damage = int(value)
+			"attack_range": attack_range = float(value)
+			"detection_range": detection_range = float(value)
+			"patrol_speed": patrol_speed = float(value)
+			"chase_speed": chase_speed = float(value)
+
+# === PUBLIC METHODS ===
 
 	if detection_area:
 		detection_area.body_entered.connect(_on_detection_body_entered)
