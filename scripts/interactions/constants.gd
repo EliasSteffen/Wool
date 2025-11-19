@@ -1,13 +1,18 @@
 extends BaseConstants
 
+const DEFAULT_BOX_WEIGHT: float = 50.0
+const DEFAULT_BOX_FRICTION: float = 1.0
+const DEFAULT_HIGHLIGHT_COLOR: Color = Color(1.5, 1.5, 1.5, 1.0)
+const DEFAULT_NORMAL_COLOR: Color = Color(1.0, 1.0, 1.0, 1.0)
+
 func _ready() -> void:
 	settings = {
 		"Box": {
-			"weight": { "value": 50.0, "min": 1.0, "max": 500.0, "step": 1.0 },
-			"friction": { "value": 1.0, "min": 0.0, "max": 5.0, "step": 0.1 }
+			"weight": { "value": DEFAULT_BOX_WEIGHT, "min": 1.0, "max": 500.0, "step": 1.0 },
+			"friction": { "value": DEFAULT_BOX_FRICTION, "min": 0.0, "max": 5.0, "step": 0.1 }
 		},
 		"Visuals": {
-			"highlight_color": { "value": Color(1, 1, 0, 1), "type": "color" },
-			"interaction_range_color": { "value": Color(0, 1, 0, 0.2), "type": "color" }
+			"highlight_color": { "value": DEFAULT_HIGHLIGHT_COLOR, "type": "color" },
+			"normal_color": { "value": DEFAULT_NORMAL_COLOR, "type": "color" }
 		}
 	}

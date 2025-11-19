@@ -6,9 +6,12 @@ class_name WingsFeature
 extends Feature
 
 # === EXPORTED VARIABLES ===
-@export var jump_boost_multiplier: float = 1.5  # 50% higher jumps
-@export var fall_speed_multiplier: float = 0.6  # Fall 40% slower (60% of normal speed)
-@export var glide_threshold: float = 50.0  # Velocity at which gliding starts
+# Removed exports in favor of Tweakables
+
+# === PUBLIC VARIABLES ===
+var jump_boost_multiplier: float
+var fall_speed_multiplier: float
+var glide_threshold: float
 
 # === PRIVATE VARIABLES ===
 var _is_gliding: bool = false

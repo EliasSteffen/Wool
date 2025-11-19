@@ -17,8 +17,10 @@ signal interaction_used(character: CharacterBody2D)
 @export var interaction_name: String = "UnnamedInteraction"
 @export var is_active: bool = true
 @export var highlight_on_range: bool = true
-@export var highlight_color: Color = Color(1.5, 1.5, 1.5, 1.0)
-@export var normal_color: Color = Color(1.0, 1.0, 1.0, 1.0)
+
+# === PUBLIC VARIABLES ===
+var highlight_color: Color
+var normal_color: Color
 
 # === PRIVATE VARIABLES ===
 var _characters_in_range: Array[CharacterBody2D] = []
@@ -35,9 +37,30 @@ func _ready() -> void:
 	if sprite:
 		sprite.modulate = normal_color
 
+	_setup_tweakables()
 	_setup_interaction()
 
 # === PUBLIC METHODS ===
+
+## Setup tweakables
+func _setup_tweakables() -> void:
+	highlight_color = InteractionConstants.get_value("Visuals", "highlight_color")
+	normal_color = InteractionConstants.get_value("Visuals", "normal_color")
+
+	if not InteractionConstants.value_changed.is_connected(_on_tweakable_changed):
+		InteractionConstants.value_changed.connect(_on_tweakable_changed)
+
+	_update_visual()
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Visuals":
+		match key:
+			"highlight_color":
+				highlight_color = value
+				_update_visual()
+			"normal_color":
+				normal_color = value
+				_update_visual()
 
 ## Check if a specific character is in range
 func is_character_in_range(character: CharacterBody2D) -> bool:

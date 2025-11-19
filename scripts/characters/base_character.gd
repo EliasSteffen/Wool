@@ -28,7 +28,7 @@ signal terrain_exited(terrain: Terrain)
 # === PUBLIC VARIABLES ===
 var max_health: int
 var move_speed: float
-var gravity: float = 980.0
+var gravity: float = WorldConstants.DEFAULT_GRAVITY
 var current_health: int = 100
 var nearby_interactions: Array[Interaction] = []
 var current_terrain: Terrain = null

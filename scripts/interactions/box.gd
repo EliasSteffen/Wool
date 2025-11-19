@@ -6,8 +6,10 @@ class_name Box
 extends Interaction
 
 # === EXPORTED VARIABLES ===
-@export var weight: float = 1.0  # Affects how hard it is to push
 @export var can_be_pushed: bool = true
+
+# === PUBLIC VARIABLES ===
+var weight: float
 
 # === PRIVATE VARIABLES ===
 var _being_pushed_by: CharacterBody2D = null
@@ -16,13 +18,13 @@ var _being_pushed_by: CharacterBody2D = null
 
 func _setup_interaction() -> void:
 	interaction_name = "Box"
-	_setup_tweakables()
 
 func _setup_tweakables() -> void:
+	super._setup_tweakables()
 	weight = InteractionConstants.get_value("Box", "weight")
-	InteractionConstants.value_changed.connect(_on_tweakable_changed)
 
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	super._on_tweakable_changed(category, key, value)
 	if category == "Box" and key == "weight":
 		weight = float(value)
 

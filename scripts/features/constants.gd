@@ -1,5 +1,9 @@
 extends BaseConstants
 
+const WINGS_JUMP_BOOST_MULTIPLIER: float = 1.5
+const WINGS_FALL_SPEED_MULTIPLIER: float = 0.6
+const WINGS_GLIDE_THRESHOLD: float = 50.0
+
 func _ready() -> void:
 	settings = {
 		"Grappling": {
@@ -23,8 +27,8 @@ func _ready() -> void:
 			"push_force_multiplier": { "value": 1.0, "min": 0.1, "max": 5.0, "step": 0.1 }
 		},
 		"Wings": {
-			"jump_boost_multiplier": { "value": 1.5, "min": 1.0, "max": 3.0, "step": 0.1 },
-			"fall_speed_multiplier": { "value": 0.6, "min": 0.1, "max": 1.0, "step": 0.05 },
-			"glide_threshold": { "value": 50.0, "min": 0.0, "max": 200.0, "step": 10.0 }
+			"jump_boost_multiplier": { "value": WINGS_JUMP_BOOST_MULTIPLIER, "min": 1.0, "max": 3.0, "step": 0.1 },
+			"fall_speed_multiplier": { "value": WINGS_FALL_SPEED_MULTIPLIER, "min": 0.1, "max": 1.0, "step": 0.05 },
+			"glide_threshold": { "value": WINGS_GLIDE_THRESHOLD, "min": 0.0, "max": 200.0, "step": 10.0 }
 		}
 	}

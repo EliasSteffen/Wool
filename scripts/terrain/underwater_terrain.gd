@@ -6,9 +6,12 @@ class_name UnderWaterTerrain
 extends Terrain
 
 # === EXPORTED VARIABLES ===
-@export var slowdown_factor: float = 0.5  # Character moves at 50% speed
-@export var buoyancy_force: float = -100.0  # Upward force (negative gravity)
-@export var water_resistance: float = 0.95  # Higher resistance than air (5% loss per second)
+# Removed exports in favor of Tweakables
+
+# === PUBLIC VARIABLES ===
+var slowdown_factor: float
+var buoyancy_force: float
+var water_resistance: float
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:

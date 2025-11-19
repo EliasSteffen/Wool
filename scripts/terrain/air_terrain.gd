@@ -6,8 +6,11 @@ class_name AirTerrain
 extends Terrain
 
 # === EXPORTED VARIABLES ===
-@export var air_resistance: float = 0.98  # Multiplier per second (0.98 = 2% loss per second)
-@export var applies_to_grappling: bool = true  # Whether to affect grappling swing
+# Removed exports in favor of Tweakables
+
+# === PUBLIC VARIABLES ===
+var air_resistance: float
+var applies_to_grappling: bool
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:

@@ -10,12 +10,15 @@ class_name BasePlayer
 extends BaseCharacter
 
 # === CONSTANTS ===
-const ACCELERATION: float = 1500.0
-const FRICTION: float = 1200.0
-const JUMP_VELOCITY: float = -400.0
+# Removed constants in favor of Tweakables
 
 # === EXPORTED VARIABLES ===
 @export var can_control: bool = true
+
+# === PUBLIC VARIABLES ===
+var acceleration: float
+var friction: float
+var jump_velocity: float
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
@@ -39,6 +42,27 @@ func _ready() -> void:
 	call_deferred("_get_features")
 	# Setup debug UI
 	call_deferred("_setup_debug_ui")
+
+func _setup_tweakables() -> void:
+	super._setup_tweakables()
+
+	# Initial load
+	acceleration = CharacterConstants.get_value("Player", "acceleration")
+	friction = CharacterConstants.get_value("Player", "friction")
+	jump_velocity = CharacterConstants.get_value("Player", "jump_velocity")
+
+	# Listen for changes (super class already connected, but we need to handle our specific keys)
+	# Note: We can't easily hook into the super connection if it doesn't expose a virtual method.
+	# But BaseCharacter connects to _on_tweakable_changed. We should override it.
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	super._on_tweakable_changed(category, key, value)
+
+	if category == "Player":
+		match key:
+			"acceleration": acceleration = float(value)
+			"friction": friction = float(value)
+			"jump_velocity": jump_velocity = float(value)
 
 func _get_features() -> void:
 	grappling_feature = get_feature_by_type(GrapplingFeature)
@@ -154,13 +178,13 @@ func _handle_movement(delta: float) -> void:
 			# This simulates leaning forward/backward on a swing
 
 			# Scale pump force by the player's move_speed so that agility upgrades feel consistent
-			# We use 200.0 as a reference base speed to normalize the multiplier
-			var speed_multiplier: float = move_speed / 200.0
+			# We use DEFAULT_MOVE_SPEED as a reference base speed to normalize the multiplier
+			var speed_multiplier: float = move_speed / CharacterConstants.DEFAULT_MOVE_SPEED
 			var pump_force: float = _direction * grappling_feature.swing_pump_force * speed_multiplier * delta
 			velocity.x += pump_force
 		else:
 			# Normal ground/air movement
-			velocity.x = move_toward(velocity.x, _direction * move_speed, ACCELERATION * delta)
+			velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
 
 			# Apply push slowdown if pushing
 			if push_feature and push_feature.is_pushing():
@@ -169,10 +193,11 @@ func _handle_movement(delta: float) -> void:
 		# Only apply friction when ON THE GROUND and NOT grappling
 		# In air: momentum is preserved, terrain damping handles energy loss
 		if not is_grappling and is_on_floor():
-			velocity.x = move_toward(velocity.x, 0, FRICTION * delta)
+			velocity.x = move_toward(velocity.x, 0, friction * delta)
 
 func _jump() -> void:
-	var jump_power: float = JUMP_VELOCITY
+	# Note: jump_velocity is positive in settings, so we negate it for upward movement
+	var jump_power: float = -jump_velocity
 
 	# Apply wings boost if available
 	if wings_feature and wings_feature.is_active():
