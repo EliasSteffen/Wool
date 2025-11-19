@@ -47,6 +47,10 @@ func set_body_part_sprite(part_name: String, texture: Texture2D) -> void:
 		sprite.texture = texture
 		skin_changed.emit()
 
+## Set the main texture for the body
+func set_texture(texture: Texture2D) -> void:
+	set_body_part_sprite("Body", texture)
+
 ## Show/hide a specific body part
 func set_body_part_visible(part_name: String, visible_state: bool) -> void:
 	var part: Node2D = get_node_or_null(part_name)

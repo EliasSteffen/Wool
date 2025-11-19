@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://level1scene123"]
+
+[ext_resource type="Script" path="res://scripts/levels/base_level.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
+[ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="3_nail"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="4_tileset"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(800, 64)
+
+[node name="Level1" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(96, 424)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(400, 568)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Sprite2D" type="Sprite2D" parent="Ground"]
+modulate = Color(0.6, 0.4, 0.2, 1)
+texture = ExtResource("4_tileset")
+region_enabled = true
+region_rect = Rect2(0, 0, 800, 64)
+
+[node name="NailInAir" parent="." instance=ExtResource("3_nail")]
+position = Vector2(384, 320)
+
+[node name="NailInAir2" parent="." instance=ExtResource("3_nail")]
+position = Vector2(768, 320)
+
+[node name="Player" parent="." instance=ExtResource("2_wool")]
+position = Vector2(96, 424)
