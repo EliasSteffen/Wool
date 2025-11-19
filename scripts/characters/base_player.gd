@@ -152,7 +152,11 @@ func _handle_movement(delta: float) -> void:
 		if is_grappling:
 			# Swing pumping: Add force in direction of input to build momentum
 			# This simulates leaning forward/backward on a swing
-			var pump_force: float = _direction * grappling_feature.swing_pump_force * delta
+
+			# Scale pump force by the player's move_speed so that agility upgrades feel consistent
+			# We use 200.0 as a reference base speed to normalize the multiplier
+			var speed_multiplier: float = move_speed / 200.0
+			var pump_force: float = _direction * grappling_feature.swing_pump_force * speed_multiplier * delta
 			velocity.x += pump_force
 		else:
 			# Normal ground/air movement
