@@ -25,6 +25,7 @@ const GRAVITY: float = 980.0
 # === EXPORTED VARIABLES ===
 @export var max_health: int = 100
 @export var move_speed: float = 200.0
+@export var skin_resource: CharacterSkin
 
 # === PUBLIC VARIABLES ===
 var current_health: int = 100
@@ -47,6 +48,7 @@ func _ready() -> void:
 	_setup_default_air_terrain()
 	_setup_features()
 	_connect_to_interactions()
+	_apply_skin()
 	_setup_character()
 
 func _physics_process(delta: float) -> void:
@@ -167,6 +169,11 @@ func _on_death() -> void:
 	queue_free()
 
 # === PRIVATE METHODS ===
+
+## Apply the skin resource to the BodySkin node
+func _apply_skin() -> void:
+	if skin and skin_resource and skin_resource.texture:
+		skin.set_texture(skin_resource.texture)
 
 ## Setup default air terrain for energy loss
 func _setup_default_air_terrain() -> void:
