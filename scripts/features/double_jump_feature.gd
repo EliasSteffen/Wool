@@ -72,7 +72,8 @@ func _calculate_movement_factor(delta: float, character_position: Vector2) -> Ve
 
 func _perform_air_jump(character: BaseCharacter) -> void:
 	if character is BasePlayer:
-		var jump_power: float = character.JUMP_VELOCITY * air_jump_power_multiplier
+		# Negate jump_velocity because Y-up is negative in Godot
+		var jump_power: float = -character.jump_velocity * air_jump_power_multiplier
 		character.velocity.y = jump_power
 		_jumps_remaining -= 1
 
