@@ -5,5 +5,8 @@
 # Build artifacts
 build/
 
+# Export artifacts
+tweakables_export.json
+
 # macOS specific ignores
 **/.DS_Store
