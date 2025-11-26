@@ -53,7 +53,11 @@ func handle_input(character: BaseCharacter) -> void:
 		return
 
 	# Can only glide in the air (not on floor)
-	var can_glide: bool = not character.is_on_floor() and character.velocity.y > 0  # Falling down
+	# Usually only when falling, unless terrain allows upward gliding (e.g. Upwind)
+	var is_falling: bool = character.velocity.y > 0
+	var terrain_allows_upward: bool = character.current_terrain and character.current_terrain.can_glide_upwards
+	
+	var can_glide: bool = not character.is_on_floor() and (is_falling or terrain_allows_upward)
 	var input_held: bool = Input.is_action_pressed(glide_input_action)
 
 	_is_gliding = can_glide and input_held

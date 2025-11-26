@@ -15,6 +15,7 @@ signal character_exited(character: CharacterBody2D)
 # === EXPORTED VARIABLES ===
 @export var terrain_name: String = "UnnamedTerrain"
 @export var affects_movement: bool = true
+@export var can_glide_upwards: bool = false # If true, allows gliding even when moving upwards (e.g. updrafts)
 
 # === PRIVATE VARIABLES ===
 var _characters_in_terrain: Array[CharacterBody2D] = []

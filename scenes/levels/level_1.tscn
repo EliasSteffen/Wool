@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=6 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Script" uid="uid://2t0xhsio7d8e" path="res://scripts/levels/base_level.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://c3oyx31vjvh0e" path="res://assets/maps/2d-map-1.png" id="2_nsrm0"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="4_x42e6"]
+[ext_resource type="PackedScene" path="res://scenes/terrain/upwind_zone.tscn" id="5_6761a"]
 
 [node name="Level1" type="Node2D"]
 script = ExtResource("1_script")
@@ -123,6 +124,13 @@ position = Vector2(88, -88)
 position = Vector2(672, -32)
 
 [node name="CollisionShape2D" parent="UnderwaterZone/DetectionArea" index="0"]
-position = Vector2(152, -82)
+position = Vector2(-4, -82)
+
+[node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
+position = Vector2(1192, -88)
+
+[node name="CollisionShape2D" parent="UpwindZone/DetectionArea" index="0"]
+position = Vector2(24, -53)
 
 [editable path="UnderwaterZone"]
+[editable path="UpwindZone"]
