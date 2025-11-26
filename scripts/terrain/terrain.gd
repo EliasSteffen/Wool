@@ -19,16 +19,28 @@ signal character_exited(character: CharacterBody2D)
 # === PRIVATE VARIABLES ===
 var _characters_in_terrain: Array[CharacterBody2D] = []
 
-# === ONREADY VARIABLES ===
-@onready var detection_area: Area2D = $DetectionArea if has_node("DetectionArea") else null
+# === PUBLIC VARIABLES ===
+var detection_area: Area2D
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	detection_area = _find_detection_area()
+
 	if detection_area:
 		detection_area.body_entered.connect(_on_body_entered)
 		detection_area.body_exited.connect(_on_body_exited)
 	else:
 		push_warning("Terrain '%s' has no DetectionArea child node!" % terrain_name)
+
+func _find_detection_area() -> Area2D:
+	if has_node("DetectionArea"):
+		return $DetectionArea
+
+	for child in get_children():
+		if child is Area2D:
+			return child
+
+	return null
 
 # === PUBLIC METHODS ===
 
@@ -53,7 +65,7 @@ func get_movement_factor(delta: float, character_position: Vector2) -> Vector2:
 	return _calculate_terrain_effect(delta, character_position)
 
 ## Override this in child classes to implement terrain-specific physics
-func _calculate_terrain_effect(delta: float, character_position: Vector2) -> Vector2:
+func _calculate_terrain_effect(_delta: float, _character_position: Vector2) -> Vector2:
 	push_error("Terrain._calculate_terrain_effect() must be overridden in: " + terrain_name)
 	return Vector2.ZERO
 
@@ -88,8 +100,14 @@ func _on_body_entered(body: Node2D) -> void:
 		_on_character_entered(body)
 		character_entered.emit(body)
 
+		if body.has_method("enter_terrain"):
+			body.enter_terrain(self)
+
 func _on_body_exited(body: Node2D) -> void:
 	if body is CharacterBody2D:
 		_characters_in_terrain.erase(body)
 		_on_character_exited(body)
 		character_exited.emit(body)
+
+		if body.has_method("exit_terrain"):
+			body.exit_terrain(self)

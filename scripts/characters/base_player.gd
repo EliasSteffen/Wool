@@ -349,4 +349,8 @@ func _update_debug_ui() -> void:
 	else:
 		text += "[4] NOT FOUND\n"
 
+	# Terrain
+	text += "\n=== TERRAIN ===\n"
+	text += "%s: ON" % current_terrain.terrain_name
+
 	_debug_label.text = text

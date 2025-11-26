@@ -27,22 +27,22 @@ position = Vector2(3.8146973e-06, -7.6293945e-06)
 scale = Vector2(0.025420342, 0.02542034)
 texture = ExtResource("2_wtfnr")
 
-[node name="GrapplingFeature" type="Node" parent="Features" index="0"]
+[node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 script = ExtResource("4_grappling")
 
-[node name="PushFeature" type="Node" parent="Features" index="1"]
+[node name="PushFeature" type="Node2D" parent="Features" index="1"]
 script = ExtResource("5_push")
 
-[node name="DoubleJumpFeature" type="Node" parent="Features" index="2"]
+[node name="DoubleJumpFeature" type="Node2D" parent="Features" index="2"]
 script = ExtResource("6_double_jump")
 max_air_jumps = 1
 air_jump_power_multiplier = 0.9
 
-[node name="GlideFeature" type="Node" parent="Features" index="3"]
+[node name="GlideFeature" type="Node2D" parent="Features" index="3"]
 script = ExtResource("7_glide")
 glide_fall_multiplier = 0.3
 
-[node name="WingsFeature" type="Node" parent="Features" index="4"]
+[node name="WingsFeature" type="Node2D" parent="Features" index="4"]
 script = ExtResource("8_wings")
 enabled = false
 jump_boost_multiplier = 1.5

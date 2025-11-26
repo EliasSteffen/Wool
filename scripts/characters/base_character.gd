@@ -37,6 +37,7 @@ var current_terrain: Terrain = null
 var _features: Array[Feature] = []
 var _physics_changers: Array[PhysicsChanger] = []
 var _default_air_terrain: AirTerrain = null  # Default terrain for air resistance
+var _active_terrains: Array[Terrain] = [] # Stack of active terrains
 
 # === ONREADY VARIABLES ===
 @onready var skin: BodySkin = $Skin if has_node("Skin") else null
@@ -146,6 +147,23 @@ func remove_nearby_interaction(interaction: Interaction) -> void:
 	nearby_interactions.erase(interaction)
 	_on_interaction_lost(interaction)
 	interaction_lost.emit(interaction)
+
+## Called by Terrain when character enters
+func enter_terrain(terrain: Terrain) -> void:
+	if terrain not in _active_terrains:
+		_active_terrains.append(terrain)
+		_update_current_terrain()
+
+## Called by Terrain when character exits
+func exit_terrain(terrain: Terrain) -> void:
+	_active_terrains.erase(terrain)
+	_update_current_terrain()
+
+func _update_current_terrain() -> void:
+	if _active_terrains.is_empty():
+		set_current_terrain(_default_air_terrain)
+	else:
+		set_current_terrain(_active_terrains.back())
 
 ## Set current terrain
 func set_current_terrain(terrain: Terrain) -> void:
