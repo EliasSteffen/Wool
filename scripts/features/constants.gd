@@ -7,7 +7,6 @@ const WINGS_GLIDE_THRESHOLD: float = 50.0
 func _ready() -> void:
 	settings = {
 		"Grappling": {
-			"rope_length": { "value": 150.0, "min": 50.0, "max": 500.0, "step": 10.0 },
 			"max_boost_force": { "value": 600.0, "min": 0.0, "max": 2000.0, "step": 50.0 },
 			"max_swing_speed": { "value": 800.0, "min": 100.0, "max": 2000.0, "step": 50.0 },
 			"tension_strength": { "value": 2000.0, "min": 100.0, "max": 5000.0, "step": 100.0 },

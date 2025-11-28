@@ -209,12 +209,31 @@ func _find_nearest_nail() -> Nail:
 	var nearest: Nail = null
 	var nearest_distance: float = INF
 
+	# Clean up stale interactions first
+	var stale_interactions: Array[Interaction] = []
+
 	for interaction in nearby_interactions:
 		if interaction is Nail:
+			# Double check if we are still overlapping (physics safety check)
+			if not interaction.overlaps_body(self):
+				stale_interactions.append(interaction)
+				continue
+
+			# Triple check: Strict distance check against detection radius
+			# This prevents grappling from outside the visual circle if physics is imprecise
 			var distance: float = global_position.distance_to(interaction.global_position)
+			var radius: float = interaction.get_detection_radius()
+
+			if radius > 0 and distance > radius:
+				continue
+
 			if distance < nearest_distance:
 				nearest = interaction
 				nearest_distance = distance
+
+	# Remove stale interactions
+	for interaction in stale_interactions:
+		remove_nearby_interaction(interaction)
 
 	return nearest
 

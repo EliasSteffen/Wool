@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=12 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
@@ -8,9 +8,10 @@
 [ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
 [ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
 [ext_resource type="Script" uid="uid://dhog5ngqpqtbh" path="res://scripts/features/wings_feature.gd" id="8_wings"]
+[ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
-size = Vector2(64, 64)
+size = Vector2(32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wtfnr"]
 atlas = ExtResource("2_texture")
@@ -23,8 +24,8 @@ can_control = true
 shape = SubResource("RectangleShape2D_cmxwk")
 
 [node name="Body" type="Sprite2D" parent="Skin" index="0"]
-position = Vector2(3.8146973e-06, -7.6293945e-06)
-scale = Vector2(0.025420342, 0.02542034)
+position = Vector2(0, 1.9073486e-06)
+scale = Vector2(0.012710169, 0.012710168)
 texture = ExtResource("2_wtfnr")
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
@@ -35,19 +36,18 @@ script = ExtResource("5_push")
 
 [node name="DoubleJumpFeature" type="Node2D" parent="Features" index="2"]
 script = ExtResource("6_double_jump")
-max_air_jumps = 1
-air_jump_power_multiplier = 0.9
 
 [node name="GlideFeature" type="Node2D" parent="Features" index="3"]
 script = ExtResource("7_glide")
-glide_fall_multiplier = 0.3
 
 [node name="WingsFeature" type="Node2D" parent="Features" index="4"]
 script = ExtResource("8_wings")
 enabled = false
-jump_boost_multiplier = 1.5
-fall_speed_multiplier = 0.6
+
+[node name="CutFeature" type="Node2D" parent="Features" index="5"]
+script = ExtResource("9_cut")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="4"]
 z_index = -1
+scale = Vector2(0.5, 0.5)
 texture = SubResource("AtlasTexture_wtfnr")

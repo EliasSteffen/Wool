@@ -17,10 +17,13 @@ signal interaction_used(character: CharacterBody2D)
 @export var interaction_name: String = "UnnamedInteraction"
 @export var is_active: bool = true
 @export var highlight_on_range: bool = true
+@export var prompt_action: String = "" # Input action name (e.g. "interact")
+@export var prompt_text: String = ""   # Text to display (e.g. "Cut")
 
 # === PUBLIC VARIABLES ===
 var highlight_color: Color
 var normal_color: Color
+var prompt_label: Label
 
 # === PRIVATE VARIABLES ===
 var _characters_in_range: Array[CharacterBody2D] = []
@@ -31,6 +34,8 @@ var _is_being_used: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	_setup_prompt_label()
+
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 
@@ -39,6 +44,38 @@ func _ready() -> void:
 
 	_setup_tweakables()
 	_setup_interaction()
+
+func _setup_prompt_label() -> void:
+	if prompt_action == "" and prompt_text == "":
+		return
+
+	prompt_label = Label.new()
+	prompt_label.visible = false
+	prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	prompt_label.position = Vector2(-50, -80) # Above the object
+	prompt_label.size = Vector2(100, 30)
+	prompt_label.z_index = 100 # On top
+	prompt_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	prompt_label.add_theme_constant_override("outline_size", 4)
+	add_child(prompt_label)
+
+	_update_prompt_text()
+
+func _update_prompt_text() -> void:
+	if not prompt_label:
+		return
+
+	var key_text: String = ""
+	if prompt_action != "":
+		var events = InputMap.action_get_events(prompt_action)
+		if events.size() > 0:
+			key_text = events[0].as_text().split(" ")[0] # Get first key (e.g. "F")
+
+	if key_text != "":
+		prompt_label.text = "Press %s to %s" % [key_text, prompt_text]
+	else:
+		prompt_label.text = prompt_text
 
 # === PUBLIC METHODS ===
 
@@ -87,11 +124,13 @@ func _setup_interaction() -> void:
 
 ## Called when a character enters interaction range
 func _on_character_entered(character: CharacterBody2D) -> void:
-	pass
+	if prompt_label:
+		prompt_label.visible = true
 
 ## Called when a character exits interaction range
 func _on_character_exited(character: CharacterBody2D) -> void:
-	pass
+	if prompt_label:
+		prompt_label.visible = false
 
 ## Called when interaction is used by a character
 func _on_interaction_used(character: CharacterBody2D) -> void:

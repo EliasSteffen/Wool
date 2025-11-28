@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://bal5htwdcgj5e"]
+
+[ext_resource type="Script" uid="uid://cn561lif0rfau" path="res://scripts/interactions/thread.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_63dfo"]
+atlas = ExtResource("2_texture")
+region = Rect2(768, 4288, 64, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_interaction"]
+size = Vector2(50, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_solid"]
+size = Vector2(10, 100)
+
+[node name="Thread" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.9, 0.9, 0.9, 1)
+position = Vector2(-1.9073486e-06, 0)
+scale = Vector2(0.75, 1.5)
+texture = SubResource("AtlasTexture_63dfo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_interaction")
+debug_color = Color(0.7, 0.7, 0, 0.42)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="."]
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
+shape = SubResource("RectangleShape2D_solid")

@@ -35,7 +35,6 @@ func _ready() -> void:
 # === PUBLIC METHODS ===
 
 func _setup_tweakables() -> void:
-	rope_length = FeatureConstants.get_value("Grappling", "rope_length")
 	max_boost_force = FeatureConstants.get_value("Grappling", "max_boost_force")
 	max_swing_speed_for_boost = FeatureConstants.get_value("Grappling", "max_swing_speed")
 	tension_strength = FeatureConstants.get_value("Grappling", "tension_strength")
@@ -48,7 +47,6 @@ func _setup_tweakables() -> void:
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
 	if category == "Grappling":
 		match key:
-			"rope_length": rope_length = float(value)
 			"max_boost_force": max_boost_force = float(value)
 			"max_swing_speed": max_swing_speed_for_boost = float(value)
 			"tension_strength": tension_strength = float(value)
@@ -60,7 +58,29 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	_grapple_target = target_position
 	_target_nail = nail
-	_has_reached_rope_length = false  # Reset flag for new grapple
+	_has_reached_rope_length = true  # Always true to enforce constraint immediately
+
+	# Set rope length to the Nail's detection radius
+	# The "max range" is determined by the Nail's detection area (CollisionShape)
+	var character: BaseCharacter = get_character()
+
+	# If we have a nail, use its detection radius as the rope length
+	# This means the rope will be as long as the max grapple distance
+	if nail is Nail:
+		rope_length = nail.get_detection_radius()
+		# Safety check: if radius is invalid (0), fallback to distance
+		if rope_length <= 1.0:
+			push_warning("GrapplingFeature: Nail returned invalid radius, falling back to distance.")
+			if character:
+				rope_length = character.global_position.distance_to(target_position)
+			else:
+				rope_length = 100.0 # Absolute fallback
+	else:
+		# Fallback: use current distance if no nail (shouldn't happen normally)
+		if character:
+			rope_length = character.global_position.distance_to(target_position)
+		else:
+			rope_length = 100.0 # Absolute fallback
 
 	if nail:
 		nail.set_used(true)
@@ -113,15 +133,7 @@ func _calculate_movement_factor(delta: float, character_position: Vector2) -> Ve
 	var to_grapple: Vector2 = _grapple_target - character_position
 	var distance: float = to_grapple.length()
 
-	# Initial pull: Strong pull ONLY until we reach rope_length for the first time
-	if not _has_reached_rope_length and distance > rope_length:
-		var direction: Vector2 = to_grapple.normalized()
-		var pull_force: Vector2 = direction * initial_pull_strength * delta
-		return pull_force
-
-	# Once we've reached rope_length, mark it
-	if distance <= rope_length:
-		_has_reached_rope_length = true
+	# No initial pull force - we rely on BaseCharacter constraint
 
 	# After initial pull: NO FORCE - constraint is handled in BaseCharacter
 	return Vector2.ZERO
