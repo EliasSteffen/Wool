@@ -162,7 +162,7 @@ polygon = PackedVector2Array(1306, 986, 1306, 991, 1311, 991, 1311, 986)
 position = Vector2(96, 424)
 
 [node name="Player" parent="." instance=ExtResource("2_wool")]
-position = Vector2(96, 776)
+position = Vector2(1032, 640)
 
 [node name="Thread" parent="." instance=ExtResource("6_sk5k4")]
 position = Vector2(1144, 656)
