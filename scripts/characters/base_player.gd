@@ -24,6 +24,9 @@ var jump_velocity: float
 var _direction: float = 0.0
 var _debug_key_pressed: Dictionary = {}  # Track key state for debouncing
 var _debug_label: Label = null  # Debug UI label for feature status
+var _interaction_prompt_label: Label = null
+var _all_interactions: Array[Interaction] = []
+const INTERACTION_PROMPT_DISTANCE: float = 500.0
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
@@ -34,6 +37,7 @@ var _debug_label: Label = null  # Debug UI label for feature status
 @onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
 @onready var double_jump_feature: DoubleJumpFeature = get_feature_by_type(DoubleJumpFeature)
 @onready var glide_feature: GlideFeature = get_feature_by_type(GlideFeature)
+var cut_feature: CutFeature
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -42,6 +46,8 @@ func _ready() -> void:
 	call_deferred("_get_features")
 	# Setup debug UI
 	call_deferred("_setup_debug_ui")
+	call_deferred("_setup_interaction_prompt_label")
+	call_deferred("_collect_all_interactions")
 
 func _setup_tweakables() -> void:
 	super._setup_tweakables()
@@ -71,6 +77,17 @@ func _get_features() -> void:
 	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
 	glide_feature = get_feature_by_type(GlideFeature)
 
+	# Ensure CutFeature exists
+	cut_feature = get_feature_by_type(CutFeature)
+	if not cut_feature:
+		print("BasePlayer: CutFeature not found, creating it...")
+		cut_feature = CutFeature.new()
+		cut_feature.name = "CutFeature"
+		if features_container:
+			features_container.add_child(cut_feature)
+		else:
+			add_child(cut_feature)
+
 	# Setup pickaxe sprite if it's directly a Sprite2D
 	if pickaxe is Sprite2D and not pickaxe_sprite:
 		pickaxe_sprite = pickaxe
@@ -78,6 +95,7 @@ func _get_features() -> void:
 func _process(delta: float) -> void:
 	_update_pickaxe_visual()
 	_update_debug_ui()
+	_update_interaction_prompt()
 
 # === OVERRIDDEN METHODS ===
 
@@ -135,6 +153,9 @@ func _handle_debug_feature_toggle() -> void:
 
 	# 4 = Wings
 	toggle_feature.call(KEY_4, wings_feature, "Wings")
+
+	# 5 = Cut
+	toggle_feature.call(KEY_5, cut_feature, "Cut")
 
 func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
@@ -305,6 +326,68 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.rotation = -0.785398  # -45 degrees
 		pickaxe.scale = Vector2(1.0, 1.0)
 
+func _setup_interaction_prompt_label() -> void:
+	_interaction_prompt_label = Label.new()
+	_interaction_prompt_label.visible = false
+	_interaction_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_interaction_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	_interaction_prompt_label.position = Vector2(-100, -100) # Above player
+	_interaction_prompt_label.size = Vector2(200, 30)
+	_interaction_prompt_label.z_index = 100
+	_interaction_prompt_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_interaction_prompt_label.add_theme_constant_override("outline_size", 4)
+	add_child(_interaction_prompt_label)
+
+func _collect_all_interactions() -> void:
+	var nodes = get_tree().get_nodes_in_group("interactions")
+	for node in nodes:
+		if node is Interaction:
+			_all_interactions.append(node)
+
+func _update_interaction_prompt() -> void:
+	if _all_interactions.is_empty():
+		return
+
+	var closest_interaction: Interaction = null
+	var closest_dist: float = INTERACTION_PROMPT_DISTANCE
+
+	for interaction in _all_interactions:
+		if not is_instance_valid(interaction) or not interaction.is_active:
+			continue
+
+		var dist = global_position.distance_to(interaction.global_position)
+		if dist < closest_dist:
+			closest_dist = dist
+			closest_interaction = interaction
+
+	if closest_interaction:
+		_show_interaction_prompt(closest_interaction)
+	else:
+		_interaction_prompt_label.visible = false
+
+func _show_interaction_prompt(interaction: Interaction) -> void:
+	var action = interaction.prompt_action
+	var text = interaction.prompt_text
+
+	if action == "" and text == "":
+		_interaction_prompt_label.visible = false
+		return
+
+	var key_text = ""
+	if action != "":
+		var events = InputMap.action_get_events(action)
+		if events.size() > 0:
+			key_text = events[0].as_text().split(" ")[0]
+
+	var prompt = ""
+	if key_text != "":
+		prompt = "Drücke %s, um %s zu tun" % [key_text, text]
+	else:
+		prompt = text
+
+	_interaction_prompt_label.text = prompt
+	_interaction_prompt_label.visible = true
+
 ## Setup debug UI to show active features
 func _setup_debug_ui() -> void:
 	# Create a CanvasLayer for UI (so it's always on top)
@@ -367,6 +450,15 @@ func _update_debug_ui() -> void:
 		text += "[4] %s: %s\n" % [wings_feature.feature_name, status]
 	else:
 		text += "[4] NOT FOUND\n"
+
+	# 5. Cut
+	if cut_feature:
+		var status: String = "OFF"
+		if cut_feature.enabled:
+			status = "ON"
+		text += "[5] %s: %s (Action: F)\n" % [cut_feature.feature_name, status]
+	else:
+		text += "[5] Cut: NOT FOUND\n"
 
 	# Terrain
 	text += "\n=== TERRAIN ===\n"

@@ -10,6 +10,10 @@ signal cut()
 
 # === EXPORTED VARIABLES ===
 @export var is_cuttable: bool = true
+@export var cut_texture: Texture2D ## Texture to display when cut
+
+# === ONREADY VARIABLES ===
+@onready var obstacle_collision: CollisionShape2D = $StaticBody2D/CollisionShape2D
 
 # === OVERRIDDEN METHODS ===
 func _setup_interaction() -> void:
@@ -27,5 +31,27 @@ func _on_interaction_used(character: CharacterBody2D) -> void:
 
 # === PUBLIC METHODS ===
 func cut_thread() -> void:
+	if not is_cuttable:
+		return
+
+	print("Cutting thread: ", name)
+	is_cuttable = false
+	is_active = false # Prevent further interaction
 	cut.emit()
-	queue_free()
+
+	# Visual feedback
+	if cut_texture:
+		sprite.texture = cut_texture
+	else:
+		# Fallback: make it semi-transparent
+		sprite.modulate.a = 0.5
+
+	# Disable physical collision
+	if obstacle_collision:
+		obstacle_collision.set_deferred("disabled", true)
+	else:
+		push_warning("ThreadInteraction: No collision shape found to disable!")
+
+	# Hide prompt immediately
+	if prompt_label:
+		prompt_label.visible = false

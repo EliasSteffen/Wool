@@ -34,6 +34,7 @@ var _is_being_used: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	add_to_group("interactions")
 	_setup_prompt_label()
 
 	body_entered.connect(_on_body_entered)
@@ -162,9 +163,17 @@ func _on_body_entered(body: Node2D) -> void:
 		_on_character_entered(body)
 		character_in_range.emit(body, self)
 
+		# Direct registration with character (more robust than scene tree search)
+		if body.has_method("add_nearby_interaction"):
+			body.add_nearby_interaction(self)
+
 func _on_body_exited(body: Node2D) -> void:
 	if body is CharacterBody2D:
 		_characters_in_range.erase(body)
 		_update_visual()
 		_on_character_exited(body)
 		character_out_of_range.emit(body, self)
+
+		# Direct deregistration
+		if body.has_method("remove_nearby_interaction"):
+			body.remove_nearby_interaction(self)
