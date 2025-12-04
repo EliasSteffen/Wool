@@ -28,6 +28,13 @@ var _interaction_prompt_label: Label = null
 var _all_interactions: Array[Interaction] = []
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 
+# Pickaxe initial state
+var _initial_pickaxe_position: Vector2
+var _initial_pickaxe_rotation: float
+var _initial_pickaxe_scale: Vector2
+var _initial_pickaxe_centered: bool
+var _initial_pickaxe_offset: Vector2
+
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
 @onready var pickaxe: Node2D = $Pickaxe if has_node("Pickaxe") else null
@@ -42,6 +49,17 @@ var cut_feature: CutFeature
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	super._ready()
+
+	# Capture initial pickaxe state
+	if pickaxe:
+		_initial_pickaxe_position = pickaxe.position
+		_initial_pickaxe_rotation = pickaxe.rotation
+		_initial_pickaxe_scale = pickaxe.scale
+
+	if pickaxe_sprite:
+		_initial_pickaxe_centered = pickaxe_sprite.centered
+		_initial_pickaxe_offset = pickaxe_sprite.offset
+
 	# Get features after they're setup
 	call_deferred("_get_features")
 	# Setup debug UI
@@ -318,13 +336,13 @@ func _update_pickaxe_visual() -> void:
 		pickaxe_sprite.centered = true
 		pickaxe_sprite.offset = Vector2.ZERO
 	else:
-		# Normal pickaxe position (in hand)
+		# Restore initial pickaxe state (as set in scene)
 		pickaxe.visible = true
-		pickaxe_sprite.centered = true
-		pickaxe_sprite.offset = Vector2.ZERO
-		pickaxe.position = Vector2(32, 0)
-		pickaxe.rotation = -0.785398  # -45 degrees
-		pickaxe.scale = Vector2(1.0, 1.0)
+		pickaxe_sprite.centered = _initial_pickaxe_centered
+		pickaxe_sprite.offset = _initial_pickaxe_offset
+		pickaxe.position = _initial_pickaxe_position
+		pickaxe.rotation = _initial_pickaxe_rotation
+		pickaxe.scale = _initial_pickaxe_scale
 
 func _setup_interaction_prompt_label() -> void:
 	_interaction_prompt_label = Label.new()
