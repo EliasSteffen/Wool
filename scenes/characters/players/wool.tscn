@@ -28,8 +28,7 @@ scale = Vector2(0.0063550845, 0.006355084)
 texture = ExtResource("2_wtfnr")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="2"]
-z_index = -1
-position = Vector2(5, 0)
+position = Vector2(7, 0)
 scale = Vector2(0.125, 0.125)
 texture = SubResource("AtlasTexture_wtfnr")
 
@@ -53,4 +52,8 @@ enabled = false
 script = ExtResource("9_cut")
 
 [node name="Camera2D" parent="." index="4"]
+limit_left = 0
+limit_top = 0
+limit_right = 6975
+limit_bottom = 1100
 limit_smoothed = true

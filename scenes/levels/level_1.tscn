@@ -118,15 +118,6 @@ texture = ExtResource("3_s8va5")
 [node name="SpawnPoint" type="Marker2D" parent="."]
 position = Vector2(96, 424)
 
-[node name="Player" parent="." instance=ExtResource("2_wool")]
-position = Vector2(32, 789)
-
-[node name="Camera2D" parent="Player" index="3"]
-limit_left = 0
-limit_top = 0
-limit_right = 7000
-limit_bottom = 1080
-
 [node name="Nail4" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(211, 755)
 
@@ -154,7 +145,9 @@ position = Vector2(-160, 957)
 [node name="CollisionShape2D" parent="KillZone" index="0"]
 position = Vector2(3804, 278)
 
-[editable path="Player"]
+[node name="Wool" parent="." instance=ExtResource("2_wool")]
+position = Vector2(16, 796)
+
 [editable path="UnderwaterZone2"]
 [editable path="UpwindZone"]
 [editable path="KillZone"]
