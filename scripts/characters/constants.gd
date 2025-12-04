@@ -11,7 +11,7 @@ func _ready() -> void:
 			"acceleration": { "value": 1500.0, "min": 100.0, "max": 5000.0, "step": 50.0 },
 			"friction": { "value": 1200.0, "min": 100.0, "max": 5000.0, "step": 50.0 },
 			"can_control": { "value": true, "type": "bool" },
-			"camera_zoom": { "value": 5.0, "min": 2.0, "max": 10.0, "step": 0.1 }
+			"camera_zoom": { "value": 4.0, "min": 2.0, "max": 10.0, "step": 0.1 }
 		},
 		"Enemy": {
 			"attack_damage": { "value": 10, "min": 1, "max": 100, "step": 1 },
