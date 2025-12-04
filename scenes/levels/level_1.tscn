@@ -1,18 +1,21 @@
-[gd_scene load_steps=8 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=11 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Script" uid="uid://2t0xhsio7d8e" path="res://scripts/levels/base_level.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dfmxxjukm286l" path="res://assets/maps/wakable-stuff.svg" id="2_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
+[ext_resource type="Texture2D" uid="uid://ctvjht6tme6vh" path="res://assets/maps/background.svg" id="3_s8va5"]
+[ext_resource type="Texture2D" uid="uid://cfpg53xxejeut" path="res://assets/maps/wasser.svg" id="4_dga24"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="4_x42e6"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/upwind_zone.tscn" id="5_6761a"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 
+[sub_resource type="CanvasTexture" id="CanvasTexture_dga24"]
+
 [node name="Level1" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="Map" type="Sprite2D" parent="."]
-texture = ExtResource("2_oc4kc")
 centered = false
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Map"]
@@ -95,11 +98,34 @@ polygon = PackedVector2Array(1624, 1075, 1624, 1076, 1623, 1076, 1623, 1077, 162
 [node name="CollisionPolygon2D26" type="CollisionPolygon2D" parent="Map/StaticBody2D"]
 polygon = PackedVector2Array(1331, 1077, 1331, 1078, 1330, 1078, 1330, 1079, 1329, 1079, 1329, 1080, 1339, 1080, 1339, 1079, 1338, 1079, 1338, 1078, 1336, 1078, 1336, 1077)
 
+[node name="Sprite2D4" type="Sprite2D" parent="Map"]
+position = Vector2(3519.75, 551.75)
+scale = Vector2(7040.4995, 1104.5)
+texture = SubResource("CanvasTexture_dga24")
+
+[node name="Sprite2D2" type="Sprite2D" parent="Map"]
+position = Vector2(1896, 896)
+texture = ExtResource("4_dga24")
+
+[node name="Sprite2D3" type="Sprite2D" parent="Map"]
+position = Vector2(3500, 540)
+texture = ExtResource("2_oc4kc")
+
+[node name="Sprite2D" type="Sprite2D" parent="Map"]
+position = Vector2(3500, 540)
+texture = ExtResource("3_s8va5")
+
 [node name="SpawnPoint" type="Marker2D" parent="."]
 position = Vector2(96, 424)
 
 [node name="Player" parent="." instance=ExtResource("2_wool")]
 position = Vector2(32, 789)
+
+[node name="Camera2D" parent="Player" index="3"]
+limit_left = 0
+limit_top = 0
+limit_right = 7000
+limit_bottom = 1080
 
 [node name="Nail4" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(211, 755)
@@ -128,6 +154,7 @@ position = Vector2(-160, 957)
 [node name="CollisionShape2D" parent="KillZone" index="0"]
 position = Vector2(3804, 278)
 
+[editable path="Player"]
 [editable path="UnderwaterZone2"]
 [editable path="UpwindZone"]
 [editable path="KillZone"]

@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
-size = Vector2(32, 32)
+size = Vector2(16, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wtfnr"]
 atlas = ExtResource("2_texture")
@@ -24,9 +24,14 @@ can_control = true
 shape = SubResource("RectangleShape2D_cmxwk")
 
 [node name="Body" type="Sprite2D" parent="Skin" index="0"]
-position = Vector2(0, 1.9073486e-06)
-scale = Vector2(0.012710169, 0.012710168)
+scale = Vector2(0.0063550845, 0.006355084)
 texture = ExtResource("2_wtfnr")
+
+[node name="Pickaxe" type="Sprite2D" parent="." index="2"]
+z_index = -1
+position = Vector2(5, 0)
+scale = Vector2(0.125, 0.125)
+texture = SubResource("AtlasTexture_wtfnr")
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 script = ExtResource("4_grappling")
@@ -47,8 +52,5 @@ enabled = false
 [node name="CutFeature" type="Node2D" parent="Features" index="5"]
 script = ExtResource("9_cut")
 
-[node name="Pickaxe" type="Sprite2D" parent="." index="4"]
-z_index = -1
-position = Vector2(8, 0)
-scale = Vector2(0.25, 0.25)
-texture = SubResource("AtlasTexture_wtfnr")
+[node name="Camera2D" parent="." index="4"]
+limit_smoothed = true

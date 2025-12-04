@@ -19,6 +19,7 @@ extends BaseCharacter
 var acceleration: float
 var friction: float
 var jump_velocity: float
+var camera_zoom: float
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
@@ -74,6 +75,10 @@ func _setup_tweakables() -> void:
 	acceleration = CharacterConstants.get_value("Player", "acceleration")
 	friction = CharacterConstants.get_value("Player", "friction")
 	jump_velocity = CharacterConstants.get_value("Player", "jump_velocity")
+	camera_zoom = CharacterConstants.get_value("Player", "camera_zoom")
+
+	if camera:
+		camera.zoom = Vector2(camera_zoom, camera_zoom)
 
 	# Listen for changes (super class already connected, but we need to handle our specific keys)
 	# Note: We can't easily hook into the super connection if it doesn't expose a virtual method.
@@ -87,6 +92,10 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 			"acceleration": acceleration = float(value)
 			"friction": friction = float(value)
 			"jump_velocity": jump_velocity = float(value)
+			"camera_zoom":
+				camera_zoom = float(value)
+				if camera:
+					camera.zoom = Vector2(camera_zoom, camera_zoom)
 
 func _get_features() -> void:
 	grappling_feature = get_feature_by_type(GrapplingFeature)
