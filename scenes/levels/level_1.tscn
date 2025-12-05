@@ -148,6 +148,18 @@ position = Vector2(3804, 278)
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
 position = Vector2(16, 796)
 
+[node name="CollisionShape2D" parent="Wool" index="0"]
+position = Vector2(10, -17)
+
+[node name="Body" parent="Wool/Skin" index="0"]
+position = Vector2(10.20151, -15.9093)
+scale = Vector2(0.019256616, 0.019256614)
+
+[node name="Pickaxe" parent="Wool" index="2"]
+position = Vector2(24, -12)
+scale = Vector2(0.35156253, 0.35156253)
+
 [editable path="UnderwaterZone2"]
 [editable path="UpwindZone"]
 [editable path="KillZone"]
+[editable path="Wool"]

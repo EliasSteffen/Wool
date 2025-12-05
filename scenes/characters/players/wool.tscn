@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
-size = Vector2(16, 16)
+size = Vector2(44, 54)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wtfnr"]
 atlas = ExtResource("2_texture")
