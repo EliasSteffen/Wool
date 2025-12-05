@@ -131,13 +131,13 @@ position = Vector2(848, 640)
 position = Vector2(1136, 784)
 
 [node name="CollisionShape2D" parent="UnderwaterZone2/DetectionArea" index="0"]
-position = Vector2(926, 106)
+position = Vector2(844, 116)
 
 [node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
 position = Vector2(4712, 592)
 
 [node name="CollisionShape2D" parent="UpwindZone/DetectionArea" index="0"]
-position = Vector2(458.5, 259)
+position = Vector2(584, 108)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
 position = Vector2(-160, 957)
