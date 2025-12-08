@@ -52,6 +52,7 @@ func handle_input(character: BaseCharacter) -> void:
 	# Reset jumps when landing on floor
 	if character.is_on_floor():
 		if not _was_on_floor:
+			print("DoubleJump: Landed on floor. Resetting jumps. Max: ", max_air_jumps)
 			reset_jumps()
 		_was_on_floor = true
 	else:
@@ -59,8 +60,12 @@ func handle_input(character: BaseCharacter) -> void:
 
 	# Check for jump input while in air
 	if Input.is_action_just_pressed(jump_input_action):
-		if not character.is_on_floor() and _jumps_remaining > 0:
-			_perform_air_jump(character)
+		if not character.is_on_floor():
+			if _jumps_remaining > 0:
+				print("DoubleJump: Performing air jump! Remaining: ", _jumps_remaining)
+				_perform_air_jump(character)
+			else:
+				print("DoubleJump: Cannot jump. Remaining: ", _jumps_remaining)
 
 func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
 	# Double jump doesn't add passive movement

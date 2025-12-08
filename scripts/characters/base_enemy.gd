@@ -43,6 +43,7 @@ enum AIState {
 # === ONREADY VARIABLES ===
 @onready var detection_area: Area2D = $DetectionArea if has_node("DetectionArea") else null
 @onready var hitbox: Area2D = $Hitbox if has_node("Hitbox") else null
+@onready var features_node: Node = $Features if has_node("Features") else null
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -83,8 +84,29 @@ func _on_enemy_tweakable_changed(category: String, key: String, value: Variant) 
 # === PUBLIC METHODS ===
 
 func die() -> void:
+	# Drop features if any
+	if features_node:
+		_drop_features()
+
 	# Play death animation if available (TODO)
 	queue_free()
+
+func _drop_features() -> void:
+	var pickup_scene = preload("res://scenes/interactions/feature_pickup.tscn")
+
+	for child in features_node.get_children():
+		if child is Feature:
+			var pickup = pickup_scene.instantiate()
+			# Add to the world (parent of the enemy)
+			get_parent().call_deferred("add_child", pickup)
+
+			# Setup pickup
+			pickup.global_position = global_position
+			# Spread out if multiple? For now just spawn at center.
+
+			# We need to pass the feature data.
+			# Since the pickup script expects a Feature instance to copy data from:
+			pickup.call_deferred("setup", child)
 
 # === OVERRIDDEN METHODS ===
 

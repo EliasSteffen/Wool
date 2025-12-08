@@ -18,6 +18,7 @@ signal feature_deactivated()
 @export var feature_name: String = "UnnamedFeature"
 @export var enabled: bool = true
 @export var auto_register: bool = true  # Automatically register with parent character
+@export var drop_icon: Texture2D = null # Icon to display when dropped as item
 
 # === PRIVATE VARIABLES ===
 var _active: bool = false

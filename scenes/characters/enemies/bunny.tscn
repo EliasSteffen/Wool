@@ -1,11 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://fhce3iot1cba"]
+[gd_scene load_steps=9 format=3 uid="uid://fhce3iot1cba"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_base_enemy"]
 [ext_resource type="Texture2D" uid="uid://cdr6yi3ee33rm" path="res://assets/character/bunny.png" id="2_1qgi1"]
-[ext_resource type="Script" path="res://scripts/characters/bunny.gd" id="3_script"]
+[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
+[ext_resource type="Script" uid="uid://cmf01a7oof3te" path="res://scripts/characters/bunny.gd" id="3_script"]
+[ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="4_g00fa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1qgi1"]
 size = Vector2(96, 111)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_humbv"]
+atlas = ExtResource("2_texture")
+region = Rect2(64, 4416, 64, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ypkhq"]
 size = Vector2(96, 110)
@@ -13,7 +19,7 @@ size = Vector2(96, 110)
 [node name="Bunny" instance=ExtResource("1_base_enemy")]
 script = ExtResource("3_script")
 
-[node name="CollisionShape2D" parent="." index="0"]
+[node name="Hitbox#CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 position = Vector2(0, 0.5)
 shape = SubResource("RectangleShape2D_1qgi1")
 
@@ -21,10 +27,11 @@ shape = SubResource("RectangleShape2D_1qgi1")
 scale = Vector2(0.04, 0.04)
 texture = ExtResource("2_1qgi1")
 
+[node name="DoubleJumpFeature" type="Node2D" parent="Features" index="0"]
+script = ExtResource("4_g00fa")
+drop_icon = SubResource("AtlasTexture_humbv")
+metadata/_custom_type_script = "uid://hyomrndp86lr"
+
 [node name="CollisionShape2D" parent="DetectionArea" index="0"]
 position = Vector2(0, 1)
 shape = SubResource("RectangleShape2D_ypkhq")
-
-[node name="CollisionShape2D" parent="Hitbox" index="0"]
-position = Vector2(0, 0.5)
-shape = SubResource("RectangleShape2D_1qgi1")
