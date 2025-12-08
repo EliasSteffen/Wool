@@ -160,17 +160,7 @@ func _get_features() -> void:
 	wings_feature = get_feature_by_type(WingsFeature)
 	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
 	glide_feature = get_feature_by_type(GlideFeature)
-
-	# Ensure CutFeature exists
 	cut_feature = get_feature_by_type(CutFeature)
-	if not cut_feature:
-		print("BasePlayer: CutFeature not found, creating it...")
-		cut_feature = CutFeature.new()
-		cut_feature.name = "CutFeature"
-		if features_container:
-			features_container.add_child(cut_feature)
-		else:
-			add_child(cut_feature)
 
 	# Setup pickaxe sprite if it's directly a Sprite2D
 	if pickaxe is Sprite2D and not pickaxe_sprite:
@@ -202,10 +192,15 @@ func _handle_input() -> void:
 	if _vertical_direction == 0.0:
 		_vertical_direction = Input.get_axis("ui_up", "ui_down")
 
-	# Jump (only if not underwater)
 	var is_underwater = current_terrain is UnderWaterTerrain
+
+	# Jump (only if not underwater)
 	if not is_underwater and Input.is_action_just_pressed("jump") and is_on_floor():
 		_jump()
+
+	# Swim Up with Jump button
+	if is_underwater and Input.is_action_pressed("jump"):
+		_vertical_direction = -1.0
 
 	# Attack
 	if Input.is_key_pressed(KEY_V) and not _is_attacking:
@@ -257,7 +252,7 @@ func _handle_feature_inputs() -> void:
 			feature.handle_input(self)
 
 func _handle_grappling_input() -> void:
-	if not grappling_feature:
+	if not grappling_feature or not grappling_feature.enabled:
 		return
 
 	if Input.is_action_just_pressed("grapple"):
@@ -269,7 +264,7 @@ func _handle_grappling_input() -> void:
 		grappling_feature.release()
 
 func _handle_push_input() -> void:
-	if not push_feature:
+	if not push_feature or not push_feature.enabled:
 		return
 
 	# Check if moving towards a box
@@ -339,7 +334,7 @@ func _jump() -> void:
 	var jump_power: float = -jump_velocity
 
 	# Apply wings boost if available
-	if wings_feature and wings_feature.is_active():
+	if wings_feature and wings_feature.enabled and wings_feature.is_active():
 		jump_power *= wings_feature.get_jump_boost()
 
 	velocity.y = jump_power
@@ -502,14 +497,14 @@ func _update_swimming_rotation(delta: float) -> void:
 				# Allow rotation from full down (-180deg) to slightly back (30deg)
 				target_rotation = clamp(angle, -PI, PI/6)
 
-	# Apply rotation with smoothing
+	# Apply rotation with smoothing to the WHOLE PLAYER (including pickaxe)
 	# Lower value = smoother/slower rotation
-	skin.rotation = lerp_angle(skin.rotation, target_rotation, 5.0 * delta)
+	rotation = lerp_angle(rotation, target_rotation, 5.0 * delta)
 
-	# Rotate collision shape to match visual rotation (if it's a capsule/rectangle)
-	# This ensures the hitbox matches the swimming posture
-	if collision_shape:
-		collision_shape.rotation = skin.rotation
+	# Reset skin rotation to 0 so it aligns with the player
+	skin.rotation = 0.0
+
+	# Collision shape rotates automatically with the player node
 
 func _setup_interaction_prompt_label() -> void:
 	_interaction_prompt_label = Label.new()

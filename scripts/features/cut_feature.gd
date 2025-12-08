@@ -11,7 +11,6 @@ extends Feature
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	feature_name = "Cut"
-	enabled = true
 	# Activate by default so it can listen for input
 	activate()
 

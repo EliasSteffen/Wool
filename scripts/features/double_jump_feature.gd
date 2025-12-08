@@ -19,7 +19,6 @@ var _was_on_floor: bool = false
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	feature_name = "DoubleJump"
-	enabled = true
 	_setup_tweakables()
 	activate()
 

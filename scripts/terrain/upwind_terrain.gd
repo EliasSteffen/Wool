@@ -7,6 +7,7 @@ extends Terrain
 
 # === PUBLIC VARIABLES ===
 var upwind_force: float
+var max_upwind_velocity: float
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -18,11 +19,14 @@ func _ready() -> void:
 
 func _setup_tweakables() -> void:
 	upwind_force = TerrainConstants.get_value("Upwind", "upwind_force")
+	max_upwind_velocity = TerrainConstants.get_value("Upwind", "max_upwind_velocity")
 	TerrainConstants.value_changed.connect(_on_tweakable_changed)
 
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
-	if category == "Upwind" and key == "upwind_force":
-		upwind_force = float(value)
+	if category == "Upwind":
+		match key:
+			"upwind_force": upwind_force = float(value)
+			"max_upwind_velocity": max_upwind_velocity = float(value)
 
 # === OVERRIDDEN METHODS ===
 
@@ -67,12 +71,11 @@ func _apply_upwind_force(character: BaseCharacter, delta: float) -> void:
 	var glide_feature = character.get_feature_by_type(GlideFeature)
 
 	if glide_feature and glide_feature.is_gliding():
-		# Apply upward force
-		# We modify velocity directly since we are in _physics_process
-		# This is additive to the character's own movement calculation
-		character.velocity.y += upwind_force * delta
+		# Apply upward force with smooth acceleration towards max velocity
+		# upwind_force is negative (e.g. -1500), max_upwind_velocity is negative (e.g. -600)
 
-		# Clamp max upward speed to prevent infinite acceleration
-		var max_upward_speed: float = -1000.0
-		if character.velocity.y < max_upward_speed:
-			character.velocity.y = max_upward_speed
+		# Only apply force if we haven't reached max upward speed yet
+		# OR if we are falling (velocity.y > max_upwind_velocity)
+		if character.velocity.y > max_upwind_velocity:
+			character.velocity.y = move_toward(character.velocity.y, max_upwind_velocity, abs(upwind_force) * delta)
+

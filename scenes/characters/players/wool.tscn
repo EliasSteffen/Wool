@@ -46,9 +46,11 @@ script = ExtResource("4_grappling")
 
 [node name="PushFeature" type="Node2D" parent="Features" index="1"]
 script = ExtResource("5_push")
+enabled = false
 
 [node name="DoubleJumpFeature" type="Node2D" parent="Features" index="2"]
 script = ExtResource("6_double_jump")
+enabled = false
 
 [node name="GlideFeature" type="Node2D" parent="Features" index="3"]
 script = ExtResource("7_glide")
