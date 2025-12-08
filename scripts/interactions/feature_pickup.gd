@@ -26,6 +26,8 @@ func _ready() -> void:
 	tween.tween_property(sprite, "position:y", -10.0, 1.0).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(sprite, "position:y", 0.0, 1.0).set_trans(Tween.TRANS_SINE)
 
+	_update_sprite_size()
+
 func setup(feature: Feature) -> void:
 	feature_script = feature.get_script()
 	feature_name = feature.feature_name
@@ -33,6 +35,27 @@ func setup(feature: Feature) -> void:
 
 	if sprite and icon_texture:
 		sprite.texture = icon_texture
+		_update_sprite_size()
+
+func _update_sprite_size() -> void:
+	if not sprite or not sprite.texture or not collision_shape or not collision_shape.shape:
+		return
+
+	var shape = collision_shape.shape
+	var target_size = Vector2.ZERO
+
+	if shape is RectangleShape2D:
+		target_size = shape.size
+	elif shape is CircleShape2D:
+		target_size = Vector2(shape.radius * 2, shape.radius * 2)
+	elif shape is CapsuleShape2D:
+		target_size = Vector2(shape.radius * 2, shape.height)
+
+	if target_size != Vector2.ZERO:
+		var tex_size = sprite.texture.get_size()
+		# Scale to fit the hitbox (uniform scaling based on the larger dimension to fill it)
+		var scale_factor = max(target_size.x / tex_size.x, target_size.y / tex_size.y)
+		sprite.scale = Vector2(scale_factor, scale_factor)
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is BasePlayer:
