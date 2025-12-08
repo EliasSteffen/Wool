@@ -29,16 +29,10 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	print("KillZone detected body: ", body.name)
 
-	# Check if the body is a player
-	if body is BasePlayer:
-		print("Player entered KillZone! Returning to menu...")
-
-		# Stop player completely (physics and input)
-		body.process_mode = Node.PROCESS_MODE_DISABLED
-		body.velocity = Vector2.ZERO # Stop movement immediately
-
-		# Wait a moment before resetting
-		get_tree().create_timer(0.5).timeout.connect(_reset_game)
+	# Check if the body is a character (Player or Enemy)
+	if body is BaseCharacter:
+		print("Character entered KillZone! Killing...")
+		body.die()
 
 func _reset_game() -> void:
 	GameManager.return_to_menu()

@@ -68,6 +68,17 @@ func _ready() -> void:
 	call_deferred("_setup_interaction_prompt_label")
 	call_deferred("_collect_all_interactions")
 
+func die() -> void:
+	# Disable control
+	can_control = false
+	velocity = Vector2.ZERO
+
+	# Play death animation if available (TODO)
+
+	# Reload scene after a short delay
+	await get_tree().create_timer(1.0).timeout
+	get_tree().reload_current_scene()
+
 func _setup_tweakables() -> void:
 	super._setup_tweakables()
 

@@ -183,7 +183,7 @@ func set_current_terrain(terrain: Terrain) -> void:
 func take_damage(amount: int) -> void:
 	current_health = max(0, current_health - amount)
 	if current_health == 0:
-		_on_death()
+		die()
 
 ## Heal
 func heal(amount: int) -> void:
@@ -208,7 +208,7 @@ func _on_interaction_lost(interaction: Interaction) -> void:
 	pass
 
 ## Called when character dies
-func _on_death() -> void:
+func die() -> void:
 	queue_free()
 
 # === PRIVATE METHODS ===
