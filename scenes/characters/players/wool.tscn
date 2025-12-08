@@ -26,6 +26,7 @@ shape = SubResource("RectangleShape2D_cmxwk")
 [node name="Body" type="Sprite2D" parent="Skin" index="0"]
 scale = Vector2(0.041, 0.041)
 texture = ExtResource("2_wtfnr")
+flip_h = true
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="2"]
 position = Vector2(24.000002, -8.000002)
