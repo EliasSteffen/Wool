@@ -27,11 +27,35 @@ var detection_area: Area2D
 func _ready() -> void:
 	detection_area = _find_detection_area()
 
+	# Support for adding CollisionShapes directly to the Terrain node in the editor.
+	# We move them into the DetectionArea at runtime so they trigger the physics logic.
 	if detection_area:
+		_move_collision_shapes_to_area()
 		detection_area.body_entered.connect(_on_body_entered)
 		detection_area.body_exited.connect(_on_body_exited)
+
+		# SAFETY CHECK: Wait one frame, then manually check for bodies already inside.
+		# This fixes issues where spawning inside an Area2D doesn't trigger the signal immediately.
+		get_tree().process_frame.connect(_check_initial_overlaps, CONNECT_ONE_SHOT)
 	else:
 		push_warning("Terrain '%s' has no DetectionArea child node!" % terrain_name)
+
+func _check_initial_overlaps() -> void:
+	if not detection_area: return
+
+	for body in detection_area.get_overlapping_bodies():
+		_on_body_entered(body)
+
+func _move_collision_shapes_to_area() -> void:
+	# Iterate backwards to safely remove children while iterating
+	var children = get_children()
+	for i in range(children.size() - 1, -1, -1):
+		var child = children[i]
+		if child is CollisionShape2D or child is CollisionPolygon2D:
+			remove_child(child)
+			detection_area.add_child(child)
+			# Ensure the shape keeps its position relative to the terrain
+			# (Assuming DetectionArea is at 0,0 relative to Terrain)
 
 func _find_detection_area() -> Area2D:
 	if has_node("DetectionArea"):
@@ -97,6 +121,10 @@ func _on_character_exited(character: CharacterBody2D) -> void:
 # === SIGNAL CALLBACKS ===
 func _on_body_entered(body: Node2D) -> void:
 	if body is CharacterBody2D:
+		# Prevent duplicates (important if we manually check overlaps AND get a signal)
+		if body in _characters_in_terrain:
+			return
+
 		_characters_in_terrain.append(body)
 		_on_character_entered(body)
 		character_entered.emit(body)

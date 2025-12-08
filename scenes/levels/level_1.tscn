@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=14 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Script" uid="uid://2t0xhsio7d8e" path="res://scripts/levels/base_level.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dfmxxjukm286l" path="res://assets/maps/wakable-stuff.svg" id="2_oc4kc"]
@@ -12,6 +12,12 @@
 [ext_resource type="PackedScene" uid="uid://fhce3iot1cba" path="res://scenes/characters/enemies/bunny.tscn" id="10_qxy0u"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_dga24"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_excbq"]
+size = Vector2(1432, 1093)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qxy0u"]
+size = Vector2(2112, 375)
 
 [node name="Level1" type="Node2D"]
 script = ExtResource("1_script")
@@ -154,18 +160,6 @@ position = Vector2(441, 806)
 [node name="Nail3" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(848, 640)
 
-[node name="UnderwaterZone2" parent="." instance=ExtResource("4_x42e6")]
-position = Vector2(1136, 784)
-
-[node name="CollisionShape2D" parent="UnderwaterZone2/DetectionArea" index="0"]
-position = Vector2(827, 145)
-
-[node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
-position = Vector2(4712, 592)
-
-[node name="CollisionShape2D" parent="UpwindZone/DetectionArea" index="0"]
-position = Vector2(604.5, 111)
-
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
 position = Vector2(-160, 957)
 
@@ -178,6 +172,18 @@ position = Vector2(2416, 768)
 [node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
 position = Vector2(3464, 720)
 
-[editable path="UnderwaterZone2"]
-[editable path="UpwindZone"]
+[node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
+position = Vector2(5323, 762)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UpwindZone"]
+position = Vector2(-48, -162.5)
+shape = SubResource("RectangleShape2D_excbq")
+
+[node name="UnderwaterZone" parent="." instance=ExtResource("4_x42e6")]
+position = Vector2(1966, 923)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UnderwaterZone"]
+position = Vector2(41, -14.5)
+shape = SubResource("RectangleShape2D_qxy0u")
+
 [editable path="KillZone"]
