@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=12 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Script" uid="uid://2t0xhsio7d8e" path="res://scripts/levels/base_level.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dfmxxjukm286l" path="res://assets/maps/wakable-stuff.svg" id="2_oc4kc"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/terrain/upwind_zone.tscn" id="5_6761a"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
+[ext_resource type="PackedScene" uid="uid://fhce3iot1cba" path="res://scenes/characters/enemies/bunny.tscn" id="10_qxy0u"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_dga24"]
 
@@ -147,6 +148,9 @@ position = Vector2(3804, 278)
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
 position = Vector2(56, 744)
+
+[node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
+position = Vector2(536, 848)
 
 [editable path="UnderwaterZone2"]
 [editable path="UpwindZone"]
