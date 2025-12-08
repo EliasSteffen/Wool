@@ -506,7 +506,14 @@ func _update_rotation(delta: float) -> void:
 
 	# Apply rotation with smoothing to the WHOLE PLAYER (including pickaxe)
 	# Lower value = smoother/slower rotation
-	rotation = lerp_angle(rotation, target_rotation, 5.0 * delta)
+	if is_underwater and not is_grappling:
+		# Use lerp (linear) instead of lerp_angle (shortest path) for swimming
+		# This prevents the rotation from crossing the bottom (PI/-PI boundary)
+		# and forces the "long way" via the top (0) when switching sides.
+		rotation = wrapf(rotation, -PI, PI) # Normalize first
+		rotation = lerp(rotation, target_rotation, 5.0 * delta)
+	else:
+		rotation = lerp_angle(rotation, target_rotation, 5.0 * delta)
 
 	# Reset skin rotation to 0 so it aligns with the player
 	skin.rotation = 0.0
