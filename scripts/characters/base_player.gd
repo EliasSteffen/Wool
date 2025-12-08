@@ -505,7 +505,7 @@ func _update_swimming_rotation(delta: float) -> void:
 	# Apply rotation with smoothing
 	# Lower value = smoother/slower rotation
 	skin.rotation = lerp_angle(skin.rotation, target_rotation, 5.0 * delta)
-	
+
 	# Rotate collision shape to match visual rotation (if it's a capsule/rectangle)
 	# This ensures the hitbox matches the swimming posture
 	if collision_shape:
