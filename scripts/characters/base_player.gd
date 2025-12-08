@@ -23,6 +23,7 @@ var camera_zoom: float
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
+var _vertical_direction: float = 0.0
 var _debug_key_pressed: Dictionary = {}  # Track key state for debouncing
 var _debug_label: Label = null  # Debug UI label for feature status
 var _interaction_prompt_label: Label = null
@@ -177,6 +178,7 @@ func _get_features() -> void:
 
 func _process(delta: float) -> void:
 	_update_pickaxe_visual()
+	_update_swimming_rotation(delta)
 	_update_debug_ui()
 	_update_interaction_prompt()
 
@@ -196,9 +198,13 @@ func _process_physics(delta: float) -> void:
 
 func _handle_input() -> void:
 	_direction = Input.get_axis("move_left", "move_right")
+	_vertical_direction = Input.get_axis("move_up", "move_down")
+	if _vertical_direction == 0.0:
+		_vertical_direction = Input.get_axis("ui_up", "ui_down")
 
-	# Jump
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	# Jump (only if not underwater)
+	var is_underwater = current_terrain is UnderWaterTerrain
+	if not is_underwater and Input.is_action_just_pressed("jump") and is_on_floor():
 		_jump()
 
 	# Attack
@@ -279,6 +285,31 @@ func _handle_push_input() -> void:
 
 func _handle_movement(delta: float) -> void:
 	var is_grappling: bool = grappling_feature and grappling_feature.is_active()
+
+	if current_terrain is UnderWaterTerrain:
+		var underwater_terrain := current_terrain as UnderWaterTerrain
+		var speed: float = move_speed * underwater_terrain.slowdown_factor
+
+		# Horizontal movement (always controlled)
+		var target_velocity_x: float = _direction * speed
+		velocity.x = move_toward(velocity.x, target_velocity_x, acceleration * delta)
+
+		# Vertical movement
+		if _vertical_direction != 0:
+			# Player is actively swimming up/down
+			var target_velocity_y: float = _vertical_direction * speed
+			velocity.y = move_toward(velocity.y, target_velocity_y, acceleration * delta)
+		else:
+			# Player is not swimming vertically -> Apply sinking/buoyancy
+			# Gravity is already applied in BaseCharacter._physics_process()
+			# Buoyancy is applied in BaseCharacter via current_terrain.get_movement_factor()
+			# We just need to make sure we don't reset velocity.y to 0 here.
+
+			# Apply water resistance (damping) to vertical velocity to prevent infinite acceleration
+			# This acts as terminal velocity underwater
+			velocity.y = move_toward(velocity.y, 0, underwater_terrain.water_resistance * 100.0 * delta)
+
+		return
 
 	if _direction != 0:
 		if is_grappling:
@@ -415,6 +446,70 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.position = _initial_pickaxe_position
 		pickaxe.rotation = _initial_pickaxe_rotation
 		pickaxe.scale = _initial_pickaxe_scale
+
+func _update_swimming_rotation(delta: float) -> void:
+	if not skin:
+		return
+
+	# Handle flipping (standard platformer behavior)
+	# Prioritize Input direction for responsiveness
+	if not is_zero_approx(_direction):
+		if _direction > 0:
+			skin.scale.x = abs(skin.scale.x)
+		else:
+			skin.scale.x = -abs(skin.scale.x)
+	# Fallback to velocity if moving significantly (e.g. knockback or drift)
+	elif abs(velocity.x) > 10.0:
+		if velocity.x > 0:
+			skin.scale.x = abs(skin.scale.x)
+		else:
+			skin.scale.x = -abs(skin.scale.x)
+
+	# Check if underwater
+	var is_underwater = current_terrain is UnderWaterTerrain
+	var target_rotation = 0.0
+
+	if is_underwater:
+		# Check for floor or proximity to floor to force upright standing
+		# We use test_move to see if ground is immediately below us (e.g. within 16 pixels)
+		# This prevents jitter when rotating upright lifts the collision shape slightly off the ground
+		var close_to_floor = is_on_floor()
+		if not close_to_floor and velocity.y >= 0: # Only check if falling/sinking
+			close_to_floor = test_move(global_transform, Vector2(0, 16))
+
+		if close_to_floor:
+			target_rotation = 0.0
+		# Otherwise calculate rotation based on velocity
+		# We want the character to lean into the movement (Superman style)
+		# Sprite Up is (0, -1). Velocity Angle 0 is Right.
+		# So we need to add 90 degrees (PI/2) to align Up with Velocity.
+		elif velocity.length() > 10.0:
+			var angle = velocity.angle() + PI / 2.0
+			angle = wrapf(angle, -PI, PI)
+
+			if skin.scale.x > 0:
+				# Facing Right
+				# Allow rotation from slightly back (-30deg) to full down (180deg)
+				target_rotation = clamp(angle, -PI/6, PI)
+			else:
+				# Facing Left
+				# We expect angles in [-PI, 0].
+				# If angle is PI (straight down), wrapf might return PI.
+				# We want to treat positive PI as negative PI for clamping purposes.
+				if angle > PI/2:
+					angle -= 2 * PI
+
+				# Allow rotation from full down (-180deg) to slightly back (30deg)
+				target_rotation = clamp(angle, -PI, PI/6)
+
+	# Apply rotation with smoothing
+	# Lower value = smoother/slower rotation
+	skin.rotation = lerp_angle(skin.rotation, target_rotation, 5.0 * delta)
+	
+	# Rotate collision shape to match visual rotation (if it's a capsule/rectangle)
+	# This ensures the hitbox matches the swimming posture
+	if collision_shape:
+		collision_shape.rotation = skin.rotation
 
 func _setup_interaction_prompt_label() -> void:
 	_interaction_prompt_label = Label.new()
