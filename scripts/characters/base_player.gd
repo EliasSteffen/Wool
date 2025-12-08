@@ -62,7 +62,7 @@ func _ready() -> void:
 	if pickaxe_sprite:
 		_initial_pickaxe_centered = pickaxe_sprite.centered
 		_initial_pickaxe_offset = pickaxe_sprite.offset
-	
+
 	if pickaxe_hitbox:
 		pickaxe_hitbox.body_entered.connect(_on_pickaxe_hitbox_body_entered)
 
@@ -86,25 +86,38 @@ func die() -> void:
 
 func attack() -> void:
 	_is_attacking = true
-	
+
 	# Enable hitbox
 	if pickaxe_hitbox:
 		pickaxe_hitbox.monitoring = true
-		
+
 	# Animate pickaxe
 	if pickaxe:
 		var tween = create_tween()
-		# Swing down
-		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation + 90, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		# Swing back
-		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		
+		tween.set_parallel(true)
+
+		# Determine forward direction based on current position
+		var forward_dir = Vector2.RIGHT
+		if pickaxe.position.x < 0:
+			forward_dir = Vector2.LEFT
+
+		# Move pickaxe forward to extend range ("full length")
+		var target_pos = _initial_pickaxe_position + (forward_dir * 40.0)
+
+		# Swing down and move forward
+		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation + 100, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(pickaxe, "position", target_pos, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		# Swing back and return to position
+		tween.chain().tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(pickaxe, "position", _initial_pickaxe_position, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+
 		await tween.finished
-		
+
 	# Disable hitbox
 	if pickaxe_hitbox:
 		pickaxe_hitbox.monitoring = false
-		
+
 	_is_attacking = false
 
 func _on_pickaxe_hitbox_body_entered(body: Node2D) -> void:
@@ -187,7 +200,7 @@ func _handle_input() -> void:
 	# Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		_jump()
-	
+
 	# Attack
 	if Input.is_key_pressed(KEY_V) and not _is_attacking:
 		attack()
@@ -392,6 +405,9 @@ func _update_pickaxe_visual() -> void:
 		pickaxe_sprite.centered = true
 		pickaxe_sprite.offset = Vector2.ZERO
 	else:
+		if _is_attacking:
+			return
+
 		# Restore initial pickaxe state (as set in scene)
 		pickaxe.visible = true
 		pickaxe_sprite.centered = _initial_pickaxe_centered
