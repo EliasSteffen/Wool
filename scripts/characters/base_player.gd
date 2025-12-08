@@ -168,7 +168,7 @@ func _get_features() -> void:
 
 func _process(delta: float) -> void:
 	_update_pickaxe_visual()
-	_update_swimming_rotation(delta)
+	_update_rotation(delta)
 	_update_debug_ui()
 	_update_interaction_prompt()
 
@@ -425,7 +425,7 @@ func _update_pickaxe_visual() -> void:
 		# Die Diagonale c->b entspricht dem Vektor (texture_width, texture_height) im Sprite
 		# Wir müssen also so rotieren, dass dieser Vektor mit rope_vector übereinstimmt
 		var diagonal_angle: float = atan2(texture_size.y, texture_size.x)
-		pickaxe.rotation = rope_angle - diagonal_angle + PI / 2.0
+		pickaxe.global_rotation = rope_angle - diagonal_angle + PI
 
 		# Sprite zentriert zeichnen
 		pickaxe_sprite.centered = true
@@ -442,7 +442,7 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.rotation = _initial_pickaxe_rotation
 		pickaxe.scale = _initial_pickaxe_scale
 
-func _update_swimming_rotation(delta: float) -> void:
+func _update_rotation(delta: float) -> void:
 	if not skin:
 		return
 
@@ -460,11 +460,18 @@ func _update_swimming_rotation(delta: float) -> void:
 		else:
 			skin.scale.x = -abs(skin.scale.x)
 
-	# Check if underwater
+	# Check states
+	var is_grappling = grappling_feature and grappling_feature.is_active()
 	var is_underwater = current_terrain is UnderWaterTerrain
 	var target_rotation = 0.0
 
-	if is_underwater:
+	if is_grappling:
+		var current_nail = grappling_feature.get_target_nail()
+		if current_nail:
+			var rope_vector = current_nail.global_position - global_position
+			# Align head with rope (rope angle + 90 deg)
+			target_rotation = rope_vector.angle() + PI / 2.0
+	elif is_underwater:
 		# Check for floor or proximity to floor to force upright standing
 		# We use test_move to see if ground is immediately below us (e.g. within 16 pixels)
 		# This prevents jitter when rotating upright lifts the collision shape slightly off the ground

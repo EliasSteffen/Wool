@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://ctvjht6tme6vh" path="res://assets/maps/background.svg" id="3_s8va5"]
 [ext_resource type="Texture2D" uid="uid://cfpg53xxejeut" path="res://assets/maps/wasser.svg" id="4_dga24"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="4_x42e6"]
-[ext_resource type="PackedScene" path="res://scenes/terrain/upwind_zone.tscn" id="5_6761a"]
+[ext_resource type="PackedScene" uid="uid://brigi4dlpr1np" path="res://scenes/terrain/upwind_zone.tscn" id="5_6761a"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://fhce3iot1cba" path="res://scenes/characters/enemies/bunny.tscn" id="10_qxy0u"]
@@ -152,7 +152,7 @@ texture = ExtResource("3_s8va5")
 position = Vector2(96, 424)
 
 [node name="Nail4" parent="." instance=ExtResource("7_oc4kc")]
-position = Vector2(211, 755)
+position = Vector2(4101, 540)
 
 [node name="Nail5" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(441, 806)
@@ -167,7 +167,7 @@ position = Vector2(-160, 957)
 position = Vector2(3804, 278)
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(2416, 768)
+position = Vector2(2978, 606)
 
 [node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
 position = Vector2(3464, 720)
