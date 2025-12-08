@@ -35,11 +35,13 @@ var _initial_pickaxe_rotation: float
 var _initial_pickaxe_scale: Vector2
 var _initial_pickaxe_centered: bool
 var _initial_pickaxe_offset: Vector2
+var _is_attacking: bool = false
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
 @onready var pickaxe: Node2D = $Pickaxe if has_node("Pickaxe") else null
 @onready var pickaxe_sprite: Sprite2D = $Pickaxe/Sprite2D if has_node("Pickaxe/Sprite2D") else ($Pickaxe as Sprite2D if has_node("Pickaxe") else null)
+@onready var pickaxe_hitbox: Area2D = $Pickaxe/Hitbox if has_node("Pickaxe/Hitbox") else null
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
 @onready var push_feature: PushFeature = get_feature_by_type(PushFeature)
 @onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
@@ -60,6 +62,9 @@ func _ready() -> void:
 	if pickaxe_sprite:
 		_initial_pickaxe_centered = pickaxe_sprite.centered
 		_initial_pickaxe_offset = pickaxe_sprite.offset
+	
+	if pickaxe_hitbox:
+		pickaxe_hitbox.body_entered.connect(_on_pickaxe_hitbox_body_entered)
 
 	# Get features after they're setup
 	call_deferred("_get_features")
@@ -78,6 +83,33 @@ func die() -> void:
 	# Reload scene after a short delay
 	await get_tree().create_timer(1.0).timeout
 	get_tree().reload_current_scene()
+
+func attack() -> void:
+	_is_attacking = true
+	
+	# Enable hitbox
+	if pickaxe_hitbox:
+		pickaxe_hitbox.monitoring = true
+		
+	# Animate pickaxe
+	if pickaxe:
+		var tween = create_tween()
+		# Swing down
+		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation + 90, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		# Swing back
+		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		
+		await tween.finished
+		
+	# Disable hitbox
+	if pickaxe_hitbox:
+		pickaxe_hitbox.monitoring = false
+		
+	_is_attacking = false
+
+func _on_pickaxe_hitbox_body_entered(body: Node2D) -> void:
+	if body is BaseEnemy:
+		body.die()
 
 func _setup_tweakables() -> void:
 	super._setup_tweakables()
@@ -155,6 +187,10 @@ func _handle_input() -> void:
 	# Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		_jump()
+	
+	# Attack
+	if Input.is_key_pressed(KEY_V) and not _is_attacking:
+		attack()
 
 	# Debug: Toggle features with number keys
 	_handle_debug_feature_toggle()

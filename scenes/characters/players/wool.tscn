@@ -1,8 +1,8 @@
 [gd_scene load_steps=12 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
-[ext_resource type="Texture2D" uid="uid://c46btcihx26g4" path="res://assets/64x64.png" id="2_texture"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
+[ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Script" uid="uid://0ml5k838ehjd" path="res://scripts/features/push_feature.gd" id="5_push"]
 [ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
@@ -13,9 +13,8 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
 size = Vector2(80, 104)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_wtfnr"]
-atlas = ExtResource("2_texture")
-region = Rect2(64, 6720, 64, 64)
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
+radius = 30.0
 
 [node name="Wool" instance=ExtResource("1_base_player")]
 can_control = true
@@ -29,9 +28,18 @@ scale = Vector2(0.041, 0.041)
 texture = ExtResource("2_wtfnr")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="2"]
-position = Vector2(38, 2)
-scale = Vector2(0.8125, 0.8125)
-texture = SubResource("AtlasTexture_wtfnr")
+position = Vector2(24.000002, -8.000002)
+rotation = 0.064577185
+scale = Vector2(0.0942141, 0.0942141)
+texture = ExtResource("3_bs72m")
+
+[node name="Hitbox" type="Area2D" parent="Pickaxe" index="0"]
+collision_layer = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pickaxe/Hitbox" index="0"]
+position = Vector2(15, -15)
+shape = SubResource("CircleShape2D_pickaxe")
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 script = ExtResource("4_grappling")
