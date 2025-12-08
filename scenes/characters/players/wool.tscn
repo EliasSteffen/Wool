@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
-size = Vector2(75, 97.5)
+size = Vector2(61, 90)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
 radius = 30.0
@@ -20,7 +20,7 @@ radius = 30.0
 can_control = true
 
 [node name="CollisionShape2D" parent="." index="0"]
-position = Vector2(-7.5, 4.75)
+position = Vector2(-8.5, 4)
 shape = SubResource("RectangleShape2D_cmxwk")
 
 [node name="Body" type="Sprite2D" parent="Skin" index="0"]
@@ -54,6 +54,7 @@ enabled = false
 
 [node name="GlideFeature" type="Node2D" parent="Features" index="3"]
 script = ExtResource("7_glide")
+enabled = false
 
 [node name="WingsFeature" type="Node2D" parent="Features" index="4"]
 script = ExtResource("8_wings")
