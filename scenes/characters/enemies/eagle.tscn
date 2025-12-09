@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://vc7o506a25ie"]
+
+[ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_base_enemy"]
+[ext_resource type="Script" uid="uid://d2j05ea08c2fv" path="res://scripts/characters/eagle.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://ce3h01o5glax7" path="res://assets/character/bird.png" id="3_3jkg6"]
+[ext_resource type="Script" uid="uid://dhog5ngqpqtbh" path="res://scripts/features/wings_feature.gd" id="3_feature"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_350ui"]
+size = Vector2(132.5, 42)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rpkyh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_3jkg6")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Eagle" instance=ExtResource("1_base_enemy")]
+script = ExtResource("2_script")
+
+[node name="PhysicsShape" parent="." index="0"]
+position = Vector2(-1.75, 0)
+shape = SubResource("RectangleShape2D_350ui")
+
+[node name="AnimatedSprite2D" parent="Skin" index="0"]
+scale = Vector2(0.04, 0.04)
+sprite_frames = SubResource("SpriteFrames_rpkyh")
+
+[node name="HitboxShape" parent="HitboxArea" index="0"]
+position = Vector2(-2, 0)
+shape = SubResource("RectangleShape2D_350ui")
+
+[node name="WingsFeature" type="Node2D" parent="Features" index="0"]
+script = ExtResource("3_feature")
+
+[node name="DetectionShape" parent="DetectionArea" index="0"]
+position = Vector2(-9, -2)

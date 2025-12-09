@@ -42,7 +42,6 @@ enum AIState {
 
 # === ONREADY VARIABLES ===
 @onready var detection_area: Area2D = $DetectionArea if has_node("DetectionArea") else null
-@onready var hitbox: Area2D = $Hitbox if has_node("Hitbox") else null
 @onready var features_node: Node = $Features if has_node("Features") else null
 
 # === BUILT-IN METHODS ===
@@ -56,9 +55,9 @@ func _ready() -> void:
 		if not detection_area.body_exited.is_connected(_on_detection_body_exited):
 			detection_area.body_exited.connect(_on_detection_body_exited)
 
-	if hitbox:
-		if not hitbox.body_entered.is_connected(_on_hitbox_body_entered):
-			hitbox.body_entered.connect(_on_hitbox_body_entered)
+	if hitbox_area:
+		if not hitbox_area.body_entered.is_connected(_on_hitbox_body_entered):
+			hitbox_area.body_entered.connect(_on_hitbox_body_entered)
 
 	_patrol_start_position = global_position
 	_ai_state = AIState.IDLE

@@ -13,10 +13,15 @@ extends PhysicsChanger
 # === SIGNALS ===
 signal feature_activated()
 signal feature_deactivated()
+signal enabled_changed(enabled: bool)
 
 # === EXPORTED VARIABLES ===
 @export var feature_name: String = "UnnamedFeature"
-@export var enabled: bool = true
+@export var enabled: bool = true:
+	set(value):
+		if enabled != value:
+			enabled = value
+			enabled_changed.emit(enabled)
 @export var auto_register: bool = true  # Automatically register with parent character
 @export var drop_icon: Texture2D = null # Icon to display when dropped as item
 

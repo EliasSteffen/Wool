@@ -1,24 +1,20 @@
 [gd_scene load_steps=4 format=3 uid="uid://bkumxcivwme5k"]
 
 [ext_resource type="PackedScene" uid="uid://bgv204hx8vot8" path="res://scenes/characters/base-character.tscn" id="1_base_character"]
-[ext_resource type="Script" path="res://scripts/characters/base_enemy.gd" id="2_base_enemy"]
+[ext_resource type="Script" uid="uid://bh26b7434xqfv" path="res://scripts/characters/base_enemy.gd" id="2_base_enemy"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
-radius = 200.0
+radius = 436.3714
 
 [node name="BaseEnemy" instance=ExtResource("1_base_character")]
 script = ExtResource("2_base_enemy")
 
-[node name="DetectionArea" type="Area2D" parent="." index="3"]
+[node name="HitboxArea" parent="." index="3"]
+collision_mask = 2
+
+[node name="DetectionArea" type="Area2D" parent="." index="4"]
 collision_layer = 0
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea" index="0"]
+[node name="DetectionShape" type="CollisionShape2D" parent="DetectionArea" index="0"]
 shape = SubResource("CircleShape2D_detection")
-
-[node name="Hitbox" type="Area2D" parent="." index="4"]
-collision_layer = 0
-collision_mask = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" index="0"]
-

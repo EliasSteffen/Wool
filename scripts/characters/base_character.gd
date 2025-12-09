@@ -41,7 +41,8 @@ var _active_terrains: Array[Terrain] = [] # Stack of active terrains
 
 # === ONREADY VARIABLES ===
 @onready var skin: BodySkin = $Skin if has_node("Skin") else null
-@onready var collision_shape: CollisionShape2D = $CollisionShape2D if has_node("CollisionShape2D") else null
+@onready var physics_shape: CollisionShape2D = $PhysicsShape if has_node("PhysicsShape") else null
+@onready var hitbox_area: Area2D = $HitboxArea if has_node("HitboxArea") else null
 @onready var features_container: Node = $Features if has_node("Features") else null
 
 # === BUILT-IN METHODS ===

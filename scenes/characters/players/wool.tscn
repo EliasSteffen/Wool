@@ -1,32 +1,69 @@
-[gd_scene load_steps=12 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=16 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
+[ext_resource type="Texture2D" uid="uid://dxjbu7aphttkn" path="res://assets/character/wool-double-jump.png" id="3_d8o7v"]
+[ext_resource type="Texture2D" uid="uid://2iwasx5a7inj" path="res://assets/character/wool-fish.png" id="4_codar"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
+[ext_resource type="Texture2D" uid="uid://b4iqxifjd33wq" path="res://assets/character/wool-wings.png" id="5_4q7dq"]
 [ext_resource type="Script" uid="uid://0ml5k838ehjd" path="res://scripts/features/push_feature.gd" id="5_push"]
 [ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
 [ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
 [ext_resource type="Script" uid="uid://dhog5ngqpqtbh" path="res://scripts/features/wings_feature.gd" id="8_wings"]
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_cmxwk"]
-size = Vector2(61, 90)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
+size = Vector2(54, 89)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_codar"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_wtfnr")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_d8o7v")
+}],
+"loop": true,
+"name": &"double-jump",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_4q7dq")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_codar")
+}],
+"loop": true,
+"name": &"swim",
+"speed": 5.0
+}]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
 radius = 30.0
 
 [node name="Wool" instance=ExtResource("1_base_player")]
-can_control = true
 
-[node name="CollisionShape2D" parent="." index="0"]
-position = Vector2(-8.5, 4)
-shape = SubResource("RectangleShape2D_cmxwk")
+[node name="PhysicsShape" parent="." index="0"]
+position = Vector2(-6, 4.5)
+shape = SubResource("RectangleShape2D_codar")
 
-[node name="Body" type="Sprite2D" parent="Skin" index="0"]
-scale = Vector2(0.041, 0.041)
-texture = ExtResource("2_wtfnr")
-flip_h = true
+[node name="AnimatedSprite2D" parent="Skin" index="0"]
+scale = Vector2(0.04, 0.04)
+sprite_frames = SubResource("SpriteFrames_codar")
+autoplay = "default"
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="2"]
 position = Vector2(24.000002, -8.000002)
@@ -41,6 +78,17 @@ monitoring = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pickaxe/Hitbox" index="0"]
 position = Vector2(15, -15)
 shape = SubResource("CircleShape2D_pickaxe")
+
+[node name="HitboxShape" parent="HitboxArea" index="0"]
+position = Vector2(-6, 4.5)
+shape = SubResource("RectangleShape2D_codar")
+
+[node name="Camera2D" parent="." index="4"]
+limit_left = 0
+limit_top = 0
+limit_right = 6975
+limit_bottom = 1100
+limit_smoothed = true
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 script = ExtResource("4_grappling")
@@ -63,10 +111,3 @@ enabled = false
 
 [node name="CutFeature" type="Node2D" parent="Features" index="5"]
 script = ExtResource("9_cut")
-
-[node name="Camera2D" parent="." index="4"]
-limit_left = 0
-limit_top = 0
-limit_right = 6975
-limit_bottom = 1100
-limit_smoothed = true

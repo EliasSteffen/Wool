@@ -25,9 +25,9 @@ var camera_zoom: float
 var _direction: float = 0.0
 var _vertical_direction: float = 0.0
 var _debug_key_pressed: Dictionary = {}  # Track key state for debouncing
-var _debug_label: Label = null  # Debug UI label for feature status
+var _debug_ui: PlayerDebugUI = null
 var _interaction_prompt_label: Label = null
-var _all_interactions: Array[Interaction] = []
+var _current_prompt_interaction: Interaction = null
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 
 # Pickaxe initial state
@@ -67,12 +67,15 @@ func _ready() -> void:
 	if pickaxe_hitbox:
 		pickaxe_hitbox.body_entered.connect(_on_pickaxe_hitbox_body_entered)
 
+	# Connect terrain signals for debug UI
+	terrain_entered.connect(func(_t): _update_debug_ui())
+	terrain_exited.connect(func(_t): _update_debug_ui())
+
 	# Get features after they're setup
 	call_deferred("_get_features")
 	# Setup debug UI
 	call_deferred("_setup_debug_ui")
 	call_deferred("_setup_interaction_prompt_label")
-	call_deferred("_collect_all_interactions")
 
 func die() -> void:
 	# Disable control
@@ -162,14 +165,36 @@ func _get_features() -> void:
 	glide_feature = get_feature_by_type(GlideFeature)
 	cut_feature = get_feature_by_type(CutFeature)
 
+	# Connect to enabled_changed signals for skin updates
+	for feature in [grappling_feature, push_feature, wings_feature, double_jump_feature, glide_feature, cut_feature]:
+		if feature:
+			if not feature.enabled_changed.is_connected(_on_feature_enabled_changed):
+				feature.enabled_changed.connect(_on_feature_enabled_changed)
+
 	# Setup pickaxe sprite if it's directly a Sprite2D
 	if pickaxe is Sprite2D and not pickaxe_sprite:
 		pickaxe_sprite = pickaxe
 
+	_update_skin_appearance()
+
+func _on_feature_enabled_changed(_enabled: bool) -> void:
+	_update_skin_appearance()
+	_update_debug_ui()
+
+func _update_skin_appearance() -> void:
+	if not skin:
+		return
+
+	# Determine which animation to play based on active features
+	# Priority: DoubleJump (as requested)
+	if double_jump_feature and double_jump_feature.enabled:
+		skin.play_animation("double-jump")
+	else:
+		skin.play_animation("default")
+
 func _process(delta: float) -> void:
 	_update_pickaxe_visual()
 	_update_rotation(delta)
-	_update_debug_ui()
 	_update_interaction_prompt()
 
 # === OVERRIDDEN METHODS ===
@@ -209,41 +234,39 @@ func _handle_input() -> void:
 	# Debug: Toggle features with number keys
 	_handle_debug_feature_toggle()
 
-func _handle_debug_feature_toggle() -> void:
-	# Helper function to toggle a feature with debouncing
-	var toggle_feature = func(key: int, feature_ref: Feature, feature_name: String) -> void:
-		if Input.is_physical_key_pressed(key):
-			if not _debug_key_pressed.get(key, false):
-				_debug_key_pressed[key] = true
-				if feature_ref:
-					feature_ref.enabled = not feature_ref.enabled
-					# Reactivate wings if re-enabled
-					if feature_ref is WingsFeature:
-						if feature_ref.enabled:
-							feature_ref.activate()
-						else:
-							feature_ref.deactivate()
-					print("%s: %s" % [feature_name, "ON" if feature_ref.enabled else "OFF"])
-					_update_debug_ui()
-				else:
-					print("%s: NOT FOUND (add to Features container)" % feature_name)
-		else:
-			_debug_key_pressed[key] = false
+func _toggle_feature(key: int, feature_ref: Feature, feature_name: String) -> void:
+	if Input.is_physical_key_pressed(key):
+		if not _debug_key_pressed.get(key, false):
+			_debug_key_pressed[key] = true
+			if feature_ref:
+				feature_ref.enabled = not feature_ref.enabled
+				# Reactivate wings if re-enabled
+				if feature_ref is WingsFeature:
+					if feature_ref.enabled:
+						feature_ref.activate()
+					else:
+						feature_ref.deactivate()
+				print("%s: %s" % [feature_name, "ON" if feature_ref.enabled else "OFF"])
+			else:
+				print("%s: NOT FOUND (add to Features container)" % feature_name)
+	else:
+		_debug_key_pressed[key] = false
 
+func _handle_debug_feature_toggle() -> void:
 	# 1 = DoubleJump
-	toggle_feature.call(KEY_1, double_jump_feature, "DoubleJump")
+	_toggle_feature(KEY_1, double_jump_feature, "DoubleJump")
 
 	# 2 = Glide
-	toggle_feature.call(KEY_2, glide_feature, "Glide")
+	_toggle_feature(KEY_2, glide_feature, "Glide")
 
 	# 3 = Grappling
-	toggle_feature.call(KEY_3, grappling_feature, "Grappling")
+	_toggle_feature(KEY_3, grappling_feature, "Grappling")
 
 	# 4 = Wings
-	toggle_feature.call(KEY_4, wings_feature, "Wings")
+	_toggle_feature(KEY_4, wings_feature, "Wings")
 
 	# 5 = Cut
-	toggle_feature.call(KEY_5, cut_feature, "Cut")
+	_toggle_feature(KEY_5, cut_feature, "Cut")
 
 func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
@@ -532,32 +555,27 @@ func _setup_interaction_prompt_label() -> void:
 	_interaction_prompt_label.add_theme_constant_override("outline_size", 4)
 	add_child(_interaction_prompt_label)
 
-func _collect_all_interactions() -> void:
-	var nodes = get_tree().get_nodes_in_group("interactions")
-	for node in nodes:
-		if node is Interaction:
-			_all_interactions.append(node)
-
 func _update_interaction_prompt() -> void:
-	if _all_interactions.is_empty():
-		return
-
 	var closest_interaction: Interaction = null
-	var closest_dist: float = INTERACTION_PROMPT_DISTANCE
 
-	for interaction in _all_interactions:
-		if not is_instance_valid(interaction) or not interaction.is_active:
-			continue
+	if not nearby_interactions.is_empty():
+		var closest_dist: float = INF
 
-		var dist = global_position.distance_to(interaction.global_position)
-		if dist < closest_dist:
-			closest_dist = dist
-			closest_interaction = interaction
+		for interaction in nearby_interactions:
+			if not is_instance_valid(interaction) or not interaction.is_active:
+				continue
 
-	if closest_interaction:
-		_show_interaction_prompt(closest_interaction)
-	else:
-		_interaction_prompt_label.visible = false
+			var dist: float = global_position.distance_to(interaction.global_position)
+			if dist < closest_dist:
+				closest_dist = dist
+				closest_interaction = interaction
+
+	if closest_interaction != _current_prompt_interaction:
+		_current_prompt_interaction = closest_interaction
+		if closest_interaction:
+			_show_interaction_prompt(closest_interaction)
+		elif _interaction_prompt_label:
+			_interaction_prompt_label.visible = false
 
 func _show_interaction_prompt(interaction: Interaction) -> void:
 	var action = interaction.prompt_action
@@ -584,78 +602,11 @@ func _show_interaction_prompt(interaction: Interaction) -> void:
 
 ## Setup debug UI to show active features
 func _setup_debug_ui() -> void:
-	# Create a CanvasLayer for UI (so it's always on top)
-	var canvas_layer: CanvasLayer = CanvasLayer.new()
-	canvas_layer.name = "DebugUI"
-	canvas_layer.layer = 100  # Make sure it's on top
-	add_child(canvas_layer)
-
-	# Create label
-	_debug_label = Label.new()
-	_debug_label.position = Vector2(10, 10)
-	_debug_label.z_index = 1000
-	_debug_label.add_theme_font_size_override("font_size", 20)
-	_debug_label.add_theme_color_override("font_color", Color.WHITE)
-	_debug_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_debug_label.add_theme_constant_override("outline_size", 2)
-	canvas_layer.add_child(_debug_label)
+	_debug_ui = PlayerDebugUI.new()
+	add_child(_debug_ui)
+	_debug_ui.setup(self)
 
 ## Update debug UI text
 func _update_debug_ui() -> void:
-	if not _debug_label:
-		return
-
-	var text: String = "=== FEATURES ===\n"
-
-	# Add feature status directly (no lambda - they don't capture outer variables properly)
-	# 1. DoubleJump
-	if double_jump_feature:
-		var status: String = "OFF"
-		if double_jump_feature.enabled:
-			status = "ON"
-		text += "[1] %s: %s\n" % [double_jump_feature.feature_name, status]
-	else:
-		text += "[1] NOT FOUND\n"
-
-	# 2. Glide
-	if glide_feature:
-		var status: String = "OFF"
-		if glide_feature.enabled:
-			status = "ON"
-		text += "[2] %s: %s\n" % [glide_feature.feature_name, status]
-	else:
-		text += "[2] NOT FOUND\n"
-
-	# 3. Grappling
-	if grappling_feature:
-		var status: String = "OFF"
-		if grappling_feature.enabled:
-			status = "ON"
-
-		text += "[3] %s: %s\n" % [grappling_feature.feature_name, status]
-	else:
-		text += "[3] NOT FOUND\n"
-
-	# 4. Wings
-	if wings_feature:
-		var status: String = "OFF"
-		if wings_feature.enabled:
-			status = "ON"
-		text += "[4] %s: %s\n" % [wings_feature.feature_name, status]
-	else:
-		text += "[4] NOT FOUND\n"
-
-	# 5. Cut
-	if cut_feature:
-		var status: String = "OFF"
-		if cut_feature.enabled:
-			status = "ON"
-		text += "[5] %s: %s (Action: F)\n" % [cut_feature.feature_name, status]
-	else:
-		text += "[5] Cut: NOT FOUND\n"
-
-	# Terrain
-	text += "\n=== TERRAIN ===\n"
-	text += "%s: ON" % current_terrain.terrain_name
-
-	_debug_label.text = text
+	if _debug_ui:
+		_debug_ui.update_ui()

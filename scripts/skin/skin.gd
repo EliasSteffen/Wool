@@ -19,12 +19,23 @@ signal skin_changed()
 @onready var head: Node2D = $Head if has_node("Head") else null
 @onready var body: Node2D = $Body if has_node("Body") else null
 @onready var feet: Node2D = $Feet if has_node("Feet") else null
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D if has_node("AnimatedSprite2D") else ($Body/AnimatedSprite2D if has_node("Body/AnimatedSprite2D") else null)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	_setup_skin()
 
 # === PUBLIC METHODS ===
+
+## Play an animation if AnimatedSprite2D is present
+func play_animation(animation_name: String) -> void:
+	if animated_sprite:
+		if animated_sprite.sprite_frames.has_animation(animation_name):
+			animated_sprite.play(animation_name)
+		else:
+			push_warning("Animation '%s' not found in skin '%s'" % [animation_name, skin_name])
+	else:
+		push_warning("No AnimatedSprite2D found in skin '%s'" % skin_name)
 
 ## Get the sprite of a specific body part
 func get_body_part_sprite(part_name: String) -> Sprite2D:
@@ -70,7 +81,3 @@ func get_all_body_parts() -> Array[Node2D]:
 ## Override for custom skin setup
 func _setup_skin() -> void:
 	pass
-
-## Override to implement animation logic
-func play_animation(animation_name: String) -> void:
-	push_warning("Skin.play_animation() not implemented for: " + skin_name)
