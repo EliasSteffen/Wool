@@ -131,10 +131,14 @@ func get_feature_by_name(feature_name: String) -> Feature:
 
 ## Get a specific feature by type
 func get_feature_by_type(feature_type: Variant) -> Feature:
+	var found_feature: Feature = null
 	for feature in _features:
 		if is_instance_of(feature, feature_type):
-			return feature
-	return null
+			if feature.enabled:
+				return feature # Return immediately if enabled
+			if found_feature == null:
+				found_feature = feature # Keep as fallback
+	return found_feature
 
 ## Add an interaction to nearby list
 func add_nearby_interaction(interaction: Interaction) -> void:

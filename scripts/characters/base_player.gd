@@ -14,6 +14,7 @@ extends BaseCharacter
 
 # === EXPORTED VARIABLES ===
 @export var can_control: bool = true
+@export var max_picked_up_features: int = 1
 
 # === PUBLIC VARIABLES ===
 var acceleration: float
@@ -30,6 +31,10 @@ var _interaction_prompt_label: Label = null
 var _current_prompt_interaction: Interaction = null
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 
+# Feature Management
+var _default_features: Array[Feature] = []
+var _picked_up_features: Array[Feature] = []
+
 # Pickaxe initial state
 var _initial_pickaxe_position: Vector2
 var _initial_pickaxe_rotation: float
@@ -43,11 +48,14 @@ var _is_attacking: bool = false
 @onready var pickaxe: Node2D = $Pickaxe if has_node("Pickaxe") else null
 @onready var pickaxe_sprite: Sprite2D = $Pickaxe/Sprite2D if has_node("Pickaxe/Sprite2D") else ($Pickaxe as Sprite2D if has_node("Pickaxe") else null)
 @onready var pickaxe_hitbox: Area2D = $Pickaxe/Hitbox if has_node("Pickaxe/Hitbox") else null
+@onready var pickupable_features_node: Node = $PickupableFeatures if has_node("PickupableFeatures") else null
+
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
 @onready var push_feature: PushFeature = get_feature_by_type(PushFeature)
 @onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
 @onready var double_jump_feature: DoubleJumpFeature = get_feature_by_type(DoubleJumpFeature)
 @onready var glide_feature: GlideFeature = get_feature_by_type(GlideFeature)
+@onready var swim_feature: SwimFeature = get_feature_by_type(SwimFeature)
 var cut_feature: CutFeature
 
 # === BUILT-IN METHODS ===
@@ -72,7 +80,7 @@ func _ready() -> void:
 	terrain_exited.connect(func(_t): _update_debug_ui())
 
 	# Get features after they're setup
-	call_deferred("_get_features")
+	call_deferred("_setup_player_features")
 	# Setup debug UI
 	call_deferred("_setup_debug_ui")
 	call_deferred("_setup_interaction_prompt_label")
@@ -157,25 +165,113 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 				if camera:
 					camera.zoom = Vector2(camera_zoom, camera_zoom)
 
-func _get_features() -> void:
+func _setup_player_features() -> void:
+	# Identify default features (those already enabled in the scene)
+	# and picked up features (initially none, unless we save/load state)
+
+	# First, get references to known feature types for easy access
 	grappling_feature = get_feature_by_type(GrapplingFeature)
 	push_feature = get_feature_by_type(PushFeature)
 	wings_feature = get_feature_by_type(WingsFeature)
 	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
 	glide_feature = get_feature_by_type(GlideFeature)
+	swim_feature = get_feature_by_type(SwimFeature)
 	cut_feature = get_feature_by_type(CutFeature)
 
-	# Connect to enabled_changed signals for skin updates
-	for feature in [grappling_feature, push_feature, wings_feature, double_jump_feature, glide_feature, cut_feature]:
-		if feature:
-			if not feature.enabled_changed.is_connected(_on_feature_enabled_changed):
-				feature.enabled_changed.connect(_on_feature_enabled_changed)
+	# Clear lists
+	_default_features.clear()
+	_picked_up_features.clear()
+
+	# 1. Base Features (Always Active)
+	# Features in the main "Features" node are considered default/base features
+	if features_container:
+		for child in features_container.get_children():
+			if child is Feature:
+				_default_features.append(child)
+				# Force enable base features as they should be active from start
+				if not child.enabled:
+					child.enabled = true
+
+				if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
+					child.enabled_changed.connect(_on_feature_enabled_changed)
+
+	# 2. Pickupable Features
+	# Features in "PickupableFeatures" are considered picked up
+	if pickupable_features_node:
+		for child in pickupable_features_node.get_children():
+			if child is Feature:
+				# Ensure feature is registered with BaseCharacter
+				if child not in get_features():
+					add_feature(child)
+
+				# Only track enabled features as "picked up" active features
+				# Disabled features in this node might be placeholders or inactive
+				if child.enabled:
+					_picked_up_features.append(child)
+					if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
+						child.enabled_changed.connect(_on_feature_enabled_changed)
 
 	# Setup pickaxe sprite if it's directly a Sprite2D
 	if pickaxe is Sprite2D and not pickaxe_sprite:
 		pickaxe_sprite = pickaxe
 
+	_update_skin_appearance()## Called when a new feature is picked up (e.g. from FeaturePickup)
+func pickup_feature(new_feature: Feature) -> void:
+	if not new_feature:
+		return
+
+	var feature_to_activate: Feature = null
+
+	# Check if we have this feature in our "pickupable" list
+	if pickupable_features_node:
+		for child in pickupable_features_node.get_children():
+			if child.get_script() == new_feature.get_script():
+				feature_to_activate = child
+				break
+
+	# The new_feature instance is just a carrier of information (type), we don't need it anymore
+	new_feature.queue_free()
+
+	if not feature_to_activate:
+		print("Player does not have pickupable feature of type: %s" % new_feature.get_script().resource_path)
+		return
+
+	# Manage picked up features limit
+	if _picked_up_features.size() >= max_picked_up_features:
+		var old_feature = _picked_up_features.pop_front()
+		if old_feature:
+			old_feature.enabled = false
+
+	_picked_up_features.append(feature_to_activate)
+	feature_to_activate.enabled = true
+	feature_to_activate.activate() # Explicitly activate the feature
+
+	# Connect signal if not already connected
+	if not feature_to_activate.enabled_changed.is_connected(_on_feature_enabled_changed):
+		feature_to_activate.enabled_changed.connect(_on_feature_enabled_changed)	# Update references if needed
+	_update_feature_references()
 	_update_skin_appearance()
+	_update_debug_ui()
+
+func _deactivate_picked_up_feature(feature: Feature) -> void:
+	if not feature:
+		return
+	feature.enabled = false
+	feature.deactivate() # Explicitly deactivate
+
+func _drop_feature(feature: Feature) -> void:
+	# Legacy wrapper
+	_deactivate_picked_up_feature(feature)
+
+func _update_feature_references() -> void:
+	# Refresh references to specific features
+	grappling_feature = get_feature_by_type(GrapplingFeature)
+	push_feature = get_feature_by_type(PushFeature)
+	wings_feature = get_feature_by_type(WingsFeature)
+	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
+	glide_feature = get_feature_by_type(GlideFeature)
+	swim_feature = get_feature_by_type(SwimFeature)
+	cut_feature = get_feature_by_type(CutFeature)
 
 func _on_feature_enabled_changed(_enabled: bool) -> void:
 	_update_skin_appearance()
@@ -186,8 +282,14 @@ func _update_skin_appearance() -> void:
 		return
 
 	# Determine which animation to play based on active features
-	# Priority: DoubleJump (as requested)
-	if double_jump_feature and double_jump_feature.enabled:
+	# Priority: Wings > Swim > Glide > DoubleJump
+	if wings_feature and wings_feature.enabled:
+		skin.play_animation("wings")
+	elif swim_feature and swim_feature.enabled:
+		skin.play_animation("swim")
+	elif glide_feature and glide_feature.enabled:
+		skin.play_animation("glide")
+	elif double_jump_feature and double_jump_feature.enabled:
 		skin.play_animation("double-jump")
 	else:
 		skin.play_animation("default")
@@ -307,6 +409,10 @@ func _handle_movement(delta: float) -> void:
 	if current_terrain is UnderWaterTerrain:
 		var underwater_terrain := current_terrain as UnderWaterTerrain
 		var speed: float = move_speed * underwater_terrain.slowdown_factor
+
+		# Apply swim boost if available
+		if swim_feature and swim_feature.is_active():
+			speed *= swim_feature.get_swim_speed_multiplier()
 
 		# Horizontal movement (always controlled)
 		var target_velocity_x: float = _direction * speed

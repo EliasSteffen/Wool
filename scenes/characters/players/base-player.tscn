@@ -10,3 +10,5 @@ script = ExtResource("2_base_player")
 can_control = true
 
 [node name="Camera2D" type="Camera2D" parent="." index="3"]
+
+[node name="PickupableFeatures" type="Node" parent="." index="4"]

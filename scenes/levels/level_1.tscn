@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=16 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Script" uid="uid://2t0xhsio7d8e" path="res://scripts/levels/base_level.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dfmxxjukm286l" path="res://assets/maps/wakable-stuff.svg" id="2_oc4kc"]
@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://fhce3iot1cba" path="res://scenes/characters/enemies/bunny.tscn" id="10_qxy0u"]
+[ext_resource type="PackedScene" uid="uid://vc7o506a25ie" path="res://scenes/characters/enemies/eagle.tscn" id="11_iav0o"]
+[ext_resource type="PackedScene" uid="uid://dgl3qoynkddvj" path="res://scenes/characters/enemies/fish.tscn" id="12_dnkej"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_dga24"]
 
@@ -163,14 +165,11 @@ position = Vector2(848, 640)
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
 position = Vector2(-160, 957)
 
-[node name="CollisionShape2D" parent="KillZone" index="0"]
-position = Vector2(3804, 278)
-
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
 position = Vector2(2978, 606)
 
 [node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
-position = Vector2(3464, 720)
+position = Vector2(3395, 699)
 
 [node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
 position = Vector2(5323, 762)
@@ -185,5 +184,11 @@ position = Vector2(1966, 923)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="UnderwaterZone"]
 position = Vector2(41, -14.5)
 shape = SubResource("RectangleShape2D_qxy0u")
+
+[node name="Eagle" parent="." instance=ExtResource("11_iav0o")]
+position = Vector2(3902, 746)
+
+[node name="Fish" parent="." instance=ExtResource("12_dnkej")]
+position = Vector2(2294, 811)
 
 [editable path="KillZone"]

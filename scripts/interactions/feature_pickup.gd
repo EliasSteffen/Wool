@@ -67,31 +67,13 @@ func _give_feature(player: BasePlayer) -> void:
 		queue_free()
 		return
 
-	# Check if player already has this feature type
-	var existing_feature = player.get_feature_by_name(feature_name)
+	# Create new instance of the feature
+	var new_feature = feature_script.new()
+	new_feature.name = feature_name
 
-	if existing_feature:
-		# If player has it but it's disabled, enable it
-		if not existing_feature.enabled:
-			existing_feature.enabled = true
-			existing_feature.activate() # Activate it immediately!
-			print("FeaturePickup: Enabled existing feature '%s'" % feature_name)
-			# Optional: Show pickup effect
-	else:
-		# Create new instance of the feature
-		var new_feature = feature_script.new()
-		new_feature.name = feature_name
-		new_feature.enabled = true
+	# Pass to player
+	player.pickup_feature(new_feature)
 
-		# Add to player's Features node
-		if player.features_container:
-			player.features_container.add_child(new_feature)
-			# Note: Feature automatically registers itself in _ready()
-			new_feature.activate() # Activate it immediately!
-			print("FeaturePickup: Added new feature '%s'" % feature_name)
-		else:
-			player.add_child(new_feature)
-			new_feature.activate() # Activate it immediately!
-			print("FeaturePickup: Added new feature '%s' (no container)" % feature_name)
+	print("FeaturePickup: Picked up feature '%s'" % feature_name)
 
 	queue_free()

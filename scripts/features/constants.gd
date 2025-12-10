@@ -29,5 +29,8 @@ func _ready() -> void:
 			"jump_boost_multiplier": { "value": WINGS_JUMP_BOOST_MULTIPLIER, "min": 1.0, "max": 3.0, "step": 0.1 },
 			"fall_speed_multiplier": { "value": WINGS_FALL_SPEED_MULTIPLIER, "min": 0.1, "max": 1.0, "step": 0.05 },
 			"glide_threshold": { "value": WINGS_GLIDE_THRESHOLD, "min": 0.0, "max": 200.0, "step": 10.0 }
+		},
+		"Swim": {
+			"swim_speed_multiplier": { "value": 1.5, "min": 1.0, "max": 3.0, "step": 0.1 }
 		}
 	}

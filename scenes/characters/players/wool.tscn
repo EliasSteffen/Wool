@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=15 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
@@ -7,10 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://2iwasx5a7inj" path="res://assets/character/wool-fish.png" id="4_codar"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Texture2D" uid="uid://b4iqxifjd33wq" path="res://assets/character/wool-wings.png" id="5_4q7dq"]
-[ext_resource type="Script" uid="uid://0ml5k838ehjd" path="res://scripts/features/push_feature.gd" id="5_push"]
 [ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
 [ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
-[ext_resource type="Script" uid="uid://dhog5ngqpqtbh" path="res://scripts/features/wings_feature.gd" id="8_wings"]
+[ext_resource type="Script" uid="uid://biu4s0f5akfsu" path="res://scripts/features/swim_feature.gd" id="9_58tpp"]
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
@@ -39,7 +38,7 @@ animations = [{
 "texture": ExtResource("5_4q7dq")
 }],
 "loop": true,
-"name": &"fly",
+"name": &"glide",
 "speed": 5.0
 }, {
 "frames": [{
@@ -55,6 +54,7 @@ animations = [{
 radius = 30.0
 
 [node name="Wool" instance=ExtResource("1_base_player")]
+max_picked_up_features = 1
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(-6, 4.5)
@@ -63,6 +63,7 @@ shape = SubResource("RectangleShape2D_codar")
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
 scale = Vector2(0.04, 0.04)
 sprite_frames = SubResource("SpriteFrames_codar")
+animation = &"glide"
 autoplay = "default"
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="2"]
@@ -90,24 +91,19 @@ limit_right = 6975
 limit_bottom = 1100
 limit_smoothed = true
 
-[node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
-script = ExtResource("4_grappling")
-
-[node name="PushFeature" type="Node2D" parent="Features" index="1"]
-script = ExtResource("5_push")
-enabled = false
-
-[node name="DoubleJumpFeature" type="Node2D" parent="Features" index="2"]
+[node name="DoubleJumpFeature" type="Node2D" parent="PickupableFeatures" index="0"]
 script = ExtResource("6_double_jump")
 enabled = false
 
-[node name="GlideFeature" type="Node2D" parent="Features" index="3"]
+[node name="GlideFeature" type="Node2D" parent="PickupableFeatures" index="1"]
 script = ExtResource("7_glide")
 enabled = false
 
-[node name="WingsFeature" type="Node2D" parent="Features" index="4"]
-script = ExtResource("8_wings")
-enabled = false
+[node name="SwimFeature" type="Node2D" parent="PickupableFeatures" index="2"]
+script = ExtResource("9_58tpp")
 
-[node name="CutFeature" type="Node2D" parent="Features" index="5"]
+[node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
+script = ExtResource("4_grappling")
+
+[node name="CutFeature" type="Node2D" parent="Features" index="1"]
 script = ExtResource("9_cut")
