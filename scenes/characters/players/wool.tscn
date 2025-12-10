@@ -50,8 +50,9 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_pickaxe"]
-radius = 30.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
+radius = 42.36795
+height = 1061.94
 
 [node name="Wool" instance=ExtResource("1_base_player")]
 max_picked_up_features = 1
@@ -77,8 +78,7 @@ collision_layer = 0
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pickaxe/Hitbox" index="0"]
-position = Vector2(15, -15)
-shape = SubResource("CircleShape2D_pickaxe")
+shape = SubResource("CapsuleShape2D_pickaxe")
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
 position = Vector2(-6, 4.5)

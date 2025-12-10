@@ -110,19 +110,24 @@ func attack() -> void:
 
 		# Determine forward direction based on current position
 		var forward_dir = Vector2.RIGHT
+		var rotation_mod = 100
+
 		if pickaxe.position.x < 0:
 			forward_dir = Vector2.LEFT
+			rotation_mod = -100
+
+		# Capture current state as start/end point
+		var start_pos = pickaxe.position
+		var start_rot_deg = pickaxe.rotation_degrees
 
 		# Move pickaxe forward to extend range ("full length")
-		var target_pos = _initial_pickaxe_position + (forward_dir * 40.0)
+		var target_pos = start_pos + (forward_dir * 40.0)
 
 		# Swing down and move forward
-		tween.tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation + 100, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(pickaxe, "position", target_pos, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-
-		# Swing back and return to position
-		tween.chain().tween_property(pickaxe, "rotation_degrees", _initial_pickaxe_rotation, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-		tween.parallel().tween_property(pickaxe, "position", _initial_pickaxe_position, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.tween_property(pickaxe, "rotation_degrees", start_rot_deg + rotation_mod, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(pickaxe, "position", target_pos, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)		# Swing back and return to position
+		tween.chain().tween_property(pickaxe, "rotation_degrees", start_rot_deg, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(pickaxe, "position", start_pos, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 
 		await tween.finished
 
@@ -295,8 +300,8 @@ func _update_skin_appearance() -> void:
 		skin.play_animation("default")
 
 func _process(delta: float) -> void:
-	_update_pickaxe_visual()
-	_update_rotation(delta)
+	_update_rotation(delta) # Update facing first
+	_update_pickaxe_visual() # Then update pickaxe based on facing
 	_update_interaction_prompt()
 
 # === OVERRIDDEN METHODS ===
@@ -567,9 +572,19 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.visible = true
 		pickaxe_sprite.centered = _initial_pickaxe_centered
 		pickaxe_sprite.offset = _initial_pickaxe_offset
-		pickaxe.position = _initial_pickaxe_position
-		pickaxe.rotation = _initial_pickaxe_rotation
-		pickaxe.scale = _initial_pickaxe_scale
+
+		# Handle facing direction
+		var facing_left = skin.scale.x < 0
+
+		if facing_left:
+			pickaxe.position = Vector2(-_initial_pickaxe_position.x, _initial_pickaxe_position.y)
+			pickaxe.scale = Vector2(-_initial_pickaxe_scale.x, _initial_pickaxe_scale.y)
+			# Rotation is mirrored by negative scale.x, so we keep the value
+			pickaxe.rotation = _initial_pickaxe_rotation
+		else:
+			pickaxe.position = _initial_pickaxe_position
+			pickaxe.scale = _initial_pickaxe_scale
+			pickaxe.rotation = _initial_pickaxe_rotation
 
 func _update_rotation(delta: float) -> void:
 	if not skin:
