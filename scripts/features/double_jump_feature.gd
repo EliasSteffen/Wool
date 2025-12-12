@@ -35,6 +35,27 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 
 # === PUBLIC METHODS ===
 
+## Trigger the double jump action (used by AI or input)
+func trigger(explicit_character: Node = null) -> void:
+	if not is_active():
+		return
+
+	var character = explicit_character
+	if not character:
+		character = get_character()
+
+	if not character:
+		print("DoubleJump: No character found in trigger!")
+		return
+
+	if not character.is_on_floor():
+		if _jumps_remaining > 0:
+			_perform_air_jump(character)
+		else:
+			print("DoubleJump: No jumps remaining (%s)" % _jumps_remaining)
+	else:
+		print("DoubleJump: Character is on floor")
+
 ## Get remaining air jumps
 func get_jumps_remaining() -> int:
 	return _jumps_remaining
@@ -47,21 +68,22 @@ func reset_jumps() -> void:
 
 func handle_input(character: BaseCharacter) -> void:
 	if not is_active():
+		# print("DoubleJump: handle_input called but not active")
 		return
 
 	# Reset jumps when landing on floor
 	if character.is_on_floor():
 		if not _was_on_floor:
 			reset_jumps()
+			print("DoubleJump: Reset jumps (Landed)")
 		_was_on_floor = true
 	else:
 		_was_on_floor = false
 
 	# Check for jump input while in air
 	if Input.is_action_just_pressed(jump_input_action):
-		if not character.is_on_floor():
-			if _jumps_remaining > 0:
-				_perform_air_jump(character)
+		print("DoubleJump: Input detected. Active: %s, OnFloor: %s, Jumps: %s" % [is_active(), character.is_on_floor(), _jumps_remaining])
+		trigger(character)
 
 func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
 	# Double jump doesn't add passive movement
@@ -71,11 +93,20 @@ func _calculate_movement_factor(delta: float, character_position: Vector2) -> Ve
 # === PRIVATE METHODS ===
 
 func _perform_air_jump(character: BaseCharacter) -> void:
-	if character is BasePlayer:
+	var jump_vel: float = 0.0
+
+	# Safely retrieve jump_velocity from the character (Player or Enemy)
+	var val = character.get("jump_velocity")
+	if val != null:
+		jump_vel = float(val)
+
+	print("DoubleJump: Attempting jump. Character: %s, JumpVel: %s, Multiplier: %s" % [character.name, jump_vel, air_jump_power_multiplier])
+
+	if jump_vel > 0:
 		# Negate jump_velocity because Y-up is negative in Godot
-		var jump_power: float = -character.jump_velocity * air_jump_power_multiplier
+		var jump_power: float = -jump_vel * air_jump_power_multiplier
 		character.velocity.y = jump_power
 		_jumps_remaining -= 1
-
-		# Optional: Emit signal or play jump effect
-		# character.emit_signal("air_jumped")
+		print("DoubleJump: Performed air jump! New Velocity Y: %s, Remaining: %s" % [character.velocity.y, _jumps_remaining])
+	else:
+		push_warning("DoubleJump: Character has no jump_velocity or it is 0")

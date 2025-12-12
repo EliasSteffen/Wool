@@ -27,7 +27,7 @@ signal enabled_changed(enabled: bool)
 
 # === PRIVATE VARIABLES ===
 var _active: bool = false
-var _character: BaseCharacter = null  # Reference to owning character
+var _character: Node = null  # Reference to owning character (typed as Node to avoid cyclic dependency)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -37,17 +37,24 @@ func _ready() -> void:
 # === PUBLIC METHODS ===
 
 ## Get the character that owns this feature
-func get_character() -> BaseCharacter:
+func get_character() -> Node:
 	return _character
 
 ## Activate this feature (called by Character)
 func activate() -> void:
 	if not enabled:
+		print("Feature %s: Cannot activate because disabled" % feature_name)
 		return
 
 	_active = true
+	print("Feature %s: Activated" % feature_name)
 	_on_activated()
 	feature_activated.emit()
+
+## Trigger the feature's primary action (used by AI or manual calls)
+## Override this in specific features (e.g. DoubleJump)
+func trigger() -> void:
+	pass
 
 ## Deactivate this feature (called by Character)
 func deactivate() -> void:

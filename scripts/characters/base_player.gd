@@ -251,6 +251,11 @@ func pickup_feature(new_feature: Feature) -> void:
 	feature_to_activate.enabled = true
 	feature_to_activate.activate() # Explicitly activate the feature
 
+	# Ensure it is in the main features list for processing
+	if feature_to_activate not in get_features():
+		print("Adding picked up feature to main list: %s" % feature_to_activate.feature_name)
+		add_feature(feature_to_activate)
+
 	# Connect signal if not already connected
 	if not feature_to_activate.enabled_changed.is_connected(_on_feature_enabled_changed):
 		feature_to_activate.enabled_changed.connect(_on_feature_enabled_changed)	# Update references if needed
@@ -379,6 +384,7 @@ func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
 	for feature in get_features():
 		if feature.enabled:
+			# print("Processing input for feature: %s" % feature.feature_name)
 			feature.handle_input(self)
 
 func _handle_grappling_input() -> void:

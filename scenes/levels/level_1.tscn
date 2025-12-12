@@ -16,10 +16,10 @@
 [sub_resource type="CanvasTexture" id="CanvasTexture_dga24"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_excbq"]
-size = Vector2(1432, 1093)
+size = Vector2(2019, 1093)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qxy0u"]
-size = Vector2(2112, 375)
+size = Vector2(2112, 394)
 
 [node name="Level1" type="Node2D"]
 script = ExtResource("1_script")
@@ -139,7 +139,8 @@ scale = Vector2(7040.4995, 1104.5)
 texture = SubResource("CanvasTexture_dga24")
 
 [node name="Sprite2D2" type="Sprite2D" parent="Map"]
-position = Vector2(1896, 896)
+position = Vector2(1969, 896)
+scale = Vector2(1.0645834, 1)
 texture = ExtResource("4_dga24")
 
 [node name="Sprite2D3" type="Sprite2D" parent="Map"]
@@ -152,9 +153,6 @@ texture = ExtResource("3_s8va5")
 
 [node name="SpawnPoint" type="Marker2D" parent="."]
 position = Vector2(96, 424)
-
-[node name="Nail4" parent="." instance=ExtResource("7_oc4kc")]
-position = Vector2(4101, 540)
 
 [node name="Nail5" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(441, 806)
@@ -175,18 +173,18 @@ position = Vector2(3395, 699)
 position = Vector2(5323, 762)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="UpwindZone"]
-position = Vector2(-48, -162.5)
+position = Vector2(-248.5, -162.5)
 shape = SubResource("RectangleShape2D_excbq")
 
 [node name="UnderwaterZone" parent="." instance=ExtResource("4_x42e6")]
 position = Vector2(1966, 923)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="UnderwaterZone"]
-position = Vector2(41, -14.5)
+position = Vector2(41, -24)
 shape = SubResource("RectangleShape2D_qxy0u")
 
 [node name="Eagle" parent="." instance=ExtResource("11_iav0o")]
-position = Vector2(3902, 746)
+position = Vector2(5423, 568)
 
 [node name="Fish" parent="." instance=ExtResource("12_dnkej")]
 position = Vector2(2294, 811)

@@ -25,6 +25,7 @@ var detection_range: float
 var patrol_speed: float
 var chase_speed: float
 var patrol_distance: float = 300.0
+var jump_velocity: float = -400.0
 
 # === PRIVATE VARIABLES ===
 var _current_target: Node2D = null
@@ -32,6 +33,7 @@ var _is_attacking: bool = false
 var _ai_state: AIState = AIState.IDLE
 var _patrol_start_position: Vector2
 var _patrol_direction: int = 1
+var _feature_use_cooldown: float = 0.0
 
 # === ENUMS ===
 enum AIState {
@@ -123,6 +125,9 @@ func _process_physics(delta: float) -> void:
 
 ## Override for custom AI behavior
 func _process_ai(delta: float) -> void:
+	if _feature_use_cooldown > 0:
+		_feature_use_cooldown -= delta
+
 	match _ai_state:
 		AIState.IDLE:
 			_ai_idle(delta)
@@ -146,11 +151,14 @@ func _ai_idle(delta: float) -> void:
 	# Check for wall collision
 	if is_on_wall():
 		_patrol_direction *= -1
-		# Update start position to center the patrol around current position?
-		# Or just let it bounce?
-		# If we hit a wall, we should probably reset the patrol start position
-		# so we don't immediately try to go back into the wall if patrol_distance is large.
-		# But simply flipping direction is enough to get away from the wall.
+
+	# Randomly jump (1% chance per frame)
+	if is_on_floor() and randf() < 0.01:
+		jump()
+
+	# Randomly use features (2% chance per frame)
+	if _feature_use_cooldown <= 0 and randf() < 0.02:
+		_try_use_random_feature()
 
 	# Apply movement
 	velocity.x = move_toward(velocity.x, _patrol_direction * patrol_speed, 20.0)
@@ -169,6 +177,19 @@ func _ai_chase(delta: float) -> void:
 	# Move towards target
 	var direction_vector = global_position.direction_to(_current_target.global_position)
 	velocity.x = move_toward(velocity.x, direction_vector.x * chase_speed, 20.0)
+
+	# Jump logic
+	if is_on_floor():
+		# Jump if target is significantly higher
+		if _current_target.global_position.y < global_position.y - 50:
+			jump()
+		# Jump if stuck on wall
+		elif is_on_wall():
+			jump()
+
+	# Use features intelligently
+	if _feature_use_cooldown <= 0:
+		_try_use_smart_feature()
 
 	# Face direction
 	if direction_vector.x > 0:
@@ -198,6 +219,11 @@ func _perform_attack() -> void:
 	attack_ended.emit()
 
 # === PUBLIC METHODS ===
+
+## Perform a jump
+func jump() -> void:
+	if is_on_floor():
+		velocity.y = jump_velocity
 
 ## Set current target
 func set_target(target: Node2D) -> void:
@@ -241,6 +267,42 @@ func _update_ai_state() -> void:
 		_change_state(AIState.CHASE)
 	else:
 		set_target(null)
+
+func _try_use_random_feature() -> void:
+	if not features_node:
+		return
+
+	var active_features: Array[Feature] = []
+	for child in features_node.get_children():
+		if child is Feature and child.is_active():
+			active_features.append(child)
+
+	if active_features.is_empty():
+		return
+
+	var feature = active_features.pick_random()
+	feature.trigger()
+	_feature_use_cooldown = randf_range(1.0, 3.0)
+
+func _try_use_smart_feature() -> void:
+	if not features_node or not _current_target:
+		return
+
+	for child in features_node.get_children():
+		if not (child is Feature and child.is_active()):
+			continue
+
+		# Logic for specific features
+		if child is DoubleJumpFeature:
+			# Use double jump if target is high and we are falling or at peak of jump
+			if not is_on_floor() and _current_target.global_position.y < global_position.y:
+				if velocity.y > -100: # Falling or slow rise
+					child.trigger()
+					_feature_use_cooldown = 0.5
+					return
+
+		# Add logic for other features here (e.g. Dash, Glide)
+		# For now, just random chance for others if needed
 
 # === SIGNAL CALLBACKS ===
 

@@ -15,6 +15,10 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
 size = Vector2(54, 89)
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
+radius = 42.36795
+height = 1061.94
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_codar"]
 animations = [{
 "frames": [{
@@ -50,10 +54,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
-radius = 42.36795
-height = 1061.94
-
 [node name="Wool" instance=ExtResource("1_base_player")]
 max_picked_up_features = 1
 
@@ -61,15 +61,9 @@ max_picked_up_features = 1
 position = Vector2(-6, 4.5)
 shape = SubResource("RectangleShape2D_codar")
 
-[node name="AnimatedSprite2D" parent="Skin" index="0"]
-scale = Vector2(0.04, 0.04)
-sprite_frames = SubResource("SpriteFrames_codar")
-animation = &"glide"
-autoplay = "default"
-
-[node name="Pickaxe" type="Sprite2D" parent="." index="2"]
-position = Vector2(24.000002, -8.000002)
-rotation = 0.064577185
+[node name="Pickaxe" type="Sprite2D" parent="." index="1"]
+position = Vector2(17.999998, -8.000001)
+rotation = 0.06457718
 scale = Vector2(0.0942141, 0.0942141)
 texture = ExtResource("3_bs72m")
 
@@ -79,6 +73,12 @@ monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pickaxe/Hitbox" index="0"]
 shape = SubResource("CapsuleShape2D_pickaxe")
+
+[node name="AnimatedSprite2D" parent="Skin" index="0"]
+scale = Vector2(0.04, 0.04)
+sprite_frames = SubResource("SpriteFrames_codar")
+animation = &"glide"
+autoplay = "default"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
 position = Vector2(-6, 4.5)
