@@ -17,13 +17,13 @@
 size = Vector2(90.93752, 104.21877)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_double_jump"]
-size = Vector2(147.43802, 108.90062)
+size = Vector2(147.43802, 94.30005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_swim"]
-size = Vector2(89.41536, 112.36458)
+size = Vector2(89.41536, 104.21452)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wings"]
-size = Vector2(191.17133, 98.29193)
+size = Vector2(191.17133, 99.451355)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
 radius = 42.36795
@@ -65,10 +65,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
-size = Vector2(67.33215, 103.86687)
+size = Vector2(67.33215, 103.40631)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_double_jump"]
-size = Vector2(70.79619, 101.32298)
+size = Vector2(70.79619, 101.728195)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_swim"]
 size = Vector2(93.528885, 110.416046)
@@ -87,20 +87,20 @@ scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_codar")
 
 [node name="PhysicsShape_DoubleJump" type="CollisionShape2D" parent="." index="1"]
-position = Vector2(-18.410069, 4.591902)
-scale = Vector2(0.99999905, 0.99999905)
+position = Vector2(-18.410065, 15.030661)
+scale = Vector2(0.9999989, 0.9999989)
 shape = SubResource("RectangleShape2D_double_jump")
 disabled = true
 
 [node name="PhysicsShape_Swim" type="CollisionShape2D" parent="." index="2"]
-position = Vector2(2.3741367, 7.1899295)
-scale = Vector2(0.9999998, 0.9999998)
+position = Vector2(2.3741362, 16.523932)
+scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("RectangleShape2D_swim")
 disabled = true
 
 [node name="PhysicsShape_Wings" type="CollisionShape2D" parent="." index="3"]
-position = Vector2(-3.0384047, 6.6486745)
-scale = Vector2(0.9999998, 0.9999998)
+position = Vector2(-3.0384047, 10.45996)
+scale = Vector2(0.9999997, 0.9999997)
 shape = SubResource("RectangleShape2D_wings")
 disabled = true
 
@@ -124,13 +124,13 @@ animation = &"swim"
 autoplay = "default"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(14.281737, 23.99591)
-scale = Vector2(0.9999995, 0.9999995)
+position = Vector2(14.281733, 23.765627)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_hitbox")
 
 [node name="HitboxShape_DoubleJump" type="CollisionShape2D" parent="HitboxArea" index="1"]
-position = Vector2(-10.399492, 12.277716)
-scale = Vector2(0.9999995, 0.9999995)
+position = Vector2(-10.399492, 12.48032)
+scale = Vector2(0.9999994, 0.9999994)
 shape = SubResource("RectangleShape2D_hitbox_double_jump")
 disabled = true
 
