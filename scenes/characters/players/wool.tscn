@@ -1,9 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=16 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
-[ext_resource type="Texture2D" uid="uid://dxjbu7aphttkn" path="res://assets/character/wool-double-jump.png" id="3_d8o7v"]
+[ext_resource type="Texture2D" uid="uid://8mqia8mddsc4" path="res://assets/character/wool-bunny.png" id="4_58tpp"]
 [ext_resource type="Texture2D" uid="uid://2iwasx5a7inj" path="res://assets/character/wool-fish.png" id="4_codar"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Texture2D" uid="uid://b4iqxifjd33wq" path="res://assets/character/wool-wings.png" id="5_4q7dq"]
@@ -13,7 +13,7 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
-size = Vector2(54, 89)
+size = Vector2(81.375046, 105.156235)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
 radius = 42.36795
@@ -31,7 +31,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_d8o7v")
+"texture": ExtResource("4_58tpp")
 }],
 "loop": true,
 "name": &"double-jump",
@@ -54,11 +54,16 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(81.375046, 105.46874)
+
 [node name="Wool" instance=ExtResource("1_base_player")]
+scale = Vector2(0.05, 0.05)
 max_picked_up_features = 1
 
 [node name="PhysicsShape" parent="." index="0"]
-position = Vector2(-6, 4.5)
+position = Vector2(13.499994, 19.999992)
+scale = Vector2(0.99999994, 0.99999994)
 shape = SubResource("RectangleShape2D_codar")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="1"]
@@ -75,16 +80,17 @@ monitoring = false
 shape = SubResource("CapsuleShape2D_pickaxe")
 
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
-scale = Vector2(0.04, 0.04)
+scale = Vector2(0.06, 0.06)
 sprite_frames = SubResource("SpriteFrames_codar")
-animation = &"glide"
 autoplay = "default"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(-6, 4.5)
-shape = SubResource("RectangleShape2D_codar")
+position = Vector2(9.343766, 24.796856)
+scale = Vector2(0.9999997, 0.9999997)
+shape = SubResource("RectangleShape2D_hitbox")
 
 [node name="Camera2D" parent="." index="4"]
+limit_enabled = false
 limit_left = 0
 limit_top = 0
 limit_right = 6975
