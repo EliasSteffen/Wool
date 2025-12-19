@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=23 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
+[ext_resource type="Script" uid="uid://cyc3rpi35h3nx" path="res://scripts/characters/wool.gd" id="2_wool"]
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
 [ext_resource type="Texture2D" uid="uid://8mqia8mddsc4" path="res://assets/character/wool-bunny.png" id="4_58tpp"]
@@ -13,7 +14,16 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
-size = Vector2(81.375046, 105.156235)
+size = Vector2(90.93752, 104.21877)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_double_jump"]
+size = Vector2(147.43802, 108.90062)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_swim"]
+size = Vector2(89.41536, 112.36458)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wings"]
+size = Vector2(191.17133, 98.29193)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pickaxe"]
 radius = 42.36795
@@ -55,18 +65,46 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
-size = Vector2(81.375046, 105.46874)
+size = Vector2(67.33215, 103.86687)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_double_jump"]
+size = Vector2(70.79619, 101.32298)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_swim"]
+size = Vector2(93.528885, 110.416046)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_wings"]
+size = Vector2(61.486572, 95.910416)
 
 [node name="Wool" instance=ExtResource("1_base_player")]
 scale = Vector2(0.05, 0.05)
+script = ExtResource("2_wool")
 max_picked_up_features = 1
 
 [node name="PhysicsShape" parent="." index="0"]
-position = Vector2(13.499994, 19.999992)
-scale = Vector2(0.99999994, 0.99999994)
+position = Vector2(13.875036, 24.671867)
+scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_codar")
 
-[node name="Pickaxe" type="Sprite2D" parent="." index="1"]
+[node name="PhysicsShape_DoubleJump" type="CollisionShape2D" parent="." index="1"]
+position = Vector2(-18.410069, 4.591902)
+scale = Vector2(0.99999905, 0.99999905)
+shape = SubResource("RectangleShape2D_double_jump")
+disabled = true
+
+[node name="PhysicsShape_Swim" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(2.3741367, 7.1899295)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_swim")
+disabled = true
+
+[node name="PhysicsShape_Wings" type="CollisionShape2D" parent="." index="3"]
+position = Vector2(-3.0384047, 6.6486745)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_wings")
+disabled = true
+
+[node name="Pickaxe" type="Sprite2D" parent="." index="4"]
 position = Vector2(17.999998, -8.000001)
 rotation = 0.06457718
 scale = Vector2(0.0942141, 0.0942141)
@@ -82,14 +120,33 @@ shape = SubResource("CapsuleShape2D_pickaxe")
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
 scale = Vector2(0.06, 0.06)
 sprite_frames = SubResource("SpriteFrames_codar")
+animation = &"swim"
 autoplay = "default"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(9.343766, 24.796856)
-scale = Vector2(0.9999997, 0.9999997)
+position = Vector2(14.281737, 23.99591)
+scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_hitbox")
 
-[node name="Camera2D" parent="." index="4"]
+[node name="HitboxShape_DoubleJump" type="CollisionShape2D" parent="HitboxArea" index="1"]
+position = Vector2(-10.399492, 12.277716)
+scale = Vector2(0.9999995, 0.9999995)
+shape = SubResource("RectangleShape2D_hitbox_double_jump")
+disabled = true
+
+[node name="HitboxShape_Swim" type="CollisionShape2D" parent="HitboxArea" index="2"]
+position = Vector2(4.863903, 5.9991636)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_hitbox_swim")
+disabled = true
+
+[node name="HitboxShape_Wings" type="CollisionShape2D" parent="HitboxArea" index="3"]
+position = Vector2(-5.5281925, 7.1899233)
+scale = Vector2(0.9999998, 0.9999998)
+shape = SubResource("RectangleShape2D_hitbox_wings")
+disabled = true
+
+[node name="Camera2D" parent="." index="7"]
 limit_enabled = false
 limit_left = 0
 limit_top = 0
