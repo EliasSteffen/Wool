@@ -42,6 +42,7 @@ var _initial_pickaxe_scale: Vector2
 var _initial_pickaxe_centered: bool
 var _initial_pickaxe_offset: Vector2
 var _is_attacking: bool = false
+var _just_jumped: bool = false
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
@@ -74,6 +75,9 @@ func _ready() -> void:
 
 	if pickaxe_hitbox:
 		pickaxe_hitbox.body_entered.connect(_on_pickaxe_hitbox_body_entered)
+
+	# Set floor snap length to ensure we stick to slopes
+	floor_snap_length = 32.0
 
 	# Connect terrain signals for debug UI
 	terrain_entered.connect(func(_t): _update_debug_ui())
@@ -314,6 +318,10 @@ func _process(delta: float) -> void:
 # === OVERRIDDEN METHODS ===
 
 func _process_physics(delta: float) -> void:
+	# Reset jump state and snap length
+	_just_jumped = false
+	floor_snap_length = 32.0
+
 	if not can_control:
 		return
 
@@ -462,6 +470,29 @@ func _handle_movement(delta: float) -> void:
 			# Normal ground/air movement
 			velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
 
+			# Adjust velocity to slope if on floor
+			if is_on_floor() and not _just_jumped:
+				var floor_normal = get_floor_normal()
+				# If we are on a slope (normal is not straight up)
+				if floor_normal != Vector2.UP:
+					# Calculate tangent (slope direction)
+					# Tangent is perpendicular to normal.
+					# If normal is (0, -1) [UP], tangent is (1, 0) [RIGHT]
+					var tangent = Vector2(-floor_normal.y, floor_normal.x)
+
+					# Ensure tangent points generally right (positive X)
+					if tangent.x < 0:
+						tangent = -tangent
+
+					# Project velocity.x onto the slope
+					# We want V.x to remain what we calculated, but V.y to match the slope
+					# V = tangent * s
+					# V.x = tangent.x * s  =>  s = V.x / tangent.x
+					# V.y = tangent.y * s  =>  V.y = tangent.y * (V.x / tangent.x)
+
+					if abs(tangent.x) > 0.001:
+						velocity.y = tangent.y * (velocity.x / tangent.x)
+
 			# Apply push slowdown if pushing
 			if push_feature and push_feature.is_pushing():
 				velocity.x *= push_feature.get_push_slowdown()
@@ -480,6 +511,10 @@ func _jump() -> void:
 		jump_power *= wings_feature.get_jump_boost()
 
 	velocity.y = jump_power
+
+	# Disable floor snapping for this frame to allow takeoff
+	floor_snap_length = 0.0
+	_just_jumped = true
 
 func _find_nearest_nail() -> Nail:
 	var nearest: Nail = null
@@ -623,6 +658,9 @@ func _update_rotation(delta: float) -> void:
 			var rope_vector = current_nail.global_position - global_position
 			# Align head with rope (rope angle + 90 deg)
 			target_rotation = rope_vector.angle() + PI / 2.0
+	elif is_on_floor():
+		# Align with floor slope
+		target_rotation = get_floor_normal().angle() + PI / 2.0
 	elif is_underwater:
 		# Check for floor or proximity to floor to force upright standing
 		# We use test_move to see if ground is immediately below us (e.g. within 16 pixels)
