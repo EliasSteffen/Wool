@@ -123,11 +123,13 @@ func attack() -> void:
 		# Move pickaxe forward to extend range ("full length")
 		var target_pos = start_pos + (forward_dir * 40.0)
 
-		# Swing down and move forward
-		tween.tween_property(pickaxe, "rotation_degrees", start_rot_deg + rotation_mod, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(pickaxe, "position", target_pos, 0.15).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)		# Swing back and return to position
-		tween.chain().tween_property(pickaxe, "rotation_degrees", start_rot_deg, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
-		tween.parallel().tween_property(pickaxe, "position", start_pos, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+		# Swing down and move forward (Fast hit)
+		tween.tween_property(pickaxe, "rotation_degrees", start_rot_deg + rotation_mod, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(pickaxe, "position", target_pos, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+		# Swing back and return to position (Slow return)
+		tween.chain().tween_property(pickaxe, "rotation_degrees", start_rot_deg, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		tween.parallel().tween_property(pickaxe, "position", start_pos, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 
 		await tween.finished
 

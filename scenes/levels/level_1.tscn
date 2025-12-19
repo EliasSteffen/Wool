@@ -165,6 +165,7 @@ position = Vector2(-160, 957)
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
 position = Vector2(2978, 606)
+scale = Vector2(1, 1)
 
 [node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
 position = Vector2(3395, 699)
