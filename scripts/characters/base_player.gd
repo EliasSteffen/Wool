@@ -49,6 +49,7 @@ var _just_jumped: bool = false
 @onready var pickaxe: Node2D = $Pickaxe if has_node("Pickaxe") else null
 @onready var pickaxe_sprite: Sprite2D = $Pickaxe/Sprite2D if has_node("Pickaxe/Sprite2D") else ($Pickaxe as Sprite2D if has_node("Pickaxe") else null)
 @onready var pickaxe_hitbox: Area2D = $Pickaxe/Hitbox if has_node("Pickaxe/Hitbox") else null
+@onready var pickaxe_pivot: Node2D = $PickaxePivot if has_node("PickaxePivot") else null
 @onready var pickupable_features_node: Node = $PickupableFeatures if has_node("PickupableFeatures") else null
 
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
@@ -112,17 +113,29 @@ func attack() -> void:
 		var tween = create_tween()
 		tween.set_parallel(true)
 
-		# Determine forward direction based on current position
+		# Determine forward direction based on skin facing
 		var forward_dir = Vector2.RIGHT
 		var rotation_mod = 100
+		var facing_left = skin and skin.scale.x < 0
 
-		if pickaxe.position.x < 0:
+		if facing_left:
 			forward_dir = Vector2.LEFT
 			rotation_mod = -100
 
 		# Capture current state as start/end point
 		var start_pos = pickaxe.position
 		var start_rot_deg = pickaxe.rotation_degrees
+
+		# If PickaxePivot exists, teleport to it and restart rotation
+		if pickaxe_pivot:
+			if facing_left:
+				start_pos = Vector2(-pickaxe_pivot.position.x, pickaxe_pivot.position.y)
+			else:
+				start_pos = pickaxe_pivot.position
+
+			pickaxe.position = start_pos
+			pickaxe.rotation = _initial_pickaxe_rotation
+			start_rot_deg = _initial_pickaxe_rotation
 
 		# Move pickaxe forward to extend range ("full length")
 		var target_pos = start_pos + (forward_dir * 40.0)

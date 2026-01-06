@@ -1,9 +1,9 @@
-[gd_scene load_steps=23 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=41 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Script" uid="uid://cyc3rpi35h3nx" path="res://scripts/characters/wool.gd" id="2_wool"]
-[ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_wtfnr"]
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
+[ext_resource type="Texture2D" uid="uid://cddx5npt6lugy" path="res://assets/character/spritesheet.png" id="4_4q7dq"]
 [ext_resource type="Texture2D" uid="uid://8mqia8mddsc4" path="res://assets/character/wool-bunny.png" id="4_58tpp"]
 [ext_resource type="Texture2D" uid="uid://2iwasx5a7inj" path="res://assets/character/wool-fish.png" id="4_codar"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
-size = Vector2(90.93752, 104.21877)
+size = Vector2(560.0003, 760.0004)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_double_jump"]
 size = Vector2(147.43802, 94.30005)
@@ -29,23 +29,87 @@ size = Vector2(191.17133, 99.451355)
 radius = 42.36795
 height = 1061.94
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_codar"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(13440, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_whd81"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(0, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2rcj1"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(1920, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_esxlt"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(3840, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cjpge"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(5760, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_quic5"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(7680, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv7gs"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(9600, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pcyoo"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(11520, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wmfhf"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(13440, 0, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fio1q"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(0, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pm30h"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(1920, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_64mnq"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(3840, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_utjtq"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(5760, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ftlvo"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(7680, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mhau2"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(9600, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wjej4"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(11520, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_teraw"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(13440, 1080, 1920, 1080)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f4wq3"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(0, 2160, 1920, 1080)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_codar"]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_wtfnr")
-}],
-"loop": true,
-"name": &"default",
-"speed": 5.0
-}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("4_58tpp")
 }],
 "loop": true,
 "name": &"double-jump",
-"speed": 5.0
+"speed": 30.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -53,7 +117,15 @@ animations = [{
 }],
 "loop": true,
 "name": &"glide",
-"speed": 5.0
+"speed": 30.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_codar")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 30.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -61,11 +133,67 @@ animations = [{
 }],
 "loop": true,
 "name": &"swim",
-"speed": 5.0
+"speed": 30.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_whd81")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2rcj1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_esxlt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cjpge")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_quic5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mv7gs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pcyoo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wmfhf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fio1q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pm30h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_64mnq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_utjtq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ftlvo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mhau2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wjej4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_teraw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f4wq3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 25.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
-size = Vector2(67.33215, 103.40631)
+size = Vector2(560.00037, 720.0005)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox_double_jump"]
 size = Vector2(70.79619, 101.728195)
@@ -82,8 +210,8 @@ script = ExtResource("2_wool")
 max_picked_up_features = 1
 
 [node name="PhysicsShape" parent="." index="0"]
-position = Vector2(13.875036, 24.671867)
-scale = Vector2(0.9999995, 0.9999995)
+position = Vector2(-199.99997, 19.999996)
+scale = Vector2(0.99999934, 0.99999934)
 shape = SubResource("RectangleShape2D_codar")
 
 [node name="PhysicsShape_DoubleJump" type="CollisionShape2D" parent="." index="1"]
@@ -105,9 +233,9 @@ shape = SubResource("RectangleShape2D_wings")
 disabled = true
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="4"]
-position = Vector2(17.999998, -8.000001)
-rotation = 0.06457718
-scale = Vector2(0.0942141, 0.0942141)
+position = Vector2(-240.00002, -160)
+rotation = 0.4537856
+scale = Vector2(1.0356653, 1.0356653)
 texture = ExtResource("3_bs72m")
 
 [node name="Hitbox" type="Area2D" parent="Pickaxe" index="0"]
@@ -115,17 +243,18 @@ collision_layer = 0
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Pickaxe/Hitbox" index="0"]
+position = Vector2(0, -3.0517578e-05)
 shape = SubResource("CapsuleShape2D_pickaxe")
 
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
-scale = Vector2(0.06, 0.06)
+position = Vector2(2.9830382, 1.6779598)
 sprite_frames = SubResource("SpriteFrames_codar")
-animation = &"swim"
-autoplay = "default"
+animation = &"walk"
+autoplay = "walk"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(14.281733, 23.765627)
-scale = Vector2(0.9999994, 0.9999994)
+position = Vector2(-199.99992, 9.536741e-06)
+scale = Vector2(0.99999905, 0.99999905)
 shape = SubResource("RectangleShape2D_hitbox")
 
 [node name="HitboxShape_DoubleJump" type="CollisionShape2D" parent="HitboxArea" index="1"]
@@ -153,6 +282,9 @@ limit_top = 0
 limit_right = 6975
 limit_bottom = 1100
 limit_smoothed = true
+
+[node name="PickaxePivot" type="Marker2D" parent="." index="8"]
+position = Vector2(159.99976, 0)
 
 [node name="DoubleJumpFeature" type="Node2D" parent="PickupableFeatures" index="0"]
 script = ExtResource("6_double_jump")

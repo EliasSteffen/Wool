@@ -164,11 +164,11 @@ position = Vector2(848, 640)
 position = Vector2(-160, 957)
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(2978, 606)
-scale = Vector2(1, 1)
+position = Vector2(3017, 583)
+scale = Vector2(0.1, 0.1)
 
 [node name="Bunny" parent="." instance=ExtResource("10_qxy0u")]
-position = Vector2(3395, 699)
+position = Vector2(4198, 667)
 
 [node name="UpwindZone" parent="." instance=ExtResource("5_6761a")]
 position = Vector2(5323, 762)

@@ -20,6 +20,32 @@ func _ready() -> void:
 	super._ready()
 	_update_shapes("default")
 
+func _process(delta: float) -> void:
+	super._process(delta)
+	_handle_movement_animation()
+
+func _handle_movement_animation() -> void:
+	# Ensure skin and sprite exist
+	if not skin or not skin.animated_sprite:
+		return
+
+	# If any transformation feature is active, do not override its animation
+	if (wings_feature and wings_feature.enabled) or \
+	   (swim_feature and swim_feature.enabled) or \
+	   (glide_feature and glide_feature.enabled) or \
+	   (double_jump_feature and double_jump_feature.enabled):
+		return
+
+	# Handle Walk/Idle
+	if not is_zero_approx(velocity.x):
+		if skin.animated_sprite.animation != "walk":
+			skin.play_animation("walk")
+			_update_shapes("walk")
+	else:
+		if skin.animated_sprite.animation != "idle":
+			skin.play_animation("idle")
+			_update_shapes("idle")
+
 func _update_skin_appearance() -> void:
 	super._update_skin_appearance()
 
@@ -64,3 +90,4 @@ func _disable_all_shapes() -> void:
 	if hitbox_shape_glide: hitbox_shape_glide.set_deferred("disabled", true)
 	if hitbox_shape_swim: hitbox_shape_swim.set_deferred("disabled", true)
 	if hitbox_shape_wings: hitbox_shape_wings.set_deferred("disabled", true)
+
