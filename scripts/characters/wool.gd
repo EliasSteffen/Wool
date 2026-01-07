@@ -30,6 +30,28 @@ var _initial_pickaxe_offset: Vector2 = Vector2.ZERO
 var _is_attacking: bool = false
 var _current_shape_animation: String = ""
 
+enum FormState { NORMAL, BUNNY, FISH, EAGLE }
+var current_form: FormState = FormState.NORMAL
+
+const ANIMATION_MAP = {
+	FormState.NORMAL: {
+		BasePlayer.PlayerState.IDLE: "walk_idle",
+		BasePlayer.PlayerState.WALK: "walk"
+	},
+	FormState.BUNNY: {
+		BasePlayer.PlayerState.IDLE: "double-jump_idle",
+		BasePlayer.PlayerState.WALK: "double-jump"
+	},
+	FormState.FISH: {
+		BasePlayer.PlayerState.IDLE: "swim_idle",
+		BasePlayer.PlayerState.WALK: "swim"
+	},
+	FormState.EAGLE: {
+		BasePlayer.PlayerState.IDLE: "glide_idle",
+		BasePlayer.PlayerState.WALK: "glide"
+	}
+}
+
 func _ready() -> void:
 	super._ready()
 
@@ -70,6 +92,65 @@ func _update_skin_appearance() -> void:
 func _process(delta: float) -> void:
 	super._process(delta)
 	_update_pickaxe_visual()
+
+# === OVERRIDDEN METHODS FOR BASE PLAYER ===
+
+func _update_form_state() -> void:
+	# Determine form based on active/enabled pickupable features
+	# Priority: SWIM > GLIDE > DOUBLE_JUMP > NORMAL
+
+	var old_form = current_form
+
+	if swim_feature and swim_feature.enabled:
+		current_form = FormState.FISH
+	elif glide_feature and glide_feature.enabled:
+		current_form = FormState.EAGLE
+	elif double_jump_feature and double_jump_feature.enabled:
+		current_form = FormState.BUNNY
+	else:
+		current_form = FormState.NORMAL
+
+	if old_form != current_form:
+		print("Wool: Form Update -> ", FormState.keys()[current_form])
+
+func _calculate_player_state() -> PlayerState:
+	if not is_zero_approx(velocity.x):
+		return PlayerState.WALK
+
+	# Special case: Swimming vertically counts as walking/swimming for Fish form
+	if current_form == FormState.FISH and not is_zero_approx(velocity.y):
+		return PlayerState.WALK
+
+	return PlayerState.IDLE
+
+func _should_force_animation_update() -> bool:
+	return true # Always check in Wool to handle form changes immediately (legacy behavior)
+
+func _play_animation_for_state(state: PlayerState) -> void:
+	var target_anim = "default"
+
+	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
+		target_anim = ANIMATION_MAP[current_form][state]
+
+	# Fallback Logic for missing "walk_idle", "double-jump_idle" etc.
+	if skin and skin.animated_sprite:
+		if not skin.animated_sprite.sprite_frames.has_animation(target_anim):
+			# 1. Try generic "idle" for unset idle animations
+			if target_anim.ends_with("_idle"):
+				var base_name = target_anim.replace("_idle", "")
+				# Try "double-jump" instead of "double-jump_idle"
+				if skin.animated_sprite.sprite_frames.has_animation(base_name):
+					target_anim = base_name
+				# Or try generic "idle"
+				elif skin.animated_sprite.sprite_frames.has_animation("idle"):
+					target_anim = "idle"
+
+			# 2. Last resort fallback
+			elif not skin.animated_sprite.sprite_frames.has_animation(target_anim):
+				if current_form == FormState.NORMAL:
+					target_anim = "walk" if state == BasePlayer.PlayerState.WALK else "idle"
+
+	skin.play_animation(target_anim)
 
 func _update_rotation(delta: float) -> void:
 	# Lock rotation during attack to prevent visual desync of the pickaxe
