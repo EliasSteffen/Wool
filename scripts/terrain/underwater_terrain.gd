@@ -18,6 +18,7 @@ func _ready() -> void:
 	super._ready()
 	terrain_name = "UnderWater"
 	affects_movement = true
+	uses_standard_gravity = false
 	_setup_tweakables()
 
 func _setup_tweakables() -> void:

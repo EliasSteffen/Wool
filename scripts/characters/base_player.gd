@@ -207,20 +207,36 @@ func pickup_feature(new_feature: Feature) -> void:
 				feature_to_activate = child
 				break
 
-	# The new_feature instance is just a carrier of information (type), we don't need it anymore
-	new_feature.queue_free()
+	if feature_to_activate:
+		# We found a pre-existing version, so we don't need the new instance
+		new_feature.queue_free()
+	else:
+		# We don't have this feature yet, so we accept the new instance!
+		print("Player acquiring NEW feature instance: %s" % new_feature.feature_name)
+		feature_to_activate = new_feature
 
-	if not feature_to_activate:
-		print("Player does not have pickupable feature of type: %s" % new_feature.get_script().resource_path)
-		return
+		# Parent it to the appropriate container
+		if pickupable_features_node:
+			pickupable_features_node.add_child(new_feature)
+		elif features_container:
+			features_container.add_child(new_feature)
+		else:
+			push_error("Player has no container to hold new feature!")
+			new_feature.queue_free()
+			return
 
 	# Manage picked up features limit
 	if _picked_up_features.size() >= max_picked_up_features:
 		var old_feature = _picked_up_features.pop_front()
 		if old_feature:
 			old_feature.enabled = false
+			# Make sure we don't accidentally remove a feature we just re-picked up
+			if old_feature == feature_to_activate:
+				_picked_up_features.append(old_feature)
 
-	_picked_up_features.append(feature_to_activate)
+	if feature_to_activate not in _picked_up_features:
+		_picked_up_features.append(feature_to_activate)
+
 	feature_to_activate.enabled = true
 	feature_to_activate.activate() # Explicitly activate the feature
 	_update_form_state()
@@ -409,6 +425,8 @@ func _handle_feature_inputs() -> void:
 
 func _handle_movement(delta: float) -> void:
 	if current_terrain is UnderWaterTerrain:
+		# Disable floor snapping when swimming to allow free vertical movement
+		floor_snap_length = 0.0
 		_handle_underwater_movement(delta)
 		return
 
@@ -441,8 +459,9 @@ func _handle_underwater_movement(delta: float) -> void:
 		var target_velocity_y: float = _vertical_direction * speed
 		velocity.y = move_toward(velocity.y, target_velocity_y, acceleration * delta)
 	else:
-		# Apply water resistance (damping) to vertical velocity to prevent infinite acceleration
-		velocity.y = move_toward(velocity.y, 0, underwater_terrain.water_resistance * 100.0 * delta)
+		# Native terrain damping (handled in BaseCharacter) will limit velocity.
+		# We don't need additional manual damping here, otherwise we fight buoyancy.
+		pass
 
 func _handle_grapple_swing_pump(delta: float) -> void:
 	# Swing pumping: Add force in direction of input to build momentum

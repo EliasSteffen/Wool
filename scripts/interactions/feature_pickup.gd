@@ -19,6 +19,9 @@ func _ready() -> void:
 	if icon_texture:
 		sprite.texture = icon_texture
 
+	# Ensure mask is correct (Layer 1 and 2 and 3 just to be safe)
+	collision_mask = 1 | 2 | 4 | 8 # Scan masks 1, 2, 3, 4 (binary 1, 10, 100, 1000)
+
 	# Setup collision
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
@@ -55,31 +58,38 @@ func _update_sprite_size() -> void:
 
 	if target_size != Vector2.ZERO:
 		var tex_size = sprite.texture.get_size()
-		# Scale to fit the hitbox (uniform scaling based on the larger dimension to fill it)
-		var scale_factor = max(target_size.x / tex_size.x, target_size.y / tex_size.y)
+		# Scale to fit INSIDE the hitbox (Contain)
+		# Use MIN to ensure the sprite stays within the collision bounds
+		# This guarantees that if you touch the visual sprite, you are definitely inside the hitbox.
+		var scale_factor = min(target_size.x / tex_size.x, target_size.y / tex_size.y)
 		sprite.scale = Vector2(scale_factor, scale_factor)
+
+# func _draw() -> void:
+	# DEBUG VISUALIZATION
+	# if collision_shape and collision_shape.shape:
+		# var shape = collision_shape.shape
+		# if shape is CircleShape2D:
+			# draw_circle(collision_shape.position, shape.radius, Color(1, 0, 0, 0.4))
+		# elif shape is RectangleShape2D:
+			# draw_rect(Rect2(collision_shape.position - shape.size/2, shape.size), Color(1, 0, 0, 0.4))
+
 
 func _physics_process(delta: float) -> void:
     # Fallback: Active monitoring if Area2D signals fail
-	if Engine.get_physics_frames() % 5 == 0:
-		# Method 1: Check overlapping bodies (Standard)
-		var bodies = get_overlapping_bodies()
-		for b in bodies:
-			_on_body_entered(b)
+	# We check every frame because the player can be fast
+	var bodies = get_overlapping_bodies()
+	for b in bodies:
+		_on_body_entered(b)
 
-		# Method 2: Point Query (Aggressive Fallback)
-		# Checks if the center of the pickup is inside any body
-		var space_state = get_world_2d().direct_space_state
-		var query = PhysicsPointQueryParameters2D.new()
-		query.position = global_position
-		query.collision_mask = collision_mask
-		query.collide_with_bodies = true
-		query.collide_with_areas = false
+	# DEBUG: Check distance to player manually
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() > 0:
+		var p = players[0] as Node2D
+		var dist = global_position.distance_to(p.global_position)
+		if dist < 80.0: # 80 pixels is slightly larger than radius 50 + player radius
+			# print("FeaturePickup: Close to player (%.2f), forcing check..." % dist)
+			_on_body_entered(p)
 
-		var results = space_state.intersect_point(query)
-		for res in results:
-			if res.collider and is_instance_valid(res.collider):
-				_on_body_entered(res.collider)
 func _on_body_entered(body: Node2D) -> void:
 	print("FeaturePickup: Body entered - ", body.name)
 

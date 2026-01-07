@@ -56,8 +56,12 @@ func _ready() -> void:
 	_setup_character()
 
 func _physics_process(delta: float) -> void:
-	# Apply gravity if not on floor
-	if not is_on_floor():
+	# Apply gravity if not on floor (and terrain allows it)
+	var apply_gravity: bool = true
+	if current_terrain and not current_terrain.uses_standard_gravity:
+		apply_gravity = false
+
+	if apply_gravity and not is_on_floor():
 		velocity.y += _calculate_gravity(delta)
 
 	# Calculate movement from all features and physics changers
@@ -174,6 +178,10 @@ func _update_current_terrain() -> void:
 func set_current_terrain(terrain: Terrain) -> void:
 	if current_terrain == terrain:
 		return
+
+	if terrain:
+		# print("BaseCharacter: Current Terrain switched to ", terrain.terrain_name, " (Type: ", terrain.get_script().resource_path, ")")
+		pass
 
 	var old_terrain: Terrain = current_terrain
 	current_terrain = terrain

@@ -4,11 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://dwou74m318rb4" path="res://assets/character/wool.png" id="2_placeholder"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
-radius = 30.0
+radius = 50.0
 
 [node name="FeaturePickup" type="Area2D"]
 collision_layer = 0
-collision_mask = 2
+collision_mask = 3
 script = ExtResource("1_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
