@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://mainmenu123"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c32olxx7fnmv6" path="res://scripts/ui/main_menu.gd" id="1_script"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -10,6 +10,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.862745)
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -25,18 +34,21 @@ theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 150
 text = "WOOL"
 horizontal_alignment = 1
 
 [node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 32
 text = "Start Game"
-
-[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
-layout_mode = 2
-text = "Quit"
 
 [node name="DevSettingsButton" type="Button" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 32
 text = "Developer Settings"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Quit"

@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dt6g6olgprbpq"]
+[gd_scene load_steps=2 format=3 uid="uid://d30ynwp46gi7s"]
 
-[ext_resource type="Script" path="res://scripts/ui/game_over.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://kpvat4vghmvj" path="res://scripts/ui/game_over.gd" id="1_script"]
 
 [node name="GameOverScreen" type="Control"]
 layout_mode = 3
@@ -34,7 +34,7 @@ theme_override_constants/separation = 30
 
 [node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 120
+theme_override_font_sizes/font_size = 150
 text = "Game Over"
 horizontal_alignment = 1
 
