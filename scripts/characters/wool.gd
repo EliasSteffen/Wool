@@ -28,6 +28,7 @@ var _initial_pickaxe_scale: Vector2
 var _initial_pickaxe_centered: bool = true
 var _initial_pickaxe_offset: Vector2 = Vector2.ZERO
 var _is_attacking: bool = false
+var _current_shape_animation: String = ""
 
 func _ready() -> void:
 	super._ready()
@@ -77,6 +78,13 @@ func _update_rotation(delta: float) -> void:
 	super._update_rotation(delta)
 
 func _update_shapes(animation_name: String) -> void:
+	# OPTIMIZATION: Only update shapes if animation actually changed.
+	# Prevents physics engine flicker where shapes are disabled/enabled every frame.
+	if _current_shape_animation == animation_name:
+		return
+
+	_current_shape_animation = animation_name
+
 	# Disable all shapes first
 	_disable_all_shapes()
 

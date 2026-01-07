@@ -10,11 +10,14 @@ var upwind_force: float
 var max_upwind_velocity: float
 
 # === BUILT-IN METHODS ===
+func _init() -> void:
+	terrain_name = "Upwind"
+
 func _ready() -> void:
 	super._ready()
-	terrain_name = "Upwind"
 	affects_movement = true
 	can_glide_upwards = true
+	priority = 10 # Upwind overrides standard zones
 	_setup_tweakables()
 
 func _setup_tweakables() -> void:
@@ -78,4 +81,7 @@ func _apply_upwind_force(character: BaseCharacter, delta: float) -> void:
 		# OR if we are falling (velocity.y > max_upwind_velocity)
 		if character.velocity.y > max_upwind_velocity:
 			character.velocity.y = move_toward(character.velocity.y, max_upwind_velocity, abs(upwind_force) * delta)
+			# print("Upwind force applied! Vel Y: ", character.velocity.y)
+	# else:
+	# 	print("Upwind active but not gliding.")
 

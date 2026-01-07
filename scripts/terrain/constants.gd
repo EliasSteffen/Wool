@@ -2,9 +2,9 @@ extends BaseConstants
 
 const DEFAULT_AIR_RESISTANCE: float = 0.98
 const DEFAULT_APPLIES_TO_GRAPPLING: bool = true
-const DEFAULT_WATER_SLOWDOWN_FACTOR: float = 0.5
-const DEFAULT_WATER_BUOYANCY_FORCE: float = -100.0
-const DEFAULT_WATER_RESISTANCE: float = 0.5
+const DEFAULT_WATER_SLOWDOWN_FACTOR: float = 0.8 # More responsive (was 0.5)
+const DEFAULT_WATER_BUOYANCY_FORCE: float = -300.0 # Clearer float effect (was -100.0)
+const DEFAULT_WATER_RESISTANCE: float = 0.8
 const DEFAULT_UPWIND_FORCE: float = -1500.0
 const DEFAULT_UPWIND_MAX_VELOCITY: float = -600.0
 

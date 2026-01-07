@@ -13,8 +13,11 @@ var air_resistance: float
 var applies_to_grappling: bool
 
 # === BUILT-IN METHODS ===
-func _ready() -> void:
+func _init() -> void:
 	terrain_name = "Air"
+
+func _ready() -> void:
+	super._ready()
 	affects_movement = true
 	_setup_tweakables()
 

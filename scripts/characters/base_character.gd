@@ -144,6 +144,17 @@ func get_feature_by_type(feature_type: Variant) -> Feature:
 				found_feature = feature # Keep as fallback
 	return found_feature
 
+## Get the active terrain instance of a specific type (e.g. UnderWaterTerrain)
+## Returns the most recently added terrain of that type, or null if none active.
+func get_active_terrain_of_type(terrain_type: Variant) -> Terrain:
+	# Iterate backwards to get the most recent one (standard stack behavior)
+	# though for "am I inside water", any water is fine.
+	for i in range(_active_terrains.size() - 1, -1, -1):
+		var terrain = _active_terrains[i]
+		if is_instance_of(terrain, terrain_type):
+			return terrain
+	return null
+
 ## Add an interaction to nearby list
 func add_nearby_interaction(interaction: Interaction) -> void:
 	if interaction not in nearby_interactions:
@@ -172,7 +183,16 @@ func _update_current_terrain() -> void:
 	if _active_terrains.is_empty():
 		set_current_terrain(_default_air_terrain)
 	else:
-		set_current_terrain(_active_terrains.back())
+		# Use terrain with highest priority
+		# If priorities are equal, prefer the most recently added (last in list)
+		var best_terrain: Terrain = _active_terrains.back()
+
+		# Iterate to find if any other terrain has strict higher priority
+		for terrain in _active_terrains:
+			if terrain.priority > best_terrain.priority:
+				best_terrain = terrain
+
+		set_current_terrain(best_terrain)
 
 ## Set current terrain
 func set_current_terrain(terrain: Terrain) -> void:
@@ -180,8 +200,12 @@ func set_current_terrain(terrain: Terrain) -> void:
 		return
 
 	if terrain:
-		# print("BaseCharacter: Current Terrain switched to ", terrain.terrain_name, " (Type: ", terrain.get_script().resource_path, ")")
-		pass
+		var type_name = "Unknown"
+		if terrain == _default_air_terrain:
+			type_name = "Default Air"
+		else:
+			type_name = terrain.terrain_name
+		# print("BaseCharacter [%s]: Current Terrain switched to %s" % [name, type_name])
 
 	var old_terrain: Terrain = current_terrain
 	current_terrain = terrain

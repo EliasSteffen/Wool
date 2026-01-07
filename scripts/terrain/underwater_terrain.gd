@@ -14,11 +14,15 @@ var buoyancy_force: float
 var water_resistance: float
 
 # === BUILT-IN METHODS ===
+func _init() -> void:
+	terrain_name = "UnderWater"
+	# Water should now use standard gravity, which we counteract with buoyancy
+	uses_standard_gravity = true
+	priority = 10 # Water overrides standard zones
+
 func _ready() -> void:
 	super._ready()
-	terrain_name = "UnderWater"
 	affects_movement = true
-	uses_standard_gravity = false
 	_setup_tweakables()
 
 func _setup_tweakables() -> void:

@@ -374,7 +374,9 @@ func _handle_input() -> void:
 	# Use ui_up/down as default vertical controls since move_up/down are not defined
 	_vertical_direction = Input.get_axis("ui_up", "ui_down")
 
-	var is_underwater := current_terrain is UnderWaterTerrain
+	var is_underwater := false
+	if get_active_terrain_of_type(UnderWaterTerrain) != null:
+		is_underwater = true
 
 	# Jump (only if not underwater)
 	if not is_underwater and Input.is_action_just_pressed("jump") and is_on_floor():
@@ -424,10 +426,18 @@ func _handle_feature_inputs() -> void:
 			feature.handle_input(self)
 
 func _handle_movement(delta: float) -> void:
-	if current_terrain is UnderWaterTerrain:
+	# Explicitly check for Water terrain, regardless of what 'current_terrain' thinks (handling overlaps)
+	var water_terrain = get_active_terrain_of_type(UnderWaterTerrain)
+
+	if water_terrain:
 		# Disable floor snapping when swimming to allow free vertical movement
 		floor_snap_length = 0.0
-		_handle_underwater_movement(delta)
+		# We need to temporarily force current_terrain to be the water terrain
+		# so the logic inside _handle_underwater_movement uses the correct params (buoyancy etc)
+		# NOTE: This does NOT change the global 'current_terrain' variable, just for this scope if we passed it.
+		# But _handle_underwater_movement uses 'current_terrain' property directly.
+		# Instead, let's pass the terrain instance to the function.
+		_handle_underwater_movement(delta, water_terrain)
 		return
 
 	if _direction != 0:
@@ -441,8 +451,15 @@ func _handle_movement(delta: float) -> void:
 		if not is_grappling and is_on_floor():
 			velocity.x = move_toward(velocity.x, 0, friction * delta)
 
-func _handle_underwater_movement(delta: float) -> void:
-	var underwater_terrain := current_terrain as UnderWaterTerrain
+func _handle_underwater_movement(delta: float, underwater_terrain: UnderWaterTerrain = null) -> void:
+	# Fallback if called without argument (for backward compat or if used elsewhere)
+	if not underwater_terrain and current_terrain is UnderWaterTerrain:
+		underwater_terrain = current_terrain as UnderWaterTerrain
+
+	if not underwater_terrain:
+		push_error("BasePlayer: _handle_underwater_movement called without valid UnderWaterTerrain context")
+		return
+
 	var speed: float = move_speed * underwater_terrain.slowdown_factor
 
 	# Apply swim boost if available

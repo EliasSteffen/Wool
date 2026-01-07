@@ -17,6 +17,7 @@ signal character_exited(character: CharacterBody2D)
 @export var affects_movement: bool = true
 @export var uses_standard_gravity: bool = true # If false, BaseCharacter won't apply standard gravity
 @export var can_glide_upwards: bool = false # If true, allows gliding even when moving upwards (e.g. updrafts)
+@export var priority: int = 0 # Higher priority terrains override lower ones (e.g. Water > Generic Zone)
 
 # === PRIVATE VARIABLES ===
 var _characters_in_terrain: Array[CharacterBody2D] = []
@@ -31,7 +32,29 @@ func _ready() -> void:
 	# Support for adding CollisionShapes directly to the Terrain node in the editor.
 	# We move them into the DetectionArea at runtime so they trigger the physics logic.
 	if detection_area:
+		# Force collision mask to include Layer 1 (Default) and Layer 2 (Player) explicitly
+		# This ensures we catch characters even if they are on default layer
+		var mask = detection_area.collision_mask
+		if mask & 1 == 0:
+			detection_area.collision_mask |= 1 # Add Layer 1
+		if mask & 2 == 0:
+			detection_area.collision_mask |= 2 # Add Layer 2
+
+		# print("Terrain '%s': Extended collision mask to include Player Layers (1+2). New Mask: %d" % [terrain_name, detection_area.collision_mask])
+
 		_move_collision_shapes_to_area()
+
+		# DEBUG: Verify we have shapes
+		var shape_count = 0
+		for child in detection_area.get_children():
+			if child is CollisionShape2D or child is CollisionPolygon2D:
+				shape_count += 1
+		# print("Terrain '%s': DetectionArea configured with %d shapes. Global Pos: %s" % [terrain_name, shape_count, global_position])
+
+		# Ensure monitoring is on!
+		detection_area.monitoring = true
+		detection_area.monitorable = true # Being monitorable helps debug, though not strictly needed for detection
+
 		detection_area.body_entered.connect(_on_body_entered)
 		detection_area.body_exited.connect(_on_body_exited)
 
@@ -44,8 +67,22 @@ func _ready() -> void:
 func _check_initial_overlaps() -> void:
 	if not detection_area: return
 
-	for body in detection_area.get_overlapping_bodies():
+	# Manually force update to catch bodies
+	# Sometimes Area2D needs a frame to update overlapping bodies
+	var bodies = detection_area.get_overlapping_bodies()
+	print("Terrain '%s' initial check: Found %d bodies" % [terrain_name, bodies.size()])
+
+	for body in bodies:
 		_on_body_entered(body)
+
+func _process(delta: float) -> void:
+	# Debug visualization (only in editor or if needed)
+	pass
+
+func _physics_process(delta: float) -> void:
+    # Standard physics processing is sufficient.
+	# We rely on Area2D 'body_entered' and 'body_exited' signals.
+	pass
 
 func _move_collision_shapes_to_area() -> void:
 	# Iterate backwards to safely remove children while iterating
@@ -53,10 +90,14 @@ func _move_collision_shapes_to_area() -> void:
 	for i in range(children.size() - 1, -1, -1):
 		var child = children[i]
 		if child is CollisionShape2D or child is CollisionPolygon2D:
+			# Cache global transform before reparenting
+			var global_trans = child.global_transform
+
 			remove_child(child)
 			detection_area.add_child(child)
-			# Ensure the shape keeps its position relative to the terrain
-			# (Assuming DetectionArea is at 0,0 relative to Terrain)
+
+			# Restore global transform to ensure it stays exactly where placed in editor
+			child.global_transform = global_trans
 
 func _find_detection_area() -> Area2D:
 	if has_node("DetectionArea"):
