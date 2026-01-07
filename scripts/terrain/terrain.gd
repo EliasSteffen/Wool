@@ -21,6 +21,7 @@ signal character_exited(character: CharacterBody2D)
 
 # === PRIVATE VARIABLES ===
 var _characters_in_terrain: Array[CharacterBody2D] = []
+var _pending_characters: Array[CharacterBody2D] = []
 
 # === PUBLIC VARIABLES ===
 var detection_area: Area2D
@@ -80,7 +81,14 @@ func _process(delta: float) -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
-    # Standard physics processing is sufficient.
+	# Check pending characters
+	for i in range(_pending_characters.size() - 1, -1, -1):
+		var char = _pending_characters[i]
+		if _should_character_enter(char):
+			_pending_characters.remove_at(i)
+			_add_character_to_terrain(char)
+
+	# Standard physics processing is sufficient.
 	# We rely on Area2D 'body_entered' and 'body_exited' signals.
 	pass
 
@@ -160,25 +168,34 @@ func _on_character_entered(character: CharacterBody2D) -> void:
 func _on_character_exited(character: CharacterBody2D) -> void:
 	pass
 
+## Check if a character should strictly enter this terrain.
+## Useful for delaying entry until character is submerged or specific condition is met.
+func _should_character_enter(character: CharacterBody2D) -> bool:
+	return true
+
+func _add_character_to_terrain(body: CharacterBody2D) -> void:
+	_characters_in_terrain.append(body)
+	_on_character_entered(body)
+	character_entered.emit(body)
+
+	if body.has_method("enter_terrain"):
+		body.enter_terrain(self)
+
 # === SIGNAL CALLBACKS ===
 func _on_body_entered(body: Node2D) -> void:
 	if body is CharacterBody2D:
 		# Prevent duplicates (important if we manually check overlaps AND get a signal)
-		if body in _characters_in_terrain:
+		if body in _characters_in_terrain or body in _pending_characters:
 			return
 
-		_characters_in_terrain.append(body)
-		_on_character_entered(body)
-		character_entered.emit(body)
-
-		if body.has_method("enter_terrain"):
-			body.enter_terrain(self)
+		if _should_character_enter(body):
+			_add_character_to_terrain(body)
+		else:
+			_pending_characters.append(body)
 
 func _on_body_exited(body: Node2D) -> void:
 	if body is CharacterBody2D:
-		_characters_in_terrain.erase(body)
-		_on_character_exited(body)
-		character_exited.emit(body)
+		if body in _pending_characters:
+			_pending_characters.erase(body)
+			return
 
-		if body.has_method("exit_terrain"):
-			body.exit_terrain(self)
