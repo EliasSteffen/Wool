@@ -411,6 +411,16 @@ func _handle_movement(delta: float) -> void:
 		# Friction / Stopping
 		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
 		if not is_grappling and is_on_floor():
+			# Apply friction along the slope
+			var floor_normal = get_floor_normal()
+			var tangent = Vector2(-floor_normal.y, floor_normal.x)
+			if tangent.x < 0: tangent = -tangent
+
+			var current_speed = velocity.dot(tangent)
+			var new_speed = move_toward(current_speed, 0, friction * delta)
+			velocity = tangent * new_speed
+		elif not is_grappling:
+			# Air friction
 			velocity.x = move_toward(velocity.x, 0, friction * delta)
 
 func _handle_underwater_movement(delta: float, underwater_terrain: UnderWaterTerrain = null) -> void:
@@ -449,18 +459,31 @@ func _handle_grapple_swing_pump(delta: float) -> void:
 	velocity.x += pump_force
 
 func _handle_ground_air_movement(delta: float) -> void:
-	# Normal ground/air movement
-	velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
-
-	# Adjust velocity to slope if on floor
 	if is_on_floor() and not _just_jumped:
-		_apply_slope_velocity_adjustment()
+		# Move exactly along the slope (tangent)
+		var floor_normal = get_floor_normal()
+		var tangent = Vector2(-floor_normal.y, floor_normal.x)
+
+		# Ensure tangent points generally right
+		if tangent.x < 0:
+			tangent = -tangent
+
+		# Calculate new speed along the tangent
+		# (Current velocity projected onto tangent)
+		var current_speed = velocity.dot(tangent)
+		var new_speed = move_toward(current_speed, _direction * move_speed, acceleration * delta)
+
+		velocity = tangent * new_speed
+	else:
+		# Global movement in air
+		velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
 
 	# Apply push slowdown if pushing
 	if push_feature and push_feature.is_pushing():
 		velocity.x *= push_feature.get_push_slowdown()
 
 func _apply_slope_velocity_adjustment() -> void:
+	# Deprecated/Unused for movement driving, but kept if needed for other adjustments
 	var floor_normal := get_floor_normal()
 	if floor_normal == Vector2.UP:
 		return
