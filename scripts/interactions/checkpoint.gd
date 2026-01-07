@@ -22,7 +22,6 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is BasePlayer:
-		print("Checkpoint entered by: ", body.name)
 		if body.has_method("checkpoint_reached"):
 			body.checkpoint_reached()
 			_activate(body)

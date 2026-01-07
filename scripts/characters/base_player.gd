@@ -474,6 +474,10 @@ func _handle_ground_air_movement(delta: float) -> void:
 		var new_speed = move_toward(current_speed, _direction * move_speed, acceleration * delta)
 
 		velocity = tangent * new_speed
+
+		# Apply a tiny downward force to ensure 'is_on_floor()' remains true and snapping works reliably
+		# This prevents "floating" when moving down slopes rapidly
+		velocity.y += 2.0
 	else:
 		# Global movement in air
 		velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
@@ -586,10 +590,24 @@ func _update_rotation(delta: float) -> void:
 		rotation = wrapf(rotation, -PI, PI) # Normalize first
 		rotation = lerp(rotation, target_rotation, 5.0 * delta)
 	else:
-		rotation = lerp_angle(rotation, target_rotation, 5.0 * delta)
+		# Faster rotation on floor to prevent floating visuals during slope changes
+		var rotate_speed = 15.0 if is_on_floor() else 5.0
+		rotation = lerp_angle(rotation, target_rotation, rotate_speed * delta)
 
-	# Reset skin rotation to 0 so it aligns with the player
-	skin.rotation = 0.0
+	# Apply to visuals only, keeping collision shape upright
+	# REVERTED: Rotate the whole body to ensure collision shape aligns with slope (feet on ground)
+	if skin:
+		skin.rotation = 0.0
+
+		# Fix floating on slopes:
+		# When rotating around the center, the feet (bottom of sprite) lift up relative to the contact point.
+		# We lower the skin slightly based on the rotation angle to compensate.
+		# A heuristic of ~10px offset at 90 degrees works well for typical sprites.
+		var slope_offset = abs(sin(rotation)) * 10.0
+		if is_on_floor():
+			skin.position.y = slope_offset
+		else:
+			skin.position.y = lerp(skin.position.y, 0.0, 10.0 * delta)
 
 	# Collision shape rotates automatically with the player node
 
