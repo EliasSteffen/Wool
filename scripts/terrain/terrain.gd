@@ -88,6 +88,16 @@ func _physics_process(delta: float) -> void:
 			_pending_characters.remove_at(i)
 			_add_character_to_terrain(char)
 
+	# Check active characters - remove if they drift out of condition (e.g. surfacing)
+	for i in range(_characters_in_terrain.size() - 1, -1, -1):
+		var char = _characters_in_terrain[i]
+		if not _should_character_enter(char):
+			_characters_in_terrain.remove_at(i)
+			_remove_character_from_terrain_logic(char)
+			# Move back to pending, so if they go deep again, they re-enter
+			if char not in _pending_characters:
+				_pending_characters.append(char)
+
 	# Standard physics processing is sufficient.
 	# We rely on Area2D 'body_entered' and 'body_exited' signals.
 	pass
@@ -181,6 +191,13 @@ func _add_character_to_terrain(body: CharacterBody2D) -> void:
 	if body.has_method("enter_terrain"):
 		body.enter_terrain(self)
 
+func _remove_character_from_terrain_logic(body: CharacterBody2D) -> void:
+	_on_character_exited(body)
+	character_exited.emit(body)
+
+	if body.has_method("exit_terrain"):
+		body.exit_terrain(self)
+
 # === SIGNAL CALLBACKS ===
 func _on_body_entered(body: Node2D) -> void:
 	if body is CharacterBody2D:
@@ -198,4 +215,8 @@ func _on_body_exited(body: Node2D) -> void:
 		if body in _pending_characters:
 			_pending_characters.erase(body)
 			return
+
+		_characters_in_terrain.erase(body)
+		_remove_character_from_terrain_logic(body)
+
 
