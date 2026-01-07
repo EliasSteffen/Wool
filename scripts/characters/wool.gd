@@ -44,8 +44,18 @@ func _ready() -> void:
 		if pickaxe_hitbox:
 			pickaxe_hitbox.monitoring = false
 			pickaxe_hitbox.monitorable = false
+			# Check default mask (1) vs Enemy Layer (usually 1 or specific)
+			# We ensure it masks enemies relative to project settings later if needed
+			if not pickaxe_hitbox.body_entered.is_connected(_on_pickaxe_hit_body):
+				pickaxe_hitbox.body_entered.connect(_on_pickaxe_hit_body)
 
 	_update_shapes("default")
+
+func _on_pickaxe_hit_body(body: Node2D) -> void:
+	if body is BaseEnemy and body.has_method("take_damage"):
+		body.take_damage(100) # Instakill for now purely based on request context? Or typical damage?
+		# Apply knockback?
+		# print("Hit enemy: ", body.name)
 
 func _update_skin_appearance() -> void:
 	super._update_skin_appearance()

@@ -205,6 +205,7 @@ size = Vector2(93.528885, 110.416046)
 size = Vector2(61.486572, 95.910416)
 
 [node name="Wool" instance=ExtResource("1_base_player")]
+position = Vector2(2.1175824e-22, 0)
 scale = Vector2(0.05, 0.05)
 script = ExtResource("2_wool")
 max_picked_up_features = 1
@@ -234,7 +235,6 @@ disabled = true
 
 [node name="PhysicsShape_Glide" type="CollisionShape2D" parent="." index="4"]
 position = Vector2(-3.038, 10.46)
-scale = Vector2(1.0, 1.0)
 shape = SubResource("RectangleShape2D_wings")
 disabled = true
 
@@ -253,13 +253,13 @@ position = Vector2(0, -3.0517578e-05)
 shape = SubResource("CapsuleShape2D_pickaxe")
 
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
-position = Vector2(2.9830382, 1.6779598)
+position = Vector2(2.3841858e-07, 1.1920929e-07)
 sprite_frames = SubResource("SpriteFrames_codar")
 animation = &"walk"
 autoplay = "walk"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(-199.99992, 9.536741e-06)
+position = Vector2(-200, 0)
 scale = Vector2(0.99999905, 0.99999905)
 shape = SubResource("RectangleShape2D_hitbox")
 
@@ -283,11 +283,13 @@ disabled = true
 
 [node name="HitboxShape_Glide" type="CollisionShape2D" parent="HitboxArea" index="4"]
 position = Vector2(-5.528, 7.19)
-scale = Vector2(1.0, 1.0)
 shape = SubResource("RectangleShape2D_hitbox_wings")
 disabled = true
 
-[node name="Camera2D" parent="." index="7"]
+[node name="PickaxePivot" type="Marker2D" parent="." index="8"]
+position = Vector2(159.99976, 0)
+
+[node name="Camera2D" parent="." index="9"]
 limit_enabled = false
 limit_left = 0
 limit_top = 0
@@ -295,23 +297,25 @@ limit_right = 6975
 limit_bottom = 1100
 limit_smoothed = true
 
-[node name="PickaxePivot" type="Marker2D" parent="." index="8"]
-position = Vector2(159.99976, 0)
-
 [node name="DoubleJumpFeature" type="Node2D" parent="PickupableFeatures" index="0"]
+position = Vector2(1.847744e-06, 0)
 script = ExtResource("6_double_jump")
 enabled = false
 
 [node name="GlideFeature" type="Node2D" parent="PickupableFeatures" index="1"]
+position = Vector2(1.847744e-06, 0)
 script = ExtResource("7_glide")
 enabled = false
 
 [node name="SwimFeature" type="Node2D" parent="PickupableFeatures" index="2"]
+position = Vector2(1.847744e-06, 0)
 script = ExtResource("9_58tpp")
 enabled = false
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
+position = Vector2(1.847744e-06, 0)
 script = ExtResource("4_grappling")
 
 [node name="CutFeature" type="Node2D" parent="Features" index="1"]
+position = Vector2(1.847744e-06, 0)
 script = ExtResource("9_cut")

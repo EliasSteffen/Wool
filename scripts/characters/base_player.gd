@@ -59,6 +59,8 @@ var cut_feature: CutFeature
 func _ready() -> void:
 	super._ready()
 
+	add_to_group("player")
+
 	# Set floor snap length to ensure we stick to slopes
 	floor_snap_length = 32.0
 
@@ -169,6 +171,8 @@ func _setup_player_features() -> void:
 func pickup_feature(new_feature: Feature) -> void:
 	if not new_feature:
 		return
+
+	print("Player: Attempting to pickup feature type: ", new_feature.get_script().resource_path)
 
 	var feature_to_activate: Feature = null
 

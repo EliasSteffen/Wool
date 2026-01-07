@@ -97,17 +97,18 @@ func _drop_features() -> void:
 
 	for child in features_node.get_children():
 		if child is Feature:
+			print("Dropping feature: ", child.feature_name)
 			var pickup = pickup_scene.instantiate()
+
+			# Setup pickup synchronously BEFORE adding to tree
+			# This ensures data is copied before the feature/enemy is freed
+			pickup.setup(child)
+
+			# Set position (since it will be a sibling, global_position works, or position = position)
+			pickup.global_position = global_position
+
 			# Add to the world (parent of the enemy)
 			get_parent().call_deferred("add_child", pickup)
-
-			# Setup pickup
-			pickup.global_position = global_position
-			# Spread out if multiple? For now just spawn at center.
-
-			# We need to pass the feature data.
-			# Since the pickup script expects a Feature instance to copy data from:
-			pickup.call_deferred("setup", child)
 
 # === OVERRIDDEN METHODS ===
 
