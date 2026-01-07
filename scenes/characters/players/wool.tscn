@@ -29,10 +29,6 @@ size = Vector2(191.17133, 99.451355)
 radius = 42.36795
 height = 1061.94
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_codar"]
-atlas = ExtResource("4_4q7dq")
-region = Rect2(13440, 0, 1920, 1080)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_whd81"]
 atlas = ExtResource("4_4q7dq")
 region = Rect2(0, 0, 1920, 1080)
@@ -101,6 +97,10 @@ region = Rect2(13440, 1080, 1920, 1080)
 atlas = ExtResource("4_4q7dq")
 region = Rect2(0, 2160, 1920, 1080)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_codar"]
+atlas = ExtResource("4_4q7dq")
+region = Rect2(5760, 1080, 1920, 1080)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_codar"]
 animations = [{
 "frames": [{
@@ -113,6 +113,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": ExtResource("4_58tpp")
+}],
+"loop": true,
+"name": &"double-jump_idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": ExtResource("5_4q7dq")
 }],
 "loop": true,
@@ -121,11 +129,11 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_codar")
+"texture": ExtResource("5_4q7dq")
 }],
 "loop": true,
-"name": &"idle",
-"speed": 30.0
+"name": &"glide_idle",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -134,6 +142,14 @@ animations = [{
 "loop": true,
 "name": &"swim",
 "speed": 30.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_codar")
+}],
+"loop": true,
+"name": &"swim_idle",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -190,6 +206,14 @@ animations = [{
 "loop": true,
 "name": &"walk",
 "speed": 25.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_codar")
+}],
+"loop": true,
+"name": &"walk_idle",
+"speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]

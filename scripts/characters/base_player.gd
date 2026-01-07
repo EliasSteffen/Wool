@@ -9,8 +9,30 @@
 class_name BasePlayer
 extends BaseCharacter
 
-enum PlayerState { IDLE, WALK, AIR, SWIM, GRAPPLE, GLIDE, WINGS, PUSH }
+enum PlayerState { IDLE, WALK }
+enum FormState { NORMAL, BUNNY, FISH, EAGLE }
+
 var current_anim_state: PlayerState = PlayerState.IDLE
+var current_form: FormState = FormState.NORMAL
+
+const ANIMATION_MAP = {
+	FormState.NORMAL: {
+		PlayerState.IDLE: "walk_idle",
+		PlayerState.WALK: "walk"
+	},
+	FormState.BUNNY: {
+		PlayerState.IDLE: "double-jump_idle",
+		PlayerState.WALK: "double-jump"
+	},
+	FormState.FISH: {
+		PlayerState.IDLE: "swim_idle",
+		PlayerState.WALK: "swim"
+	},
+	FormState.EAGLE: {
+		PlayerState.IDLE: "glide_idle",
+		PlayerState.WALK: "glide"
+	}
+}
 
 # === CONSTANTS ===
 # Removed constants in favor of Tweakables
@@ -73,6 +95,8 @@ func _ready() -> void:
 
 	# Get features after they're setup
 	call_deferred("_setup_player_features")
+	call_deferred("_update_form_state")
+
 	# Setup debug UI
 	call_deferred("_setup_debug_ui")
 	call_deferred("_setup_interaction_prompt_label")
@@ -199,6 +223,7 @@ func pickup_feature(new_feature: Feature) -> void:
 	_picked_up_features.append(feature_to_activate)
 	feature_to_activate.enabled = true
 	feature_to_activate.activate() # Explicitly activate the feature
+	_update_form_state()
 
 	# Ensure it is in the main features list for processing
 	if feature_to_activate not in get_features():
@@ -240,59 +265,71 @@ func _update_skin_appearance() -> void:
 	if not skin:
 		return
 
-	var is_moving = not is_zero_approx(velocity.x)
+	var is_moving_x = not is_zero_approx(velocity.x)
+	var is_moving_y = not is_zero_approx(velocity.y)
+	# var is_grappling = grappling_feature and grappling_feature.is_active() # Grapple has no special animation state
 
 	# Determine State
 	var new_state = PlayerState.IDLE
 
-	# Priority 1: Transformations & Features
-	if wings_feature and wings_feature.enabled:
-		new_state = PlayerState.WINGS
-	elif swim_feature and swim_feature.is_active() and current_terrain is UnderWaterTerrain:
-		new_state = PlayerState.SWIM
-	elif glide_feature and glide_feature.is_active():
-		new_state = PlayerState.GLIDE
-	elif push_feature and push_feature.is_active():
-		new_state = PlayerState.PUSH
-	elif grappling_feature and grappling_feature.is_active():
-		new_state = PlayerState.GRAPPLE
-
-	# Priority 2: Standard Movement (if not transformed/fishing)
-	elif not is_on_floor():
-		new_state = PlayerState.AIR
-	elif is_moving:
+	if is_moving_x:
+		new_state = PlayerState.WALK
+	elif current_form == FormState.FISH and is_moving_y:
+		# Special case: Swimming vertically counts as walking/swimming
 		new_state = PlayerState.WALK
 	else:
 		new_state = PlayerState.IDLE
 
-	# Apply Animation only if state changed
-	if current_anim_state != new_state:
+	# Apply Animation only if state or form changed
+	# (We check logic every frame, optimization could be added but this is safe)
+	if current_anim_state != new_state or true: # or true to force re-check of form/anim combination
 		current_anim_state = new_state
 		_play_animation_for_state(new_state)
 
+
+func _update_form_state() -> void:
+	# Determine form based on active/enabled pickupable features
+	# Priority: SWIM > GLIDE > DOUBLE_JUMP > NORMAL
+
+	var old_form = current_form
+
+	if swim_feature and swim_feature.enabled:
+		current_form = FormState.FISH
+	elif glide_feature and glide_feature.enabled:
+		current_form = FormState.EAGLE
+	elif double_jump_feature and double_jump_feature.enabled:
+		current_form = FormState.BUNNY
+	else:
+		current_form = FormState.NORMAL
+
+	if old_form != current_form:
+		print("BasePlayer: Form Update -> ", FormState.keys()[current_form])
+
 func _play_animation_for_state(state: PlayerState) -> void:
-	match state:
-		PlayerState.WINGS:
-			skin.play_animation("wings")
-		PlayerState.SWIM:
-			skin.play_animation("swim")
-		PlayerState.GLIDE:
-			skin.play_animation("glide")
-		PlayerState.GRAPPLE:
-			skin.play_animation("default") # Or specific grapple anim
-		PlayerState.PUSH:
-			skin.play_animation("walk") # Or specific push anim
-		PlayerState.AIR:
-			if double_jump_feature and double_jump_feature.is_active():
-				skin.play_animation("double-jump")
-			else:
-				skin.play_animation("default") # fall/jump?
-		PlayerState.WALK:
-			skin.play_animation("walk")
-		PlayerState.IDLE:
-			skin.play_animation("idle")
-		_:
-			skin.play_animation("default")
+	var target_anim = "default"
+
+	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
+		target_anim = ANIMATION_MAP[current_form][state]
+
+	# Fallback Logic for missing "walk_idle", "double-jump_idle" etc.
+	if skin and skin.animated_sprite:
+		if not skin.animated_sprite.sprite_frames.has_animation(target_anim):
+			# 1. Try generic "idle" for unset idle animations
+			if target_anim.ends_with("_idle"):
+				var base_name = target_anim.replace("_idle", "")
+				# Try "double-jump" instead of "double-jump_idle"
+				if skin.animated_sprite.sprite_frames.has_animation(base_name):
+					target_anim = base_name
+				# Or try generic "idle"
+				elif skin.animated_sprite.sprite_frames.has_animation("idle"):
+					target_anim = "idle"
+
+			# 2. Last resort fallback
+			elif not skin.animated_sprite.sprite_frames.has_animation(target_anim):
+				if current_form == FormState.NORMAL:
+					target_anim = "walk" if state == PlayerState.WALK else "idle"
+
+	skin.play_animation(target_anim)
 
 func _process(delta: float) -> void:
 	_update_skin_appearance() # Check for changes every frame
