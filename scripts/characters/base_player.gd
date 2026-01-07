@@ -9,6 +9,9 @@
 class_name BasePlayer
 extends BaseCharacter
 
+enum PlayerState { IDLE, WALK, AIR, SWIM, GRAPPLE, GLIDE, WINGS, PUSH }
+var current_anim_state: PlayerState = PlayerState.IDLE
+
 # === CONSTANTS ===
 # Removed constants in favor of Tweakables
 
@@ -30,26 +33,18 @@ var _debug_ui: PlayerDebugUI = null
 var _interaction_prompt_label: Label = null
 var _current_prompt_interaction: Interaction = null
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
+var _just_jumped: bool = false
 
 # Feature Management
 var _default_features: Array[Feature] = []
 var _picked_up_features: Array[Feature] = []
 
-# Pickaxe initial state
-var _initial_pickaxe_position: Vector2
-var _initial_pickaxe_rotation: float
-var _initial_pickaxe_scale: Vector2
-var _initial_pickaxe_centered: bool
-var _initial_pickaxe_offset: Vector2
-var _is_attacking: bool = false
-var _just_jumped: bool = false
+# Pickaxe initial state - REMOVED (Specific to Wool)
+# var _initial_pickaxe_position: Vector2
+# ...
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
-@onready var pickaxe: Node2D = $Pickaxe if has_node("Pickaxe") else null
-@onready var pickaxe_sprite: Sprite2D = $Pickaxe/Sprite2D if has_node("Pickaxe/Sprite2D") else ($Pickaxe as Sprite2D if has_node("Pickaxe") else null)
-@onready var pickaxe_hitbox: Area2D = $Pickaxe/Hitbox if has_node("Pickaxe/Hitbox") else null
-@onready var pickaxe_pivot: Node2D = $PickaxePivot if has_node("PickaxePivot") else null
 @onready var pickupable_features_node: Node = $PickupableFeatures if has_node("PickupableFeatures") else null
 
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
@@ -64,21 +59,11 @@ var cut_feature: CutFeature
 func _ready() -> void:
 	super._ready()
 
-	# Capture initial pickaxe state
-	if pickaxe:
-		_initial_pickaxe_position = pickaxe.position
-		_initial_pickaxe_rotation = pickaxe.rotation
-		_initial_pickaxe_scale = pickaxe.scale
-
-	if pickaxe_sprite:
-		_initial_pickaxe_centered = pickaxe_sprite.centered
-		_initial_pickaxe_offset = pickaxe_sprite.offset
-
-	if pickaxe_hitbox:
-		pickaxe_hitbox.body_entered.connect(_on_pickaxe_hitbox_body_entered)
-
 	# Set floor snap length to ensure we stick to slopes
 	floor_snap_length = 32.0
+
+	# Ensure essential nodes exist
+	assert(skin != null, "BasePlayer: Skin node is missing!")
 
 	# Connect terrain signals for debug UI
 	terrain_entered.connect(func(_t): _update_debug_ui())
@@ -102,63 +87,8 @@ func die() -> void:
 	get_tree().reload_current_scene()
 
 func attack() -> void:
-	_is_attacking = true
-
-	# Enable hitbox
-	if pickaxe_hitbox:
-		pickaxe_hitbox.monitoring = true
-
-	# Animate pickaxe
-	if pickaxe:
-		var tween = create_tween()
-		tween.set_parallel(true)
-
-		# Determine forward direction based on skin facing
-		var forward_dir = Vector2.RIGHT
-		var rotation_mod = 100
-		var facing_left = skin and skin.scale.x < 0
-
-		if facing_left:
-			forward_dir = Vector2.LEFT
-			rotation_mod = -100
-
-		# Capture current state as start/end point
-		var start_pos = pickaxe.position
-		var start_rot_deg = pickaxe.rotation_degrees
-
-		# If PickaxePivot exists, teleport to it and restart rotation
-		if pickaxe_pivot:
-			if facing_left:
-				start_pos = Vector2(-pickaxe_pivot.position.x, pickaxe_pivot.position.y)
-			else:
-				start_pos = pickaxe_pivot.position
-
-			pickaxe.position = start_pos
-			pickaxe.rotation = _initial_pickaxe_rotation
-			start_rot_deg = _initial_pickaxe_rotation
-
-		# Move pickaxe forward to extend range ("full length")
-		var target_pos = start_pos + (forward_dir * 40.0)
-
-		# Swing down and move forward (Fast hit)
-		tween.tween_property(pickaxe, "rotation_degrees", start_rot_deg + rotation_mod, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-		tween.tween_property(pickaxe, "position", target_pos, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-
-		# Swing back and return to position (Slow return)
-		tween.chain().tween_property(pickaxe, "rotation_degrees", start_rot_deg, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-		tween.parallel().tween_property(pickaxe, "position", start_pos, 0.75).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-
-		await tween.finished
-
-	# Disable hitbox
-	if pickaxe_hitbox:
-		pickaxe_hitbox.monitoring = false
-
-	_is_attacking = false
-
-func _on_pickaxe_hitbox_body_entered(body: Node2D) -> void:
-	if body is BaseEnemy:
-		body.die()
+	# Virtual method - override in child classes (e.g. Wool)
+	pass
 
 func _setup_tweakables() -> void:
 	super._setup_tweakables()
@@ -235,10 +165,6 @@ func _setup_player_features() -> void:
 					if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
 						child.enabled_changed.connect(_on_feature_enabled_changed)
 
-	# Setup pickaxe sprite if it's directly a Sprite2D
-	if pickaxe is Sprite2D and not pickaxe_sprite:
-		pickaxe_sprite = pickaxe
-
 	_update_skin_appearance()## Called when a new feature is picked up (e.g. from FeaturePickup)
 func pickup_feature(new_feature: Feature) -> void:
 	if not new_feature:
@@ -310,28 +236,69 @@ func _update_skin_appearance() -> void:
 	if not skin:
 		return
 
-	# Determine which animation to play based on active features
-	# Priority: Wings > Swim > Glide > DoubleJump
+	var is_moving = not is_zero_approx(velocity.x)
+
+	# Determine State
+	var new_state = PlayerState.IDLE
+
+	# Priority 1: Transformations & Features
 	if wings_feature and wings_feature.enabled:
-		skin.play_animation("wings")
-	elif swim_feature and swim_feature.enabled:
-		skin.play_animation("swim")
-	elif glide_feature and glide_feature.enabled:
-		skin.play_animation("glide")
-	elif double_jump_feature and double_jump_feature.enabled:
-		skin.play_animation("double-jump")
+		new_state = PlayerState.WINGS
+	elif swim_feature and swim_feature.is_active() and current_terrain is UnderWaterTerrain:
+		new_state = PlayerState.SWIM
+	elif glide_feature and glide_feature.is_active():
+		new_state = PlayerState.GLIDE
+	elif push_feature and push_feature.is_active():
+		new_state = PlayerState.PUSH
+	elif grappling_feature and grappling_feature.is_active():
+		new_state = PlayerState.GRAPPLE
+
+	# Priority 2: Standard Movement (if not transformed/fishing)
+	elif not is_on_floor():
+		new_state = PlayerState.AIR
+	elif is_moving:
+		new_state = PlayerState.WALK
 	else:
-		skin.play_animation("default")
+		new_state = PlayerState.IDLE
+
+	# Apply Animation only if state changed
+	if current_anim_state != new_state:
+		current_anim_state = new_state
+		_play_animation_for_state(new_state)
+
+func _play_animation_for_state(state: PlayerState) -> void:
+	match state:
+		PlayerState.WINGS:
+			skin.play_animation("wings")
+		PlayerState.SWIM:
+			skin.play_animation("swim")
+		PlayerState.GLIDE:
+			skin.play_animation("glide")
+		PlayerState.GRAPPLE:
+			skin.play_animation("default") # Or specific grapple anim
+		PlayerState.PUSH:
+			skin.play_animation("walk") # Or specific push anim
+		PlayerState.AIR:
+			if double_jump_feature and double_jump_feature.is_active():
+				skin.play_animation("double-jump")
+			else:
+				skin.play_animation("default") # fall/jump?
+		PlayerState.WALK:
+			skin.play_animation("walk")
+		PlayerState.IDLE:
+			skin.play_animation("idle")
+		_:
+			skin.play_animation("default")
 
 func _process(delta: float) -> void:
+	_update_skin_appearance() # Check for changes every frame
 	_update_rotation(delta) # Update facing first
-	_update_pickaxe_visual() # Then update pickaxe based on facing
 	_update_interaction_prompt()
 
 # === OVERRIDDEN METHODS ===
 
 func _process_physics(delta: float) -> void:
-	# Reset jump state and snap length
+	# Reset state
 	_just_jumped = false
 	floor_snap_length = 32.0
 
@@ -340,8 +307,7 @@ func _process_physics(delta: float) -> void:
 
 	_handle_input()
 	_handle_feature_inputs()
-	_handle_grappling_input()
-	_handle_push_input()
+	# Specific feature inputs are now handled via _handle_feature_inputs calling feature.handle_input()
 	_handle_movement(delta)
 
 # === PRIVATE METHODS ===
@@ -352,7 +318,7 @@ func _handle_input() -> void:
 	if _vertical_direction == 0.0:
 		_vertical_direction = Input.get_axis("ui_up", "ui_down")
 
-	var is_underwater = current_terrain is UnderWaterTerrain
+	var is_underwater := current_terrain is UnderWaterTerrain
 
 	# Jump (only if not underwater)
 	if not is_underwater and Input.is_action_just_pressed("jump") and is_on_floor():
@@ -363,7 +329,8 @@ func _handle_input() -> void:
 		_vertical_direction = -1.0
 
 	# Attack
-	if Input.is_key_pressed(KEY_V) and not _is_attacking:
+	# "attack" action is mapped to input (e.g. mouse click or key)
+	if Input.is_key_pressed(KEY_V):
 		attack()
 
 	# Debug: Toggle features with number keys
@@ -388,132 +355,87 @@ func _toggle_feature(key: int, feature_ref: Feature, feature_name: String) -> vo
 		_debug_key_pressed[key] = false
 
 func _handle_debug_feature_toggle() -> void:
-	# 1 = DoubleJump
 	_toggle_feature(KEY_1, double_jump_feature, "DoubleJump")
-
-	# 2 = Glide
 	_toggle_feature(KEY_2, glide_feature, "Glide")
-
-	# 3 = Grappling
 	_toggle_feature(KEY_3, grappling_feature, "Grappling")
-
-	# 4 = Wings
 	_toggle_feature(KEY_4, wings_feature, "Wings")
-
-	# 5 = Cut
 	_toggle_feature(KEY_5, cut_feature, "Cut")
 
 func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
 	for feature in get_features():
 		if feature.enabled:
-			# print("Processing input for feature: %s" % feature.feature_name)
 			feature.handle_input(self)
 
-func _handle_grappling_input() -> void:
-	if not grappling_feature or not grappling_feature.enabled:
-		return
-
-	if Input.is_action_just_pressed("grapple"):
-		var nail: Nail = _find_nearest_nail()
-		if nail:
-			grappling_feature.set_target(nail.get_grapple_point(), nail)
-
-	if Input.is_action_just_released("grapple"):
-		grappling_feature.release()
-
-func _handle_push_input() -> void:
-	if not push_feature or not push_feature.enabled:
-		return
-
-	# Check if moving towards a box
-	var box: Box = _find_nearest_box()
-	if box and _direction != 0:
-		var direction_to_box: float = sign(box.global_position.x - global_position.x)
-		if sign(_direction) == direction_to_box:
-			push_feature.start_pushing(box)
-		else:
-			push_feature.stop_pushing()
-	else:
-		push_feature.stop_pushing()
-
 func _handle_movement(delta: float) -> void:
-	var is_grappling: bool = grappling_feature and grappling_feature.is_active()
-
 	if current_terrain is UnderWaterTerrain:
-		var underwater_terrain := current_terrain as UnderWaterTerrain
-		var speed: float = move_speed * underwater_terrain.slowdown_factor
-
-		# Apply swim boost if available
-		if swim_feature and swim_feature.is_active():
-			speed *= swim_feature.get_swim_speed_multiplier()
-
-		# Horizontal movement (always controlled)
-		var target_velocity_x: float = _direction * speed
-		velocity.x = move_toward(velocity.x, target_velocity_x, acceleration * delta)
-
-		# Vertical movement
-		if _vertical_direction != 0:
-			# Player is actively swimming up/down
-			var target_velocity_y: float = _vertical_direction * speed
-			velocity.y = move_toward(velocity.y, target_velocity_y, acceleration * delta)
-		else:
-			# Player is not swimming vertically -> Apply sinking/buoyancy
-			# Gravity is already applied in BaseCharacter._physics_process()
-			# Buoyancy is applied in BaseCharacter via current_terrain.get_movement_factor()
-			# We just need to make sure we don't reset velocity.y to 0 here.
-
-			# Apply water resistance (damping) to vertical velocity to prevent infinite acceleration
-			# This acts as terminal velocity underwater
-			velocity.y = move_toward(velocity.y, 0, underwater_terrain.water_resistance * 100.0 * delta)
-
+		_handle_underwater_movement(delta)
 		return
 
 	if _direction != 0:
-		if is_grappling:
-			# Swing pumping: Add force in direction of input to build momentum
-			# This simulates leaning forward/backward on a swing
-
-			# Scale pump force by the player's move_speed so that agility upgrades feel consistent
-			# We use DEFAULT_MOVE_SPEED as a reference base speed to normalize the multiplier
-			var speed_multiplier: float = move_speed / CharacterConstants.DEFAULT_MOVE_SPEED
-			var pump_force: float = _direction * grappling_feature.swing_pump_force * speed_multiplier * delta
-			velocity.x += pump_force
+		if grappling_feature and grappling_feature.is_active():
+			_handle_grapple_swing_pump(delta)
 		else:
-			# Normal ground/air movement
-			velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
-
-			# Adjust velocity to slope if on floor
-			if is_on_floor() and not _just_jumped:
-				var floor_normal = get_floor_normal()
-				# If we are on a slope (normal is not straight up)
-				if floor_normal != Vector2.UP:
-					# Calculate tangent (slope direction)
-					# Tangent is perpendicular to normal.
-					# If normal is (0, -1) [UP], tangent is (1, 0) [RIGHT]
-					var tangent = Vector2(-floor_normal.y, floor_normal.x)
-
-					# Ensure tangent points generally right (positive X)
-					if tangent.x < 0:
-						tangent = -tangent
-
-					# Project velocity.x onto the slope
-					# We want V.x to remain what we calculated, but V.y to match the slope
-					# V = tangent * s
-					# V.x = tangent.x * s  =>  s = V.x / tangent.x
-					# V.y = tangent.y * s  =>  V.y = tangent.y * (V.x / tangent.x)
-
-					if abs(tangent.x) > 0.001:
-						velocity.y = tangent.y * (velocity.x / tangent.x)
-
-			# Apply push slowdown if pushing
-			if push_feature and push_feature.is_pushing():
-				velocity.x *= push_feature.get_push_slowdown()
+			_handle_ground_air_movement(delta)
 	else:
-		# Only apply friction when ON THE GROUND and NOT grappling
-		# In air: momentum is preserved, terrain damping handles energy loss
+		# Friction / Stopping
+		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
 		if not is_grappling and is_on_floor():
 			velocity.x = move_toward(velocity.x, 0, friction * delta)
+
+func _handle_underwater_movement(delta: float) -> void:
+	var underwater_terrain := current_terrain as UnderWaterTerrain
+	var speed: float = move_speed * underwater_terrain.slowdown_factor
+
+	# Apply swim boost if available
+	if swim_feature and swim_feature.is_active():
+		speed *= swim_feature.get_swim_speed_multiplier()
+
+	# Horizontal movement (always controlled)
+	var target_velocity_x: float = _direction * speed
+	velocity.x = move_toward(velocity.x, target_velocity_x, acceleration * delta)
+
+	# Vertical movement
+	if _vertical_direction != 0:
+		# Player is actively swimming up/down
+		var target_velocity_y: float = _vertical_direction * speed
+		velocity.y = move_toward(velocity.y, target_velocity_y, acceleration * delta)
+	else:
+		# Apply water resistance (damping) to vertical velocity to prevent infinite acceleration
+		velocity.y = move_toward(velocity.y, 0, underwater_terrain.water_resistance * 100.0 * delta)
+
+func _handle_grapple_swing_pump(delta: float) -> void:
+	# Swing pumping: Add force in direction of input to build momentum
+	var speed_multiplier: float = move_speed / CharacterConstants.DEFAULT_MOVE_SPEED
+	var pump_force: float = _direction * grappling_feature.swing_pump_force * speed_multiplier * delta
+	velocity.x += pump_force
+
+func _handle_ground_air_movement(delta: float) -> void:
+	# Normal ground/air movement
+	velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
+
+	# Adjust velocity to slope if on floor
+	if is_on_floor() and not _just_jumped:
+		_apply_slope_velocity_adjustment()
+
+	# Apply push slowdown if pushing
+	if push_feature and push_feature.is_pushing():
+		velocity.x *= push_feature.get_push_slowdown()
+
+func _apply_slope_velocity_adjustment() -> void:
+	var floor_normal := get_floor_normal()
+	if floor_normal == Vector2.UP:
+		return
+
+	# Calculate tangent (slope direction)
+	var tangent = Vector2(-floor_normal.y, floor_normal.x)
+
+	# Ensure tangent points generally right (positive X)
+	if tangent.x < 0:
+		tangent = -tangent
+
+	if abs(tangent.x) > 0.001:
+		velocity.y = tangent.y * (velocity.x / tangent.x)
 
 func _jump() -> void:
 	# Note: jump_velocity is positive in settings, so we negate it for upward movement
@@ -528,119 +450,6 @@ func _jump() -> void:
 	# Disable floor snapping for this frame to allow takeoff
 	floor_snap_length = 0.0
 	_just_jumped = true
-
-func _find_nearest_nail() -> Nail:
-	var nearest: Nail = null
-	var nearest_distance: float = INF
-
-	# Clean up stale interactions first
-	var stale_interactions: Array[Interaction] = []
-
-	for interaction in nearby_interactions:
-		if interaction is Nail:
-			# Double check if we are still overlapping (physics safety check)
-			if not interaction.overlaps_body(self):
-				stale_interactions.append(interaction)
-				continue
-
-			# Triple check: Strict distance check against detection radius
-			# This prevents grappling from outside the visual circle if physics is imprecise
-			var distance: float = global_position.distance_to(interaction.global_position)
-			var radius: float = interaction.get_detection_radius()
-
-			if radius > 0 and distance > radius:
-				continue
-
-			if distance < nearest_distance:
-				nearest = interaction
-				nearest_distance = distance
-
-	# Remove stale interactions
-	for interaction in stale_interactions:
-		remove_nearby_interaction(interaction)
-
-	return nearest
-
-func _find_nearest_box() -> Box:
-	var nearest: Box = null
-	var nearest_distance: float = INF
-
-	for interaction in nearby_interactions:
-		if interaction is Box:
-			var distance: float = global_position.distance_to(interaction.global_position)
-			if distance < nearest_distance:
-				nearest = interaction
-				nearest_distance = distance
-
-	return nearest
-
-## Update pickaxe visual based on grappling state
-func _update_pickaxe_visual() -> void:
-	if not pickaxe or not pickaxe_sprite:
-		return
-
-	var is_grappling: bool = grappling_feature and grappling_feature.is_active()
-	var current_nail: Nail = null
-
-	if is_grappling and grappling_feature:
-		current_nail = grappling_feature.get_target_nail() as Nail
-
-	if is_grappling and current_nail:
-		# Show pickaxe as rope stretching from player to nail
-		pickaxe.visible = true
-
-		# c_player und c_nail definieren
-		var c_player: Vector2 = global_position
-		var c_nail: Vector2 = current_nail.global_position
-
-		# Vektor und Distanz zwischen den Punkten
-		var rope_vector: Vector2 = c_nail - c_player
-		var rope_distance: float = rope_vector.length()
-		var rope_angle: float = rope_vector.angle()
-
-		# Original Sprite-Dimensionen
-		var texture_size: Vector2 = pickaxe_sprite.texture.get_size()
-		# Diagonale von c zu b im unskaliertem Sprite (von links-unten zu rechts-oben)
-		var original_diagonal: float = Vector2(texture_size.x, texture_size.y).length()
-
-		# Skalierung so berechnen, dass Diagonale c->b = rope_distance
-		var scale_factor: float = rope_distance / original_diagonal
-		pickaxe.scale = Vector2(scale_factor, scale_factor)
-
-		# Pickaxe auf Mittelpunkt zwischen c_player und c_nail positionieren
-		var midpoint: Vector2 = c_player + rope_vector * 0.5
-		pickaxe.global_position = midpoint
-
-		# Rotation: c zeigt zu c_player, b zeigt zu c_nail
-		# Die Diagonale c->b entspricht dem Vektor (texture_width, texture_height) im Sprite
-		# Wir müssen also so rotieren, dass dieser Vektor mit rope_vector übereinstimmt
-		var diagonal_angle: float = atan2(texture_size.y, texture_size.x)
-		pickaxe.global_rotation = rope_angle - diagonal_angle + PI
-
-		# Sprite zentriert zeichnen
-		pickaxe_sprite.centered = true
-		pickaxe_sprite.offset = Vector2.ZERO
-	else:
-		if _is_attacking:
-			return
-
-		# Restore initial pickaxe state (as set in scene)
-		pickaxe.visible = true
-		pickaxe_sprite.centered = _initial_pickaxe_centered
-		pickaxe_sprite.offset = _initial_pickaxe_offset
-
-		# Handle facing direction
-		var facing_left = skin.scale.x < 0
-
-		if facing_left:
-			pickaxe.position = Vector2(-_initial_pickaxe_position.x, _initial_pickaxe_position.y)
-			pickaxe.scale = Vector2(-_initial_pickaxe_scale.x, _initial_pickaxe_scale.y)
-			# Rotation is mirrored by negative scale.x, so we keep the value
-			pickaxe.rotation = _initial_pickaxe_rotation
-		else:
-			pickaxe.position = _initial_pickaxe_position
-			pickaxe.scale = _initial_pickaxe_scale
-			pickaxe.rotation = _initial_pickaxe_rotation
 
 func _update_rotation(delta: float) -> void:
 	if not skin:

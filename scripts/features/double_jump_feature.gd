@@ -19,19 +19,11 @@ var _was_on_floor: bool = false
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	feature_name = "DoubleJump"
-	_setup_tweakables()
+	setup_tweakables_generic({
+		"max_air_jumps": "max_air_jumps",
+		"air_jump_power_multiplier": "air_jump_power_multiplier"
+	})
 	activate()
-
-func _setup_tweakables() -> void:
-	max_air_jumps = int(FeatureConstants.get_value("DoubleJump", "max_air_jumps"))
-	air_jump_power_multiplier = FeatureConstants.get_value("DoubleJump", "air_jump_power_multiplier")
-	FeatureConstants.value_changed.connect(_on_tweakable_changed)
-
-func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
-	if category == "DoubleJump":
-		match key:
-			"max_air_jumps": max_air_jumps = int(value)
-			"air_jump_power_multiplier": air_jump_power_multiplier = float(value)
 
 # === PUBLIC METHODS ===
 

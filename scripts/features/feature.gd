@@ -36,6 +36,34 @@ func _ready() -> void:
 
 # === PUBLIC METHODS ===
 
+## Setup tweakable values from Autoload using a dictionary mapping
+## @param config: A Dictionary mapping "settings_key" -> "script_property_name"
+## @param category: The category name in FeatureConstants (defaults to feature_name)
+func setup_tweakables_generic(config: Dictionary, category: String = "") -> void:
+	if category == "":
+		category = feature_name
+
+	# Initial Load
+	for key in config:
+		var property_name: String = config[key]
+		var val = FeatureConstants.get_value(category, key)
+		if val != null:
+			set(property_name, val)
+
+	# Connect signal
+	if not FeatureConstants.value_changed.is_connected(_on_generic_tweakable_changed):
+		FeatureConstants.value_changed.connect(_on_generic_tweakable_changed.bind(config, category))
+
+func _on_generic_tweakable_changed(changed_category: String, key: String, value: Variant, config: Dictionary, target_category: String) -> void:
+	if changed_category != target_category:
+		return
+
+	if key in config:
+		var property: String = config[key]
+		# Use explicit casting if possible, or rely on Variant assignment
+		# For type safety, we assume the Property type matches the Value type
+		set(property, value)
+
 ## Get the character that owns this feature
 func get_character() -> Node:
 	return _character

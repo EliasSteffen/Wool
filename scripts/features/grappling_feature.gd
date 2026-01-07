@@ -30,29 +30,16 @@ var _has_reached_rope_length: bool = false  # Track if we've reached the rope le
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	feature_name = "Grappling"
-	_setup_tweakables()
+	setup_tweakables_generic({
+		"max_boost_force": "max_boost_force",
+		"max_swing_speed": "max_swing_speed_for_boost",
+		"tension_strength": "tension_strength",
+		"swing_pump_force": "swing_pump_force",
+		"damping": "damping",
+		"initial_pull_strength": "initial_pull_strength"
+	})
 
 # === PUBLIC METHODS ===
-
-func _setup_tweakables() -> void:
-	max_boost_force = FeatureConstants.get_value("Grappling", "max_boost_force")
-	max_swing_speed_for_boost = FeatureConstants.get_value("Grappling", "max_swing_speed")
-	tension_strength = FeatureConstants.get_value("Grappling", "tension_strength")
-	swing_pump_force = FeatureConstants.get_value("Grappling", "swing_pump_force")
-	damping = FeatureConstants.get_value("Grappling", "damping")
-	initial_pull_strength = FeatureConstants.get_value("Grappling", "initial_pull_strength")
-
-	FeatureConstants.value_changed.connect(_on_tweakable_changed)
-
-func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
-	if category == "Grappling":
-		match key:
-			"max_boost_force": max_boost_force = float(value)
-			"max_swing_speed": max_swing_speed_for_boost = float(value)
-			"tension_strength": tension_strength = float(value)
-			"swing_pump_force": swing_pump_force = float(value)
-			"damping": damping = float(value)
-			"initial_pull_strength": initial_pull_strength = float(value)
 
 ## Set the grapple target position (called by character)
 func set_target(target_position: Vector2, nail: Interaction = null) -> void:
@@ -117,6 +104,40 @@ func get_target_nail() -> Interaction:
 	return _target_nail
 
 # === OVERRIDDEN METHODS ===
+
+func handle_input(character: BaseCharacter) -> void:
+	if Input.is_action_just_pressed("grapple"):
+		_try_start_grapple(character)
+
+	if Input.is_action_just_released("grapple"):
+		release()
+
+func _try_start_grapple(character: BaseCharacter) -> void:
+	var nail: Nail = _find_nearest_nail(character)
+	if nail:
+		set_target(nail.get_grapple_point(), nail)
+
+func _find_nearest_nail(character: BaseCharacter) -> Nail:
+	var nearest: Nail = null
+	var nearest_distance: float = INF
+
+	for interaction in character.nearby_interactions:
+		var nail := interaction as Nail
+		if not nail:
+			continue
+
+		# Strict distance check against detection radius
+		var distance: float = character.global_position.distance_to(nail.global_position)
+		var radius: float = nail.get_detection_radius()
+
+		if radius > 0 and distance > radius:
+			continue
+
+		if distance < nearest_distance:
+			nearest = nail
+			nearest_distance = distance
+
+	return nearest
 
 func _on_activated() -> void:
 	pass
