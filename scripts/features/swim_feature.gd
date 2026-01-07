@@ -10,6 +10,7 @@ var swim_speed_multiplier: float
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Swim"
 	_setup_tweakables()
 	# Passive feature, always active if enabled
@@ -32,3 +33,7 @@ func get_swim_speed_multiplier() -> float:
 	if is_active():
 		return swim_speed_multiplier
 	return 1.0
+
+# === OVERRIDDEN METHODS ===
+func _calculate_movement_factor(_delta: float, _character_position: Vector2) -> Vector2:
+	return Vector2.ZERO

@@ -18,6 +18,7 @@ var _is_gliding: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Wings"
 	_setup_tweakables()
 	# Wings are always active if enabled

@@ -33,7 +33,15 @@ func play_animation(animation_name: String) -> void:
 		if animated_sprite.sprite_frames.has_animation(animation_name):
 			animated_sprite.play(animation_name)
 		else:
-			push_warning("Animation '%s' not found in skin '%s'" % [animation_name, skin_name])
+			# Fallback logic to prevent spam
+			if (animation_name == "default" or animation_name == "idle") and animated_sprite.sprite_frames.has_animation("walk"):
+				animated_sprite.play("walk")
+			elif animated_sprite.sprite_frames.get_animation_names().size() > 0:
+				# Play the first available animation as generic fallback
+				var first_anim = animated_sprite.sprite_frames.get_animation_names()[0]
+				animated_sprite.play(first_anim)
+			else:
+				push_warning("Animation '%s' not found in skin '%s'" % [animation_name, skin_name])
 	else:
 		push_warning("No AnimatedSprite2D found in skin '%s'" % skin_name)
 

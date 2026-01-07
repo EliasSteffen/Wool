@@ -232,7 +232,13 @@ scale = Vector2(0.9999997, 0.9999997)
 shape = SubResource("RectangleShape2D_wings")
 disabled = true
 
-[node name="Pickaxe" type="Sprite2D" parent="." index="4"]
+[node name="PhysicsShape_Glide" type="CollisionShape2D" parent="." index="4"]
+position = Vector2(-3.038, 10.46)
+scale = Vector2(1.0, 1.0)
+shape = SubResource("RectangleShape2D_wings")
+disabled = true
+
+[node name="Pickaxe" type="Sprite2D" parent="." index="5"]
 position = Vector2(-240.00002, -160)
 rotation = 0.4537856
 scale = Vector2(1.0356653, 1.0356653)
@@ -275,6 +281,12 @@ scale = Vector2(0.9999998, 0.9999998)
 shape = SubResource("RectangleShape2D_hitbox_wings")
 disabled = true
 
+[node name="HitboxShape_Glide" type="CollisionShape2D" parent="HitboxArea" index="4"]
+position = Vector2(-5.528, 7.19)
+scale = Vector2(1.0, 1.0)
+shape = SubResource("RectangleShape2D_hitbox_wings")
+disabled = true
+
 [node name="Camera2D" parent="." index="7"]
 limit_enabled = false
 limit_left = 0
@@ -296,6 +308,7 @@ enabled = false
 
 [node name="SwimFeature" type="Node2D" parent="PickupableFeatures" index="2"]
 script = ExtResource("9_58tpp")
+enabled = false
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 script = ExtResource("4_grappling")

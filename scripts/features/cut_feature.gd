@@ -10,6 +10,7 @@ extends Feature
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Cut"
 	# Activate by default so it can listen for input
 	activate()
@@ -24,10 +25,12 @@ func handle_input(character: BaseCharacter) -> void:
 		return
 
 	if Input.is_action_just_pressed(cut_input_action):
-		print("CutFeature: Input detected!")
+		# print("CutFeature: Input detected!")
 		_try_cut(character)
 
-# === PRIVATE METHODS ===
+# === OVERRIDDEN METHODS ===
+func _calculate_movement_factor(_delta: float, _character_position: Vector2) -> Vector2:
+	return Vector2.ZERO
 func _try_cut(character: BaseCharacter) -> void:
 	print("CutFeature: Trying to cut...")
 	# Check for nearby ThreadInteractions

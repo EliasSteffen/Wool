@@ -29,6 +29,7 @@ var _has_reached_rope_length: bool = false  # Track if we've reached the rope le
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Grappling"
 	setup_tweakables_generic({
 		"max_boost_force": "max_boost_force",

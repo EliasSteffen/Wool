@@ -314,9 +314,8 @@ func _process_physics(delta: float) -> void:
 
 func _handle_input() -> void:
 	_direction = Input.get_axis("move_left", "move_right")
-	_vertical_direction = Input.get_axis("move_up", "move_down")
-	if _vertical_direction == 0.0:
-		_vertical_direction = Input.get_axis("ui_up", "ui_down")
+	# Use ui_up/down as default vertical controls since move_up/down are not defined
+	_vertical_direction = Input.get_axis("ui_up", "ui_down")
 
 	var is_underwater := current_terrain is UnderWaterTerrain
 

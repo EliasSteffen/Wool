@@ -71,11 +71,11 @@ func get_character() -> Node:
 ## Activate this feature (called by Character)
 func activate() -> void:
 	if not enabled:
-		print("Feature %s: Cannot activate because disabled" % feature_name)
+		# print("Feature %s: Cannot activate because disabled" % feature_name)
 		return
 
 	_active = true
-	print("Feature %s: Activated" % feature_name)
+	# print("Feature %s: Activated" % feature_name)
 	_on_activated()
 	feature_activated.emit()
 
@@ -126,7 +126,7 @@ func get_movement_factor(delta: float, character_position: Vector2) -> Vector2:
 	return _calculate_movement_factor(delta, character_position)
 
 ## Override this in child classes to implement feature-specific physics
-func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
+func _calculate_movement_factor(_delta: float, _character_position: Vector2) -> Vector2:
 	push_error("Feature._calculate_movement_factor() must be overridden in: " + feature_name)
 	return Vector2.ZERO
 
@@ -136,12 +136,16 @@ func _calculate_movement_factor(delta: float, character_position: Vector2) -> Ve
 func _register_with_character() -> void:
 	# Walk up the tree to find a BaseCharacter parent
 	var node: Node = get_parent()
-	while node:
-		if node is BaseCharacter:
+	var depth = 0
+	while node and depth < 5: # Safety limit
+		# Use duck typing to avoid cyclic dependency issues with class_name BaseCharacter
+		if node.has_method("add_feature"):
 			_character = node
 			_character.add_feature(self)
 			return
+
 		node = node.get_parent()
+		depth += 1
 
 	# If no BaseCharacter found, warn user
-	push_warning("Feature '%s' could not find a BaseCharacter parent! Ensure it's a child (or descendant) of a BaseCharacter." % feature_name)
+	push_warning("Feature '%s' could not find a parent with add_feature()! Ensure it's a child (or descendant) of a BaseCharacter." % feature_name)

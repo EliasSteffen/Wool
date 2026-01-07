@@ -18,6 +18,7 @@ var _was_on_floor: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "DoubleJump"
 	setup_tweakables_generic({
 		"max_air_jumps": "max_air_jumps",
@@ -43,10 +44,7 @@ func trigger(explicit_character: Node = null) -> void:
 	if not character.is_on_floor():
 		if _jumps_remaining > 0:
 			_perform_air_jump(character)
-		else:
-			print("DoubleJump: No jumps remaining (%s)" % _jumps_remaining)
-	else:
-		print("DoubleJump: Character is on floor")
+
 
 ## Get remaining air jumps
 func get_jumps_remaining() -> int:

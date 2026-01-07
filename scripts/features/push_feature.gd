@@ -23,6 +23,7 @@ var _is_pushing: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Push"
 	setup_tweakables_generic({
 		"push_slowdown_factor": "push_slowdown_factor",

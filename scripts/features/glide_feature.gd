@@ -16,6 +16,7 @@ var _is_gliding: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
+	super._ready()
 	feature_name = "Glide"
 	_setup_tweakables()
 	# Glide activates/deactivates based on input and air state
