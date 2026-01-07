@@ -181,7 +181,14 @@ func _setup_player_features() -> void:
 					if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
 						child.enabled_changed.connect(_on_feature_enabled_changed)
 
-	_update_skin_appearance()## Called when a new feature is picked up (e.g. from FeaturePickup)
+	_update_skin_appearance()
+
+## Called when a checkpoint is reached.
+## Should be overridden by subclasses to reset specific state.
+func checkpoint_reached() -> void:
+	pass
+
+## Called when a new feature is picked up (e.g. from FeaturePickup)
 func pickup_feature(new_feature: Feature) -> void:
 	if not new_feature:
 		return

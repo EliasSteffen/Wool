@@ -95,6 +95,24 @@ func _process(delta: float) -> void:
 
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
 
+func checkpoint_reached() -> void:
+	super.checkpoint_reached()
+
+	# Reset picked up features
+	for feature in _picked_up_features:
+		feature.enabled = false
+		feature.deactivate()
+
+	_picked_up_features.clear()
+
+	current_form = FormState.NORMAL
+
+	# Update appearances
+	_update_feature_references()
+	_update_form_state()
+	_update_skin_appearance()
+	_update_debug_ui()
+
 func _update_form_state() -> void:
 	# Determine form based on active/enabled pickupable features
 	# Priority: SWIM > GLIDE > DOUBLE_JUMP > NORMAL
