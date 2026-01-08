@@ -175,18 +175,9 @@ func _ai_chase(delta: float) -> void:
 		_change_state(AIState.IDLE)
 		return
 
-	# Move towards target
+	# Move towards target (delegate to specific implementation)
 	var direction_vector = global_position.direction_to(_current_target.global_position)
-	velocity.x = move_toward(velocity.x, direction_vector.x * chase_speed, 20.0)
-
-	# Jump logic
-	if is_on_floor():
-		# Jump if target is significantly higher
-		if _current_target.global_position.y < global_position.y - 50:
-			jump()
-		# Jump if stuck on wall
-		elif is_on_wall():
-			jump()
+	_execute_chase_movement(delta, direction_vector)
 
 	# Use features intelligently
 	if _feature_use_cooldown <= 0:
@@ -197,6 +188,21 @@ func _ai_chase(delta: float) -> void:
 		if skin: skin.scale.x = abs(skin.scale.x)
 	elif direction_vector.x < 0:
 		if skin: skin.scale.x = -abs(skin.scale.x)
+
+## Virtual Method: Execute movement towards target during CHASE state
+## Default implementation provides standard ground movement + jumping
+func _execute_chase_movement(delta: float, direction: Vector2) -> void:
+	# Default ground movement
+	velocity.x = move_toward(velocity.x, direction.x * chase_speed, 20.0)
+
+	# Jump logic
+	if is_on_floor():
+		# Jump if target is significantly higher
+		if _current_target.global_position.y < global_position.y - 50:
+			jump()
+		# Jump if stuck on wall
+		elif is_on_wall():
+			jump()
 
 func _ai_attack(delta: float) -> void:
 	# Stop moving when attacking
