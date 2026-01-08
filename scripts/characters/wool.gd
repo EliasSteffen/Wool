@@ -187,8 +187,10 @@ func _update_shapes(animation_name: String) -> void:
 	# Disable all shapes first
 	_disable_all_shapes()
 
-	# Enable specific shapes based on animation
-	match animation_name:
+	# Enable specific shapes based on animation (handle both moving and idle variants)
+	var base_anim = animation_name.replace("_idle", "")
+
+	match base_anim:
 		"wings":
 			if physics_shape_wings: physics_shape_wings.set_deferred("disabled", false)
 			if hitbox_shape_wings: hitbox_shape_wings.set_deferred("disabled", false)

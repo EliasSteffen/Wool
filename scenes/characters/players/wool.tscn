@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=42 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Script" uid="uid://cyc3rpi35h3nx" path="res://scripts/characters/wool.gd" id="2_wool"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
 [ext_resource type="Texture2D" uid="uid://b4iqxifjd33wq" path="res://assets/character/wool-wings.png" id="5_4q7dq"]
 [ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
+[ext_resource type="Texture2D" uid="uid://boanqhx2bn1hp" path="res://assets/character/animation-3.png" id="7_4q7dq"]
 [ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
 [ext_resource type="Script" uid="uid://biu4s0f5akfsu" path="res://scripts/features/swim_feature.gd" id="9_58tpp"]
 [ext_resource type="Script" uid="uid://ihbxt3ae8dcn" path="res://scripts/features/cut_feature.gd" id="9_cut"]
@@ -30,71 +31,71 @@ radius = 42.36795
 height = 1061.94
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_whd81"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(0, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2rcj1"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(1920, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_esxlt"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(3840, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cjpge"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(5760, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_quic5"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(7680, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mv7gs"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(9600, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pcyoo"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(11520, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wmfhf"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(13440, 0, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fio1q"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(0, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pm30h"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(1920, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_64mnq"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(3840, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_utjtq"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(5760, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ftlvo"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(7680, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mhau2"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(9600, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wjej4"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(11520, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_teraw"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(13440, 1080, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f4wq3"]
-atlas = ExtResource("4_4q7dq")
+atlas = ExtResource("7_4q7dq")
 region = Rect2(0, 2160, 1920, 1080)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_codar"]

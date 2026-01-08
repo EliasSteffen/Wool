@@ -35,6 +35,7 @@ var _interaction_prompt_label: Label = null
 var _current_prompt_interaction: Interaction = null
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 var _just_jumped: bool = false
+var _coyote_timer: float = 0.0 # Buffer to allow jumping shortly after leaving ground
 
 # Feature Management
 var _default_features: Array[Feature] = []
@@ -317,6 +318,12 @@ func _process(delta: float) -> void:
 # === OVERRIDDEN METHODS ===
 
 func _process_physics(delta: float) -> void:
+	# Update timers
+	if is_on_floor():
+		_coyote_timer = 0.15 # 150ms forgiveness
+	else:
+		_coyote_timer = max(0.0, _coyote_timer - delta)
+
 	# Reset state
 	_just_jumped = false
 	floor_snap_length = 32.0
@@ -340,9 +347,14 @@ func _handle_input() -> void:
 	if get_active_terrain_of_type(UnderWaterTerrain) != null:
 		is_underwater = true
 
-	# Jump (only if not underwater)
-	if not is_underwater and Input.is_action_just_pressed("jump") and is_on_floor():
-		_jump()
+	# Jump (only if not underwater) -> Uses coyote time or floor check
+	if not is_underwater and Input.is_action_just_pressed("jump"):
+		if is_on_floor() or _coyote_timer > 0.0:
+			_jump()
+		else:
+			# Debug why jump failed
+			# print("Jump failed: OnFloor=%s, Coyote=%s" % [is_on_floor(), _coyote_timer])
+			pass
 
 	# Swim Up with Jump button
 	if is_underwater and Input.is_action_pressed("jump"):
@@ -410,7 +422,7 @@ func _handle_movement(delta: float) -> void:
 	else:
 		# Friction / Stopping
 		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
-		if not is_grappling and is_on_floor():
+		if not is_grappling and is_on_floor() and not _just_jumped:
 			# Apply friction along the slope
 			var floor_normal = get_floor_normal()
 			var tangent = Vector2(-floor_normal.y, floor_normal.x)
@@ -419,6 +431,9 @@ func _handle_movement(delta: float) -> void:
 			var current_speed = velocity.dot(tangent)
 			var new_speed = move_toward(current_speed, 0, friction * delta)
 			velocity = tangent * new_speed
+
+			# Apply downward force to keep on floor (same as moving state)
+			velocity.y += 2.0
 		elif not is_grappling:
 			# Air friction
 			velocity.x = move_toward(velocity.x, 0, friction * delta)
@@ -504,7 +519,11 @@ func _apply_slope_velocity_adjustment() -> void:
 
 func _jump() -> void:
 	# Note: jump_velocity is positive in settings, so we negate it for upward movement
-	var jump_power: float = -jump_velocity
+	var effective_jump_velocity = jump_velocity
+	if effective_jump_velocity <= 0.0:
+		effective_jump_velocity = 400.0 # Safe fallback
+
+	var jump_power: float = -effective_jump_velocity
 
 	# Apply wings boost if available
 	if wings_feature and wings_feature.enabled and wings_feature.is_active():
@@ -515,6 +534,7 @@ func _jump() -> void:
 	# Disable floor snapping for this frame to allow takeoff
 	floor_snap_length = 0.0
 	_just_jumped = true
+	_coyote_timer = 0.0 # Consume coyote time
 
 func _update_rotation(delta: float) -> void:
 	if not skin:
@@ -646,6 +666,9 @@ func _update_interaction_prompt() -> void:
 			_interaction_prompt_label.visible = false
 
 func _show_interaction_prompt(interaction: Interaction) -> void:
+	if not is_instance_valid(_interaction_prompt_label):
+		return
+
 	var action = interaction.prompt_action
 	var text = interaction.prompt_text
 
