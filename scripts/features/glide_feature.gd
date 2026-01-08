@@ -55,12 +55,36 @@ func handle_input(character: BaseCharacter) -> void:
 	# Can only glide in the air (not on floor)
 	# Usually only when falling, unless terrain allows upward gliding (e.g. Upwind)
 	var is_falling: bool = character.velocity.y > 0
-	var terrain_allows_upward: bool = character.current_terrain and character.current_terrain.can_glide_upwards
+
+	# Check if current terrain allows upward gliding OR if we seem to be in an upwind zone
+	# We check strictly for UpwindTerrain type as a fallback if current_terrain priority didn't switch yet
+	var terrain_allows_upward: bool = false
+	if character.current_terrain and character.current_terrain.can_glide_upwards:
+		terrain_allows_upward = true
+	elif character.get_active_terrain_of_type(UpwindTerrain) != null:
+		terrain_allows_upward = true
 
 	var can_glide: bool = not character.is_on_floor() and (is_falling or terrain_allows_upward)
 	var input_held: bool = Input.is_action_pressed(glide_input_action)
 
-	_is_gliding = can_glide and input_held
+	# For Player: Input determines gliding
+	# For AI: Method calls determine gliding (so we don't override AI decisions with Input result if false)
+	if character.is_in_group("player"):
+		_is_gliding = can_glide and input_held
+	else:
+		# For AI/Enemies, _is_gliding is managed via start_gliding/stop_gliding
+		# But we still enforce physical possibility
+		if _is_gliding and not can_glide:
+			_is_gliding = false
+
+## Start gliding (for AI control)
+func start_gliding() -> void:
+	if is_active():
+		_is_gliding = true
+
+## Stop gliding (for AI control)
+func stop_gliding() -> void:
+	_is_gliding = false
 
 func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
 	# Gliding doesn't add movement

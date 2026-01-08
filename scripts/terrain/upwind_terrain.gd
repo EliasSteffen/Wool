@@ -65,6 +65,8 @@ func _calculate_terrain_effect(delta: float, _character_position: Vector2) -> Ve
 
 ## Apply force directly to characters in the terrain
 func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
+
 	for character in _characters_in_terrain:
 		if character is BaseCharacter:
 			_apply_upwind_force(character, delta)
