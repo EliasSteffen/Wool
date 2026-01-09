@@ -107,10 +107,10 @@ func get_target_nail() -> Interaction:
 # === OVERRIDDEN METHODS ===
 
 func handle_input(character: BaseCharacter) -> void:
-	if Input.is_action_just_pressed("grapple"):
+	if Input.is_action_just_pressed("interact"):
 		_try_start_grapple(character)
 
-	if Input.is_action_just_released("grapple"):
+	if Input.is_action_just_released("interact"):
 		release()
 
 func _try_start_grapple(character: BaseCharacter) -> void:

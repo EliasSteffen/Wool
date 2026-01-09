@@ -362,7 +362,7 @@ func _handle_input() -> void:
 
 	# Attack
 	# "attack" action is mapped to input (e.g. mouse click or key)
-	if Input.is_key_pressed(KEY_V):
+	if Input.is_action_just_pressed("attack"):
 		attack()
 
 	# Debug: Toggle features with number keys
