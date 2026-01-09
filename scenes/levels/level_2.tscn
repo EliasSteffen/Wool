@@ -1,9 +1,10 @@
-[gd_scene load_steps=52 format=3 uid="uid://17deowwhqmtg"]
+[gd_scene load_steps=53 format=3 uid="uid://17deowwhqmtg"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="1_j2425"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="1_l37oo"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="2_g2h2n"]
 [ext_resource type="PackedScene" uid="uid://brigi4dlpr1np" path="res://scenes/terrain/upwind_zone.tscn" id="2_qsp8v"]
+[ext_resource type="Script" uid="uid://ew7bt006ouvk" path="res://scripts/utils/collision_visualizer.gd" id="3_nt80m"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="3_ra442"]
 [ext_resource type="PackedScene" uid="uid://bal5htwdcgj5e" path="res://scenes/interactions/thread.tscn" id="4_fiq81"]
 [ext_resource type="PackedScene" uid="uid://dgl3qoynkddvj" path="res://scenes/characters/enemies/fish.tscn" id="6_qpwj6"]
@@ -179,264 +180,384 @@ debug_color = Color(0.6, 0.8, 1, 0.42)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(695, 46)
 shape = SubResource("RectangleShape2D_g2h2n")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(918, -78)
 shape = SubResource("RectangleShape2D_ra442")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(1054, -182)
 shape = SubResource("RectangleShape2D_ra442")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(890, -290)
 shape = SubResource("RectangleShape2D_ra442")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D5" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(1088, -398)
 shape = SubResource("RectangleShape2D_ra442")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D6" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(1574, -392)
 shape = SubResource("RectangleShape2D_ra442")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D7" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(2491.25, 94)
 shape = SubResource("RectangleShape2D_fiq81")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D11" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(2793.625, 400)
 shape = SubResource("RectangleShape2D_3p04p")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D12" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3092, 452)
 shape = SubResource("RectangleShape2D_qsp8v")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D13" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3448, 396)
 shape = SubResource("RectangleShape2D_nt80m")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D14" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3766.4363, 422.67606)
 rotation = 0.17453296
 scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("RectangleShape2D_brxtv")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D15" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(4014.3037, 652.0209)
 rotation = 1.0471976
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_tv7cl")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D16" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(4080.1243, 323.70584)
 rotation = 1.0471976
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_tv7cl")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D18" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(4429, 526)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_tv7cl")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D35" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(5245.3726, 104)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_ndlae")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D34" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(4648, 318.37234)
 rotation = 1.5707964
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_v8d84")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D19" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(4979.6274, 884)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_gw1l3")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D20" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(5950, 718)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D24" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6202, 764)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D25" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6694, 770)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D26" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7186, 772)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D21" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6460, 718)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D22" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6938, 710)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D23" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7416, 700)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D38" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7678.5464, 767.4114)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_5niy6")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D27" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(5944, 56)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D28" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6196, -58)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D29" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6696, -114)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D30" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7176, -142)
 shape = SubResource("RectangleShape2D_sibr7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D31" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6454, 56)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D32" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(6932, 48)
 shape = SubResource("RectangleShape2D_p4se4")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D33" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7410, -355.41135)
 shape = SubResource("RectangleShape2D_wikm6")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D36" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(8611.273, 371)
 shape = SubResource("RectangleShape2D_1c1qw")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D39" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(9405.363, 217.75)
 shape = SubResource("RectangleShape2D_mx6s3")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D40" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(9838, -36.125)
 shape = SubResource("RectangleShape2D_fqy8p")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D41" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(10866, -84)
 shape = SubResource("RectangleShape2D_mx6s3")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D42" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(11864, -184)
 shape = SubResource("RectangleShape2D_r6ket")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D43" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(13299, -388.3125)
 shape = SubResource("RectangleShape2D_xworo")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D53" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(14322, -648)
 shape = SubResource("RectangleShape2D_s7kn7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D54" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(13420, -756)
 shape = SubResource("RectangleShape2D_s7kn7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D55" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(12988, -888)
 shape = SubResource("RectangleShape2D_s7kn7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D56" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(13620, -1022)
 shape = SubResource("RectangleShape2D_s7kn7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D57" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(14278, -1048)
 shape = SubResource("RectangleShape2D_s7kn7")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D44" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(15354, -843.6875)
 shape = SubResource("RectangleShape2D_wwjag")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D47" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(16974, -894)
 shape = SubResource("RectangleShape2D_wk7pi")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D48" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(20290, -2052)
 shape = SubResource("RectangleShape2D_rvwo1")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D58" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(21235.418, -3588)
 shape = SubResource("RectangleShape2D_yqg3d")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D59" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(16924, -1672)
 shape = SubResource("RectangleShape2D_2e0t0")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D60" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(17988.572, -1521.9219)
 shape = SubResource("RectangleShape2D_keip3")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D49" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(22752, -546)
 shape = SubResource("RectangleShape2D_rvwo1")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D50" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(25950.836, -2416)
 shape = SubResource("RectangleShape2D_rvwo1")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D45" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(15526, 102)
 shape = SubResource("RectangleShape2D_yxkvy")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D46" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(13719.918, 234.96094)
 shape = SubResource("RectangleShape2D_joiyc")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D51" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(22134.959, 1026)
 shape = SubResource("RectangleShape2D_tn15g")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D52" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(25909, -620)
 shape = SubResource("RectangleShape2D_oftal")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D37" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(7946.06, 356.63605)
 rotation = 0.38920844
 shape = SubResource("RectangleShape2D_1a10c")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D17" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3591.623, 29.451971)
 rotation = 0.17453295
 scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("RectangleShape2D_r88tb")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D8" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3070, -146)
 shape = SubResource("RectangleShape2D_qpwj6")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D9" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(3176.875, -451)
 shape = SubResource("RectangleShape2D_ibugp")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D10" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(2852, -718)
 shape = SubResource("RectangleShape2D_8qukl")
+script = ExtResource("3_nt80m")
+debug_color = Color(0, 0, 0, 1)
 
 [node name="Checkpoint" parent="StaticBody2D" instance=ExtResource("7_ibugp")]
 position = Vector2(25856, -2644)

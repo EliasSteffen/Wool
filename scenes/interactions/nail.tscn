@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dyc68xp3u5p3y"]
+[gd_scene load_steps=4 format=3 uid="uid://dyc68xp3u5p3y"]
 
 [ext_resource type="Script" uid="uid://bdllnt34naubf" path="res://scripts/interactions/nail.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="2_4aftr"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
 radius = 104.0
@@ -15,7 +16,9 @@ shape = SubResource("CircleShape2D_detection")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.5, 0.5, 0.5, 1)
-position = Vector2(9.536743e-07, -9.536743e-07)
-scale = Vector2(0.625, 0.625)
+position = Vector2(24, -47.999992)
+rotation = 3.562217
+scale = Vector2(0.10315423, 0.10315423)
+texture = ExtResource("2_4aftr")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]
