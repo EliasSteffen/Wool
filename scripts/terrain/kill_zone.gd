@@ -14,14 +14,14 @@ func _ready() -> void:
 	# Make sure we detect the player (Layer 1 is usually default, but let's be safe)
 	# If you have a specific Player layer, set collision_mask in the Inspector or here.
 	# For now, we rely on the Inspector/Scene settings, but we'll print debug info.
-	print("KillZone ready. Monitoring: ", monitoring, " Mask: ", collision_mask)
+	# print("KillZone ready. Monitoring: ", monitoring, " Mask: ", collision_mask)
 
 	# FORCE ENABLE LAYER 1 (Value 1) just in case it was turned off
 	set_collision_mask_value(1, true)
 	# Also enable Layer 2 just in case
 	set_collision_mask_value(2, true)
 
-	print("KillZone updated Mask: ", collision_mask)
+	# print("KillZone updated Mask: ", collision_mask)
 
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)

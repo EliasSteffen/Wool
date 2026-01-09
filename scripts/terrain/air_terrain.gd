@@ -17,7 +17,10 @@ func _init() -> void:
 	terrain_name = "Air"
 
 func _ready() -> void:
-	super._ready()
+	# Note: We intentionally do NOT call super._ready() because AirTerrain
+	# is a global/default terrain without a DetectionArea (Area2D).
+	# super._ready() would try to find one and push a warning if missing.
+
 	affects_movement = true
 	_setup_tweakables()
 
