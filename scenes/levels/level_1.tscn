@@ -187,6 +187,7 @@ shape = SubResource("RectangleShape2D_qxy0u")
 
 [node name="Eagle" parent="." instance=ExtResource("11_iav0o")]
 position = Vector2(5575, 473)
+chase_hover_height = 60.0
 
 [node name="Fish" parent="." instance=ExtResource("12_dnkej")]
 position = Vector2(2294, 811)

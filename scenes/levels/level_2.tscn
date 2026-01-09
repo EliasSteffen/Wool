@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://17deowwhqmtg"]
+[gd_scene load_steps=52 format=3 uid="uid://17deowwhqmtg"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="1_j2425"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="1_l37oo"]
@@ -94,13 +94,19 @@ size = Vector2(375, 81.6875)
 size = Vector2(1281.3184, 451.375)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wk7pi"]
-size = Vector2(1009.1648, 363.6875)
+size = Vector2(840.00037, 363.6875)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rvwo1"]
 size = Vector2(1558.3296, 363.6875)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yqg3d"]
 size = Vector2(11425.164, 363.6875)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2e0t0"]
+size = Vector2(2566.291, 363.6875)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_keip3"]
+size = Vector2(437.1455, 663.84375)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yxkvy"]
 size = Vector2(940.6592, 1619.6875)
@@ -162,6 +168,11 @@ position = Vector2(17660, -96)
 [node name="CollisionShape2D" parent="UpwindZone/DetectionArea" index="0"]
 position = Vector2(3226, -1400)
 shape = SubResource("RectangleShape2D_7d3nu")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="UpwindZone/DetectionArea" index="1"]
+position = Vector2(3226, -1400)
+shape = SubResource("RectangleShape2D_7d3nu")
+debug_color = Color(0.6, 0.8, 1, 0.42)
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
@@ -361,7 +372,7 @@ position = Vector2(15354, -843.6875)
 shape = SubResource("RectangleShape2D_wwjag")
 
 [node name="CollisionShape2D47" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(17058.582, -894)
+position = Vector2(16974, -894)
 shape = SubResource("RectangleShape2D_wk7pi")
 
 [node name="CollisionShape2D48" type="CollisionShape2D" parent="StaticBody2D"]
@@ -371,6 +382,14 @@ shape = SubResource("RectangleShape2D_rvwo1")
 [node name="CollisionShape2D58" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(21235.418, -3588)
 shape = SubResource("RectangleShape2D_yqg3d")
+
+[node name="CollisionShape2D59" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(16924, -1672)
+shape = SubResource("RectangleShape2D_2e0t0")
+
+[node name="CollisionShape2D60" type="CollisionShape2D" parent="StaticBody2D"]
+position = Vector2(17988.572, -1521.9219)
+shape = SubResource("RectangleShape2D_keip3")
 
 [node name="CollisionShape2D49" type="CollisionShape2D" parent="StaticBody2D"]
 position = Vector2(22752, -546)
@@ -423,7 +442,7 @@ shape = SubResource("RectangleShape2D_8qukl")
 position = Vector2(25856, -2644)
 
 [node name="Wool" parent="." instance=ExtResource("1_j2425")]
-position = Vector2(15304, -1296)
+position = Vector2(116, -48.00003)
 
 [node name="Nail" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(1338, -570)
@@ -476,27 +495,43 @@ position = Vector2(14910, -1116)
 
 [node name="Eagle" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(16914, -1184)
+chase_hover_height = 60.0
+attack_dive_height = 20.0
 
 [node name="Eagle6" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(17148, -1182)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle7" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(16282, -846)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle8" parent="." instance=ExtResource("10_nt80m")]
-position = Vector2(16354, -1726)
+position = Vector2(18680, -2258)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle2" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(19142, -760)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle3" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(21266, -3056)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle4" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(18742, -2830)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Eagle5" parent="." instance=ExtResource("10_nt80m")]
 position = Vector2(24398, -290)
+chase_hover_height = 120.0
+attack_dive_height = 20.0
 
 [node name="Nail9" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(13826, -900)

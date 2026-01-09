@@ -175,6 +175,14 @@ func _ai_chase(delta: float) -> void:
 		_change_state(AIState.IDLE)
 		return
 
+	# Aggro check: If close enough, switch to ATTACK
+	var dist_sq = global_position.distance_squared_to(_current_target.global_position)
+	# Use half attack range as trigger for the dedicated "Attack/Swoop" behavior
+	# or use detection range logic. Let's say if within 300px, we go fast.
+	if dist_sq < (300.0 * 300.0):
+		_change_state(AIState.ATTACK)
+		return
+
 	# Move towards target (delegate to specific implementation)
 	var direction_vector = global_position.direction_to(_current_target.global_position)
 	_execute_chase_movement(delta, direction_vector)
@@ -188,6 +196,38 @@ func _ai_chase(delta: float) -> void:
 		if skin: skin.scale.x = abs(skin.scale.x)
 	elif direction_vector.x < 0:
 		if skin: skin.scale.x = -abs(skin.scale.x)
+
+func _ai_attack(delta: float) -> void:
+	if not _current_target:
+		_change_state(AIState.IDLE)
+		return
+
+	# Check if target moved far away, go back to chase
+	var dist_sq = global_position.distance_squared_to(_current_target.global_position)
+	if dist_sq > (400.0 * 400.0):
+		_change_state(AIState.CHASE)
+		return
+
+	# Execute Attack Movement (Logic usually faster/more aggressive)
+	var direction_vector = global_position.direction_to(_current_target.global_position)
+	_execute_attack_movement(delta, direction_vector)
+
+	# Face direction
+	if direction_vector.x > 0:
+		if skin: skin.scale.x = abs(skin.scale.x)
+	elif direction_vector.x < 0:
+		if skin: skin.scale.x = -abs(skin.scale.x)
+
+## Virtual Method: Execute movement towards target during ATTACK state
+## Default implementation is just faster chase
+func _execute_attack_movement(delta: float, direction: Vector2) -> void:
+	# Default ground movement (faster)
+	velocity.x = move_toward(velocity.x, direction.x * (chase_speed * 1.5), 30.0)
+
+	# Jump logic (more aggressive)
+	if is_on_floor():
+		if direction.y < -0.2: # Target is above
+			jump()
 
 ## Virtual Method: Execute movement towards target during CHASE state
 ## Default implementation provides standard ground movement + jumping
@@ -204,12 +244,6 @@ func _execute_chase_movement(delta: float, direction: Vector2) -> void:
 		elif is_on_wall():
 			jump()
 
-func _ai_attack(delta: float) -> void:
-	# Stop moving when attacking
-	velocity.x = 0
-
-	if not _is_attacking:
-		_perform_attack()
 
 ## Override for custom attack behavior
 func _perform_attack() -> void:

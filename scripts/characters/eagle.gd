@@ -1,6 +1,10 @@
 class_name Eagle
 extends BaseEnemy
 
+@export_group("Eagle Behavior")
+@export var chase_hover_height: float = 120.0 ## Height above target during CHASE state
+@export var attack_dive_height: float = 20.0 ## Height relative to target during ATTACK state (positive is below target)
+
 var _glide_feature: GlideFeature
 var _flight_time: float = 0.0
 
@@ -28,11 +32,17 @@ func _process_ai(delta: float) -> void:
 		var in_upwind = get_active_terrain_of_type(UpwindTerrain) != null
 		var want_to_go_up = false
 
-		# If chasing, height depends on target
-		if _ai_state == AIState.CHASE and _current_target:
+		# If chasing or attacking, height depends on target
+		if (_ai_state == AIState.CHASE or _ai_state == AIState.ATTACK) and _current_target:
 			var target_y = _current_target.global_position.y
-			# Aim slightly above player to swoop or attack head
-			var desired_y = target_y - 50.0
+			var desired_y = target_y
+
+			if _ai_state == AIState.CHASE:
+				# Hover well above player while stalking (slow phase)
+				desired_y = target_y - chase_hover_height
+			else:
+				# Dive bomb (fast phase)
+				desired_y = target_y + attack_dive_height
 
 			if global_position.y > desired_y:
 				want_to_go_up = true
@@ -95,13 +105,17 @@ func _process_ai(delta: float) -> void:
 			_glide_feature.stop_gliding()
 
 func _execute_chase_movement(delta: float, direction: Vector2) -> void:
-	# Eagle movement logic
+	# 1. Slow Horizontal Movement (Hovering)
+	var slow_speed = chase_speed * 0.5
+	velocity.x = move_toward(velocity.x, direction.x * slow_speed, 10.0)
 
-	# 1. Horizontal Movement
-	# Fly/Glide towards target horizontally
-	velocity.x = move_toward(velocity.x, direction.x * chase_speed, 20.0)
+	if is_on_floor():
+		jump()
 
-	# 2. Vertical / Takeoff Logic
-	# If we are on the ground and chasing, we should immediately take off to start flying/gliding
+func _execute_attack_movement(delta: float, direction: Vector2) -> void:
+	# 1. Fast Horizontal Movement (Swooping)
+	var fast_speed = chase_speed * 1.5
+	velocity.x = move_toward(velocity.x, direction.x * fast_speed, 40.0)
+
 	if is_on_floor():
 		jump()
