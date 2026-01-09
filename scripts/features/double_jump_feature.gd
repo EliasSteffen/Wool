@@ -38,7 +38,7 @@ func trigger(explicit_character: Node = null) -> void:
 		character = get_character()
 
 	if not character:
-		print("DoubleJump: No character found in trigger!")
+		# print("DoubleJump: No character found in trigger!")
 		return
 
 	if not character.is_on_floor():
@@ -65,14 +65,14 @@ func handle_input(character: BaseCharacter) -> void:
 	if character.is_on_floor():
 		if not _was_on_floor:
 			reset_jumps()
-			print("DoubleJump: Reset jumps (Landed)")
+			# print("DoubleJump: Reset jumps (Landed)")
 		_was_on_floor = true
 	else:
 		_was_on_floor = false
 
 	# Check for jump input while in air
 	if Input.is_action_just_pressed(jump_input_action):
-		print("DoubleJump: Input detected. Active: %s, OnFloor: %s, Jumps: %s" % [is_active(), character.is_on_floor(), _jumps_remaining])
+		# print("DoubleJump: Input detected. Active: %s, OnFloor: %s, Jumps: %s" % [is_active(), character.is_on_floor(), _jumps_remaining])
 		trigger(character)
 
 func _calculate_movement_factor(delta: float, character_position: Vector2) -> Vector2:
@@ -90,13 +90,13 @@ func _perform_air_jump(character: BaseCharacter) -> void:
 	if val != null:
 		jump_vel = float(val)
 
-	print("DoubleJump: Attempting jump. Character: %s, JumpVel: %s, Multiplier: %s" % [character.name, jump_vel, air_jump_power_multiplier])
+	# print("DoubleJump: Attempting jump. Character: %s, JumpVel: %s, Multiplier: %s" % [character.name, jump_vel, air_jump_power_multiplier])
 
 	if jump_vel > 0:
 		# Negate jump_velocity because Y-up is negative in Godot
 		var jump_power: float = -jump_vel * air_jump_power_multiplier
 		character.velocity.y = jump_power
 		_jumps_remaining -= 1
-		print("DoubleJump: Performed air jump! New Velocity Y: %s, Remaining: %s" % [character.velocity.y, _jumps_remaining])
+		# print("DoubleJump: Performed air jump! New Velocity Y: %s, Remaining: %s" % [character.velocity.y, _jumps_remaining])
 	else:
 		push_warning("DoubleJump: Character has no jump_velocity or it is 0")

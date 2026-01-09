@@ -13,8 +13,10 @@ var icon_texture: Texture2D
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 
+var _picked_up: bool = false
+
 func _ready() -> void:
-	print("FeaturePickup: Ready! Global Pos: ", global_position, " Monitoring: ", monitoring, " Monitorable: ", monitorable)
+	# print("FeaturePickup: Ready! Global Pos: ", global_position, " Monitoring: ", monitoring, " Monitorable: ", monitorable)
 	# Setup visual
 	if icon_texture:
 		sprite.texture = icon_texture
@@ -25,6 +27,7 @@ func _ready() -> void:
 	# Setup collision
 	if not body_entered.is_connected(_on_body_entered):
 		body_entered.connect(_on_body_entered)
+
 
 	# Simple floating animation
 	var tween = create_tween().set_loops()
@@ -75,31 +78,38 @@ func _update_sprite_size() -> void:
 
 
 func _physics_process(delta: float) -> void:
-    # Fallback: Active monitoring if Area2D signals fail
+	if _picked_up: return
+
+	# Fallback: Active monitoring if Area2D signals fail
 	# We check every frame because the player can be fast
 	var bodies = get_overlapping_bodies()
 	for b in bodies:
-		_on_body_entered(b)
+		if b is BasePlayer or b.is_in_group("player"):
+			_on_body_entered(b)
 
 	# DEBUG: Check distance to player manually
-	var players = get_tree().get_nodes_in_group("player")
-	if players.size() > 0:
-		var p = players[0] as Node2D
-		var dist = global_position.distance_to(p.global_position)
-		if dist < 80.0: # 80 pixels is slightly larger than radius 50 + player radius
-			# print("FeaturePickup: Close to player (%.2f), forcing check..." % dist)
-			_on_body_entered(p)
+	# var players = get_tree().get_nodes_in_group("player")
+	# if players.size() > 0:
+	# 	var p = players[0] as Node2D
+	# 	var dist = global_position.distance_to(p.global_position)
+	# 	if dist < 80.0: # 80 pixels is slightly larger than radius 50 + player radius
+	# 		# print("FeaturePickup: Close to player (%.2f), forcing check..." % dist)
+	# 		_on_body_entered(p)
 
 func _on_body_entered(body: Node2D) -> void:
-	print("FeaturePickup: Body entered - ", body.name)
+	if _picked_up: return
 
-	if body is BasePlayer:
+	# Only log if it's the player, to avoid spamming "Body entered - StaticBody2D"
+	if body is BasePlayer or body.is_in_group("player"):
+		# print("FeaturePickup: Body entered - ", body.name)
 		_give_feature(body)
-	# Check via group or duck typing as fallback if class check fails
-	elif body.is_in_group("player") or body.has_method("pickup_feature"):
+	elif body.has_method("pickup_feature"):
 		_give_feature(body)
 
 func _give_feature(player: Node) -> void:
+	if _picked_up: return
+	_picked_up = true
+
 	if not feature_script:
 		push_error("FeaturePickup: No feature script assigned!")
 		queue_free()
@@ -107,11 +117,11 @@ func _give_feature(player: Node) -> void:
 
 	# Create new instance of the feature
 	var new_feature = feature_script.new()
-	print("FeaturePickup: Created new feature instance: ", new_feature)
+	# print("FeaturePickup: Created new feature instance: ", new_feature)
 	new_feature.name = feature_name
 
 	# Pass to player
-	print("FeaturePickup: Giving feature to player...")
+	# print("FeaturePickup: Giving feature to player...")
 	player.pickup_feature(new_feature)
 
 	print("FeaturePickup: Picked up feature '%s'" % feature_name)
