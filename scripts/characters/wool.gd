@@ -383,3 +383,53 @@ func _update_pickaxe_visual() -> void:
 			pickaxe.position = base_pos
 			pickaxe.scale = base_scale
 			pickaxe.rotation = base_rot
+
+## Override to handle Wool-specific shape mirroring
+func _update_facing_direction(is_facing_left: bool) -> void:
+	# Call base to update skin and hitbox scale
+	super._update_facing_direction(is_facing_left)
+
+	# Manually update PhysicsShapes positions
+	_update_physics_shapes_facing(is_facing_left)
+
+	# Force pickaxe visual update immediately
+	_update_pickaxe_visual()
+
+## Helper to flip PhysicsShapes positions
+func _update_physics_shapes_facing(is_facing_left: bool) -> void:
+	# Default shape (usually centered, but strictness is good)
+	if physics_shape_default: _flip_shape_pos(physics_shape_default, is_facing_left)
+
+	# Feature shapes (often offset)
+	if physics_shape_double_jump: _flip_shape_pos(physics_shape_double_jump, is_facing_left)
+	if physics_shape_glide: _flip_shape_pos(physics_shape_glide, is_facing_left)
+	if physics_shape_swim: _flip_shape_pos(physics_shape_swim, is_facing_left)
+	if physics_shape_wings: _flip_shape_pos(physics_shape_wings, is_facing_left)
+
+## Helper to flip a single shape's position based on direction
+## Assumes positive X in editor is "Right"
+func _flip_shape_pos(shape: Node2D, is_facing_left: bool) -> void:
+	if not shape: return
+
+	# We use ABS to always restore 'Right' side magnitude, then negate for 'Left'
+	var current_x = shape.position.x
+
+	# Heuristic: If we don't store initial positions, we might get drift if we just flip sign.
+	# But if we assume the shape is currently correct for *some* direction, we can't be sure which.
+	# HACK: We assume the shape's ABSOLUTE x position is correct for one side.
+	# Since shapes are usually saved in "Right" facing state in editor (positive X or whatever offset).
+
+	# Better approach: We should have stored initial positions in _ready.
+	# But since I didn't want to add 10 variables, let's use the dictionary approach NOW.
+	if not _initial_shape_positions.has(shape):
+		_initial_shape_positions[shape] = shape.position
+
+	var initial_pos = _initial_shape_positions[shape]
+
+	if is_facing_left:
+		# Mirror X relative to parent (Root/0)
+		shape.position.x = -initial_pos.x
+	else:
+		shape.position.x = initial_pos.x
+
+var _initial_shape_positions: Dictionary = {}

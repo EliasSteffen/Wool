@@ -543,16 +543,10 @@ func _update_rotation(delta: float) -> void:
 	# Handle flipping (standard platformer behavior)
 	# Prioritize Input direction for responsiveness
 	if not is_zero_approx(_direction):
-		if _direction > 0:
-			skin.scale.x = abs(skin.scale.x)
-		else:
-			skin.scale.x = -abs(skin.scale.x)
+		_update_facing_direction(_direction < 0)
 	# Fallback to velocity if moving significantly (e.g. knockback or drift)
 	elif abs(velocity.x) > 10.0:
-		if velocity.x > 0:
-			skin.scale.x = abs(skin.scale.x)
-		else:
-			skin.scale.x = -abs(skin.scale.x)
+		_update_facing_direction(velocity.x < 0)
 
 	# Check states
 	var is_grappling = grappling_feature and grappling_feature.is_active()
@@ -614,34 +608,27 @@ func _update_rotation(delta: float) -> void:
 		var rotate_speed = 15.0 if is_on_floor() else 5.0
 		rotation = lerp_angle(rotation, target_rotation, rotate_speed * delta)
 
-	# Apply to visuals only, keeping collision shape upright
-	# REVERTED: Rotate the whole body to ensure collision shape aligns with slope (feet on ground)
-	if skin:
-		skin.rotation = 0.0
+	# Fix floating on slopes:
+	# When rotating around the center, the feet (bottom of sprite) lift up relative to the contact point.
+	# We lower the skin slightly based on the rotation angle to compensate.
+	# A heuristic of ~10px offset at 90 degrees works well for typical sprites.
+	var slope_offset = abs(sin(rotation)) * 10.0
+	if is_on_floor():
+		skin.position.y = slope_offset
+	else:
+		skin.position.y = lerp(skin.position.y, 0.0, 10.0 * delta)
 
-		# Fix floating on slopes:
-		# When rotating around the center, the feet (bottom of sprite) lift up relative to the contact point.
-		# We lower the skin slightly based on the rotation angle to compensate.
-		# A heuristic of ~10px offset at 90 degrees works well for typical sprites.
-		var slope_offset = abs(sin(rotation)) * 10.0
-		if is_on_floor():
-			skin.position.y = slope_offset
-		else:
-			skin.position.y = lerp(skin.position.y, 0.0, 10.0 * delta)
-
-	# Collision shape rotates automatically with the player node
-
-func _setup_interaction_prompt_label() -> void:
-	_interaction_prompt_label = Label.new()
-	_interaction_prompt_label.visible = false
-	_interaction_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_interaction_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
-	_interaction_prompt_label.position = Vector2(-100, -100) # Above player
-	_interaction_prompt_label.size = Vector2(200, 30)
-	_interaction_prompt_label.z_index = 100
-	_interaction_prompt_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_interaction_prompt_label.add_theme_constant_override("outline_size", 4)
-	add_child(_interaction_prompt_label)
+## Update visual facing direction
+## Can be overridden by child classes to handle specialized shapes
+func _update_facing_direction(is_facing_left: bool) -> void:
+	if is_facing_left:
+		skin.scale.x = -abs(skin.scale.x)
+		if has_node("HitboxArea"): $HitboxArea.scale.x = -abs($HitboxArea.scale.x)
+		# Note: We do NOT flip PhysicsShape scale here, as it doesn't handle offset positions.
+		# Child classes should handle offset physics shapes manually.
+	else:
+		skin.scale.x = abs(skin.scale.x)
+		if has_node("HitboxArea"): $HitboxArea.scale.x = abs($HitboxArea.scale.x)
 
 func _update_interaction_prompt() -> void:
 	var closest_interaction: Interaction = null

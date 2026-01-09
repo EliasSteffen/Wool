@@ -18,16 +18,19 @@ signal cut()
 # === OVERRIDDEN METHODS ===
 func _setup_interaction() -> void:
 	interaction_name = "Thread"
-	prompt_action = "interact"
-	prompt_text = "Cut"
+	# Remove prompt as player cuts automatically on contact/attack
+	prompt_action = ""
+	prompt_text = ""
 
-	# Update prompt if label already exists (if _ready ran before this)
-	if prompt_label:
-		_update_prompt_text()
+func _ready() -> void:
+	super._ready()
+	# Disable interaction monitoring as we rely purely on physical collision / manual cutting
+	monitoring = false
+	monitorable = false
 
 func _on_interaction_used(character: CharacterBody2D) -> void:
-	if is_cuttable:
-		cut_thread()
+	# Not used for threads anymore
+	pass
 
 # === PUBLIC METHODS ===
 func cut_thread() -> void:

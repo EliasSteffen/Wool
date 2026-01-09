@@ -2,11 +2,20 @@
 
 [ext_resource type="Script" uid="uid://bph0l3lu5yrgl" path="res://scripts/terrain/upwind_terrain.gd" id="1_script"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_upwind"]
+resource_local_to_scene = true
+size = Vector2(200, 400)
+
 [node name="UpwindZone" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="DetectionArea" type="Area2D" parent="."]
 collision_layer = 0
 collision_mask = 3
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
+shape = SubResource("RectangleShape2D_upwind")
+debug_color = Color(0.6, 0.8, 1, 0.42)
 
 [node name="Visuals" type="Node2D" parent="."]
