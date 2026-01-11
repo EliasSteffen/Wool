@@ -387,6 +387,34 @@ func _update_pickaxe_visual() -> void:
 			pickaxe.scale = base_scale
 			pickaxe.rotation = base_rot
 
+		# --- DYNAMIC MOVEMENT (Backpack Style) ---
+		var time = Time.get_ticks_msec() / 1000.0
+		var dynamic_y = 0.0
+		var dynamic_r = 0.0
+
+		# 1. Walking Bob (On Floor)
+		if is_on_floor() and abs(velocity.x) > 10.0:
+			# Bobbing up and down
+			dynamic_y = sin(time * 15.0) * 3.0
+			# Slight rotation sway
+			dynamic_r = cos(time * 15.0) * 0.1
+
+		# 2. Air Physics (Jumping/Falling)
+		if not is_on_floor():
+			# Tilt based on vertical velocity (lag behind movement)
+			# dragging behind -> rotates opposite to velocity direction visually
+			dynamic_r = clamp(velocity.y * 0.001, -0.3, 0.3)
+
+		# Apply dynamics
+		pickaxe.position.y += dynamic_y
+		
+		# Apply rotation correctly based on facing
+		if facing_left:
+			pickaxe.rotation -= dynamic_r
+		else:
+			pickaxe.rotation += dynamic_r
+		# ----------------------------------------
+
 ## Override to handle Wool-specific shape mirroring
 func _update_facing_direction(is_facing_left: bool) -> void:
 	# Call base to update skin and hitbox scale
