@@ -19,5 +19,9 @@ func _ready() -> void:
 			"detection_range": { "value": 200.0, "min": 50.0, "max": 1000.0, "step": 50.0 },
 			"patrol_speed": { "value": 100.0, "min": 10.0, "max": 500.0, "step": 10.0 },
 			"chase_speed": { "value": 150.0, "min": 10.0, "max": 600.0, "step": 10.0 }
+		},
+		"Plant": {
+			"shoot_interval": { "value": 3.0, "min": 0.5, "max": 10.0, "step": 0.5 },
+			"fireball_speed": { "value": 300.0, "min": 100.0, "max": 1000.0, "step": 10.0 }
 		}
 	}

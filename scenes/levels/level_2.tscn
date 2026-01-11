@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://17deowwhqmtg"]
+[gd_scene load_steps=54 format=3 uid="uid://17deowwhqmtg"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="1_j2425"]
 [ext_resource type="PackedScene" path="res://scenes/terrain/underwater_zone.tscn" id="1_l37oo"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://rccv2atlj0j1" path="res://scenes/interactions/checkpoint.tscn" id="7_ibugp"]
 [ext_resource type="PackedScene" uid="uid://fhce3iot1cba" path="res://scenes/characters/enemies/bunny.tscn" id="8_8qukl"]
 [ext_resource type="PackedScene" uid="uid://vc7o506a25ie" path="res://scenes/characters/enemies/eagle.tscn" id="10_nt80m"]
+[ext_resource type="PackedScene" uid="uid://bx5imbb4rcw7a" path="res://scenes/characters/enemies/plant.tscn" id="12_brxtv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1yj8c"]
 resource_local_to_scene = true
@@ -563,7 +564,7 @@ debug_color = Color(0, 0, 0, 1)
 position = Vector2(25856, -2644)
 
 [node name="Wool" parent="." instance=ExtResource("1_j2425")]
-position = Vector2(116, -48.00003)
+position = Vector2(5841.9995, 397.99997)
 
 [node name="Nail" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(1338, -570)
@@ -656,6 +657,9 @@ attack_dive_height = 20.0
 
 [node name="Nail9" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(13826, -900)
+
+[node name="BaseEnemy" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(6196, 480)
 
 [editable path="UnderwaterZone"]
 [editable path="UnderwaterZone2"]
