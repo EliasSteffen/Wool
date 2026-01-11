@@ -23,7 +23,7 @@ size = Vector2(1074, 600)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sbygb"]
 resource_local_to_scene = true
-size = Vector2(3480, 1094)
+size = Vector2(3480, 1038)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7d3nu"]
 resource_local_to_scene = true
@@ -161,7 +161,7 @@ shape = SubResource("RectangleShape2D_lkn2k")
 position = Vector2(2680, 898)
 
 [node name="CollisionShape2D" parent="UnderwaterZone3/DetectionArea" index="0"]
-position = Vector2(3670, -387)
+position = Vector2(3670, -415)
 shape = SubResource("RectangleShape2D_sbygb")
 
 [node name="UpwindZone" parent="." instance=ExtResource("2_qsp8v")]
@@ -299,7 +299,7 @@ script = ExtResource("3_nt80m")
 debug_color = Color(0, 0, 0, 1)
 
 [node name="CollisionShape2D24" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(6202, 764)
+position = Vector2(6202, 802)
 scale = Vector2(0.9999999, 0.9999999)
 shape = SubResource("RectangleShape2D_sibr7")
 script = ExtResource("3_nt80m")
@@ -660,6 +660,17 @@ position = Vector2(13826, -900)
 
 [node name="BaseEnemy" parent="." instance=ExtResource("12_brxtv")]
 position = Vector2(6196, 480)
+fireball_scene = null
+
+[node name="BaseEnemy2" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(6690, 202)
+rotation = 3.1415927
+fireball_scene = null
+
+[node name="BaseEnemy3" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(7174, 176)
+rotation = 3.1415927
+fireball_scene = null
 
 [editable path="UnderwaterZone"]
 [editable path="UnderwaterZone2"]
