@@ -9,7 +9,7 @@
 class_name BasePlayer
 extends BaseCharacter
 
-enum PlayerState { IDLE, WALK }
+enum PlayerState { IDLE, WALK, GRAPPLE }
 
 var current_anim_state: PlayerState = PlayerState.IDLE
 

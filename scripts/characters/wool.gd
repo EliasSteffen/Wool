@@ -35,8 +35,9 @@ var current_form: FormState = FormState.NORMAL
 
 const ANIMATION_MAP = {
 	FormState.NORMAL: {
-		BasePlayer.PlayerState.IDLE: "walk_idle",
-		BasePlayer.PlayerState.WALK: "walk"
+		BasePlayer.PlayerState.IDLE: "idle",
+		BasePlayer.PlayerState.WALK: "walk",
+		BasePlayer.PlayerState.GRAPPLE: "grapple",
 	},
 	FormState.BUNNY: {
 		BasePlayer.PlayerState.IDLE: "double-jump_idle",
@@ -132,6 +133,9 @@ func _update_form_state() -> void:
 		print("Wool: Form Update -> ", FormState.keys()[current_form])
 
 func _calculate_player_state() -> PlayerState:
+	if grappling_feature and grappling_feature.is_active():
+		return PlayerState.GRAPPLE
+
 	if not is_zero_approx(velocity.x):
 		return PlayerState.WALK
 
@@ -150,7 +154,6 @@ func _play_animation_for_state(state: PlayerState) -> void:
 	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
 		target_anim = ANIMATION_MAP[current_form][state]
 
-	# Fallback Logic for missing "walk_idle", "double-jump_idle" etc.
 	if skin and skin.animated_sprite:
 		if not skin.animated_sprite.sprite_frames.has_animation(target_anim):
 			# 1. Try generic "idle" for unset idle animations
@@ -334,20 +337,20 @@ func _update_pickaxe_visual() -> void:
 
 		# Original Sprite Dimensions
 		var texture_size: Vector2 = pickaxe.texture.get_size()
-		# Diagonal from bottom-left to top-right (unscaled)
-		var original_diagonal: float = Vector2(texture_size.x, texture_size.y).length()
 
-		# Scale to match distance
-		var scale_factor: float = rope_distance / original_diagonal
-		pickaxe.scale = Vector2(scale_factor, scale_factor)
+		# Stretch along X axis to fit length, preserve Y (thickness)
+		# Assuming the needle sprite is roughly horizontal.
+		var scale_x: float = rope_distance / texture_size.x
+		# Use absolute scale X but keep Y 1.0
+		pickaxe.scale = Vector2(scale_x, 1.0)
 
 		# Position at midpoint
 		var midpoint: Vector2 = c_player + rope_vector * 0.5
 		pickaxe.global_position = midpoint
 
-		# Rotation
-		var diagonal_angle: float = atan2(texture_size.y, texture_size.x)
-		pickaxe.global_rotation = rope_angle - diagonal_angle + PI
+		# Align to rope direction.
+		# Adjusted rotation based on user feedback (-90 deg from previous state)
+		pickaxe.global_rotation = rope_angle + PI / 2.0
 
 		# Center sprite
 		pickaxe.centered = true
