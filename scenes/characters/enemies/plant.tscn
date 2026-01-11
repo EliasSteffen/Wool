@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/interactions/fireball.tscn" id="3_0tivd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5ok27"]
-size = Vector2(544, 787)
+size = Vector2(480, 832)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_orb0g"]
 atlas = ExtResource("2_5ok27")
@@ -356,24 +356,38 @@ animations = [{
 }],
 "loop": true,
 "name": &"default",
-"speed": 5.0
+"speed": 15.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_orb0g"]
-size = Vector2(538, 784)
+size = Vector2(544, 832)
 
-[node name="BaseEnemy" instance=ExtResource("1_gv240")]
-scale = Vector2(0.25, 0.25)
+[node name="Plant" instance=ExtResource("1_gv240")]
+position = Vector2(0, 16)
 script = ExtResource("2_plant_script")
 fireball_scene = ExtResource("3_0tivd")
 
 [node name="PhysicsShape" parent="." index="0"]
-position = Vector2(-9, 59.5)
+position = Vector2(-4, -120)
+scale = Vector2(0.25, 0.25)
 shape = SubResource("RectangleShape2D_5ok27")
+
+[node name="Skin" parent="." index="1"]
+position = Vector2(0, -135)
+scale = Vector2(0.25, 0.25)
 
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
 sprite_frames = SubResource("SpriteFrames_1qr0c")
+autoplay = "default"
+frame_progress = 0.477622
+
+[node name="HitboxArea" parent="." index="2"]
+position = Vector2(0, -112)
+scale = Vector2(0.25, 0.25)
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(-5, 56)
+position = Vector2(-16, -32)
 shape = SubResource("RectangleShape2D_orb0g")
+
+[node name="DetectionShape" parent="DetectionArea" index="0"]
+position = Vector2(0, -16)

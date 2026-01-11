@@ -658,19 +658,16 @@ attack_dive_height = 20.0
 [node name="Nail9" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(13826, -900)
 
-[node name="BaseEnemy" parent="." instance=ExtResource("12_brxtv")]
-position = Vector2(6196, 480)
-fireball_scene = null
+[node name="Plant" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(6194, 654)
 
-[node name="BaseEnemy2" parent="." instance=ExtResource("12_brxtv")]
-position = Vector2(6690, 202)
+[node name="Plant2" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(6688, 34)
 rotation = 3.1415927
-fireball_scene = null
 
-[node name="BaseEnemy3" parent="." instance=ExtResource("12_brxtv")]
-position = Vector2(7174, 176)
+[node name="Plant3" parent="." instance=ExtResource("12_brxtv")]
+position = Vector2(7166, 6)
 rotation = 3.1415927
-fireball_scene = null
 
 [editable path="UnderwaterZone"]
 [editable path="UnderwaterZone2"]

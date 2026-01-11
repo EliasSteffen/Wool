@@ -45,19 +45,25 @@ func shoot_fireball() -> void:
 	# Add projectile to the main scene (usually /root/..., or the parent of behavior)
 	get_parent().add_child(fireball)
 
-	# Spawn slightly above the center to ensure it doesn't clipping ground
-	# Adjust this offset based on your sprite height
-	fireball.global_position = global_position + Vector2(0, -100)
+	# Spawn relative to the plant's orientation
+	# Local offset (0, -400) accounts for the plant height (since it's scaled down visuals, we assume local space of 1.0)
+	# But wait, children are scaled 0.25, Root is 1.0.
+	# If we want to spawn at the "mouth" (top of plant), that's near -200 to -250 in local unscaled space?
+	# Plant visuals are 270px tall. Mouth is at top. So -270?
+	# Let's say -250.
+	var spawn_pos_local = Vector2(0, -250)
+	fireball.global_position = to_global(spawn_pos_local)
 
 	if "speed" in fireball:
 		fireball.speed = _fireball_speed
 
 	if "direction" in fireball:
-		fireball.direction = Vector2.UP
+		# Shoot in the direction the plant is facing (Up relative to plant)
+		fireball.direction = Vector2.UP.rotated(global_rotation)
 
 	# print("Plant: Shot fireball at ", fireball.global_position)
 
 func _process_ai(_delta: float) -> void:
 	# Override BaseEnemy AI to be static.
-	# We strictly stop horizontal movement but allow gravity (handled in BaseCharacter).
 	velocity.x = 0
+	velocity.y = 0
