@@ -407,7 +407,7 @@ func _update_pickaxe_visual() -> void:
 
 		# Apply dynamics
 		pickaxe.position.y += dynamic_y
-		
+
 		# Apply rotation correctly based on facing
 		if facing_left:
 			pickaxe.rotation -= dynamic_r
