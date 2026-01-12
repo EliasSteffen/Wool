@@ -12,14 +12,14 @@ extends BasePlayer
 @onready var physics_shape_double_jump: CollisionShape2D = $PhysicsShape_DoubleJump
 @onready var physics_shape_glide: CollisionShape2D = $PhysicsShape_Glide
 @onready var physics_shape_swim: CollisionShape2D = $PhysicsShape_Swim
-@onready var physics_shape_wings: CollisionShape2D = $PhysicsShape_Wings
+@onready var physics_shape_wings: CollisionShape2D = $PhysicsShape_Glide # Alias for compatibility
 
 # Hitbox Shapes
 @onready var hitbox_shape_default: CollisionShape2D = $HitboxArea/HitboxShape
 @onready var hitbox_shape_double_jump: CollisionShape2D = $HitboxArea/HitboxShape_DoubleJump
 @onready var hitbox_shape_glide: CollisionShape2D = $HitboxArea/HitboxShape_Glide
 @onready var hitbox_shape_swim: CollisionShape2D = $HitboxArea/HitboxShape_Swim
-@onready var hitbox_shape_wings: CollisionShape2D = $HitboxArea/HitboxShape_Wings
+@onready var hitbox_shape_wings: CollisionShape2D = $HitboxArea/HitboxShape_Glide # Alias for compatibility
 
 # Pickaxe State
 var _initial_pickaxe_position: Vector2

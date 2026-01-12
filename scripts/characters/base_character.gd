@@ -75,6 +75,9 @@ func _physics_process(delta: float) -> void:
 	# Custom physics processing (override in child classes)
 	_process_physics(delta)
 
+	# Apply swinging constraint
+	_apply_grapple_constraint()
+
 	# Apply movement
 	move_and_slide()
 

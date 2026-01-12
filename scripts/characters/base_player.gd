@@ -746,6 +746,26 @@ func _show_interaction_prompt(interaction: Interaction) -> void:
 	_interaction_prompt_label.text = prompt
 	_interaction_prompt_label.visible = true
 
+## Setup interaction prompt label
+func _setup_interaction_prompt_label() -> void:
+	if has_node("InteractionPromptLabel"):
+		_interaction_prompt_label = $InteractionPromptLabel
+	else:
+		_interaction_prompt_label = Label.new()
+		_interaction_prompt_label.name = "InteractionPromptLabel"
+		add_child(_interaction_prompt_label)
+
+		# Configure label style
+		_interaction_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_interaction_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		_interaction_prompt_label.position = Vector2(-100, -150) # Above head (approx)
+		_interaction_prompt_label.size = Vector2(200, 30)
+		_interaction_prompt_label.visible = false
+
+		# Optional: Load a custom font or style if available
+		# var font = load("res://assets/fonts/my_font.ttf")
+		# if font: _interaction_prompt_label.add_theme_font_override("font", font)
+
 ## Setup debug UI to show active features
 func _setup_debug_ui() -> void:
 	_debug_ui = PlayerDebugUI.new()
