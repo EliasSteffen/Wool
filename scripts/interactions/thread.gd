@@ -24,9 +24,32 @@ func _setup_interaction() -> void:
 
 func _ready() -> void:
 	super._ready()
-	# Disable interaction monitoring as we rely purely on physical collision / manual cutting
-	monitoring = false
-	monitorable = false
+
+	# Ensure monitoring is active so key interaction features (like CutFeature)
+	# can detect this thread via nearby_interactions.
+
+	# If the Area2D interaction shape is missing (common since we usually just define the StaticBody),
+	# we verify and create one matching the obstacle.
+	if obstacle_collision and not has_node("CollisionShape2D"):
+		# Check if we already have a child that IS a CollisionShape2D but with a different name
+		var has_shape = false
+		for child in get_children():
+			if child is CollisionShape2D:
+				has_shape = true
+				break
+
+		# If really no shape, create one
+		if not has_shape:
+			var interaction_shape = CollisionShape2D.new()
+			interaction_shape.name = "InteractionShape"
+			interaction_shape.shape = obstacle_collision.shape
+			# Make the interaction area slightly larger than the collision obstacle
+			# to ensure the player is detected even when "standing on" (colliding with) the obstacle.
+			interaction_shape.scale = Vector2(1.1, 1.1)
+			interaction_shape.debug_color = Color(0.8, 0.2, 0.8, 0.42)
+			add_child(interaction_shape)
+
+
 
 func _on_interaction_used(character: CharacterBody2D) -> void:
 	# Not used for threads anymore
