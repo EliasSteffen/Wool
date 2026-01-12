@@ -17,7 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://bordbegqbbr6g" path="res://assets/character/idle.png" id="9_whd81"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
-size = Vector2(560.0003, 840.0006)
+size = Vector2(480.00043, 840.0006)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_double_jump"]
 size = Vector2(147.43802, 94.30005)
@@ -619,8 +619,8 @@ script = ExtResource("2_wool")
 max_picked_up_features = 1
 
 [node name="PhysicsShape" parent="." index="0"]
-position = Vector2(100.00012, 3.0517578e-05)
-scale = Vector2(0.99999917, 0.99999917)
+position = Vector2(-7.748603e-06, 3.0517564e-05)
+scale = Vector2(0.9999989, 0.9999989)
 shape = SubResource("RectangleShape2D_codar")
 
 [node name="PhysicsShape_DoubleJump" type="CollisionShape2D" parent="." index="1"]
@@ -663,12 +663,12 @@ shape = SubResource("CapsuleShape2D_pickaxe")
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
 position = Vector2(2.3841858e-07, 1.1920929e-07)
 sprite_frames = SubResource("SpriteFrames_codar")
-animation = &"walk"
+animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.48363897
+frame_progress = 0.2829254
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
-position = Vector2(99.99997, 0)
+position = Vector2(40.000004, 0)
 scale = Vector2(0.99999887, 0.99999887)
 shape = SubResource("RectangleShape2D_hitbox")
 
