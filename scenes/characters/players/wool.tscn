@@ -36,7 +36,7 @@ height = 1061.94
 atlas = ExtResource("7_4q7dq")
 region = Rect2(9600, 1080, 1920, 1080)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_4q7dq"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_2rcj1"]
 atlas = ExtResource("9_whd81")
 region = Rect2(0, 0, 1920, 1080)
 
@@ -360,7 +360,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_4q7dq")
+"texture": SubResource("AtlasTexture_2rcj1")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_njyv0")
@@ -665,7 +665,7 @@ position = Vector2(2.3841858e-07, 1.1920929e-07)
 sprite_frames = SubResource("SpriteFrames_codar")
 animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.2829254
+frame_progress = 0.1240762
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
 position = Vector2(40.000004, 0)

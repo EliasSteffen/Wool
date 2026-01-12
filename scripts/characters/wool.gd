@@ -28,6 +28,7 @@ var _initial_pickaxe_scale: Vector2
 var _initial_pickaxe_centered: bool = true
 var _initial_pickaxe_offset: Vector2 = Vector2.ZERO
 var _is_attacking: bool = false
+var _is_jumping_active: bool = false # Tracks if a jump was voluntarily initiated
 var _current_shape_animation: String = ""
 var _idle_timer: float = 0.0
 var _last_played_anim: String = ""
@@ -110,6 +111,10 @@ func _process(delta: float) -> void:
 
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
 
+func _jump() -> void:
+	super._jump()
+	_is_jumping_active = true
+
 func checkpoint_reached() -> void:
 	super.checkpoint_reached()
 
@@ -154,19 +159,21 @@ func _calculate_player_state() -> PlayerState:
 	var jump_just_pressed = Input.is_action_just_pressed("jump")
 
 	if current_form == FormState.NORMAL:
-		# Trigger JUMP if button pressed, flag set, or clearly in air
-		if jump_just_pressed or _just_jumped:
+		if _is_jumping_active or jump_just_pressed:
 			return PlayerState.JUMP
 
 	# Floating/Falling State
 	if not is_on_floor() and current_form != FormState.FISH:
-		return PlayerState.JUMP
+		if current_form != FormState.NORMAL:
+			return PlayerState.JUMP
+		# For Normal Form: Fall through to check movement (WALK)
+		# This prevents JUMP animation flickering when running down slopes
 
-	if not is_zero_approx(velocity.x):
+	if current_form == FormState.FISH and not is_zero_approx(velocity.y):
 		return PlayerState.WALK
 
-	# Special case: Swimming vertically counts as walking/swimming for Fish form
-	if current_form == FormState.FISH and not is_zero_approx(velocity.y):
+	# Check for horizontal movement (Walking)
+	if not is_zero_approx(velocity.x):
 		return PlayerState.WALK
 
 	return PlayerState.IDLE
@@ -182,7 +189,15 @@ func _should_force_animation_update() -> bool:
 	# FORCE UPDATE FOR IDLE DELAY
 	if current_anim_state == PlayerState.IDLE:
 		# If timer just crossed threshold, force update to start playing animation
-		if _idle_timer >= CharacterConstants.IDLE_ANIMATION_DELAY and skin and skin.animated_sprite and not skin.animated_sprite.is_playing():
+		if _idle_timer >= CharacterConstants.IDLE_ANIMATION_DELAY:
+			if skin and skin.animated_sprite and not skin.animated_sprite.is_playing():
+				return true
+
+	# SAFETY CHECK: Ensure Walk/Jump animations don't get stuck
+	# If we are walking or jumping, the animation should strictly be playing.
+	# This catches cases where an animation finished (non-looping) or was paused errantly.
+	if current_anim_state != PlayerState.IDLE:
+		if skin and skin.animated_sprite and not skin.animated_sprite.is_playing():
 			return true
 
 	return false
@@ -193,61 +208,128 @@ func _play_animation_for_state(state: PlayerState) -> void:
 	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
 		target_anim = ANIMATION_MAP[current_form][state]
 
-	# IDLE DELAY: If waiting, use "stand" frame or pause animation
-	if state == BasePlayer.PlayerState.IDLE and _idle_timer < CharacterConstants.IDLE_ANIMATION_DELAY:
-		if skin and skin.animated_sprite:
-			# Play the animation but pause on first frame (assuming frame 0 is the "stand" pose)
-			skin.play_animation(target_anim)
-			skin.animated_sprite.set_frame_and_progress(0, 0.0)
-			skin.animated_sprite.pause()
-			_last_played_anim = target_anim
-			return
-
-	if skin and skin.animated_sprite:
-		# If we were paused (from idle delay), resume
-		if skin.animated_sprite.is_playing() == false and state != BasePlayer.PlayerState.IDLE: # Only resume if moving, or if idle timer passed (implicit by not entering above if)
-			skin.animated_sprite.play()
-		elif state == BasePlayer.PlayerState.IDLE and _idle_timer >= CharacterConstants.IDLE_ANIMATION_DELAY and not skin.animated_sprite.is_playing():
-			skin.animated_sprite.play()
-
-		if not skin.animated_sprite.sprite_frames.has_animation(target_anim):
+	if skin:
+		# FALLBACK LOGIC for missing animations
+		if skin.animated_sprite and not skin.animated_sprite.sprite_frames.has_animation(target_anim):
 			# 1. Try generic "idle" for unset idle animations (fallback)
 			if target_anim.ends_with("_idle"):
 				var base_name = target_anim.replace("_idle", "")
-				# Try "double-jump" instead of "double-jump_idle"
 				if skin.animated_sprite.sprite_frames.has_animation(base_name):
 					target_anim = base_name
-				# Or try generic "idle"
 				elif skin.animated_sprite.sprite_frames.has_animation("idle"):
 					target_anim = "idle"
-
 			# 2. Last resort fallback
 			elif not skin.animated_sprite.sprite_frames.has_animation(target_anim):
 				if current_form == FormState.NORMAL:
 					target_anim = "walk" if state == BasePlayer.PlayerState.WALK else "idle"
 
-	# Optimized Play with Windup Skip
-	if target_anim != _last_played_anim:
-		skin.play_animation(target_anim)
+		# PLAY ANIMATION
+		# Only play if the animation actually changed.
+		# This allows non-looping animations (like Jump) to finish properly without being restarted.
+		if target_anim != _last_played_anim:
+			# SPECIAL CASE: Skip windup for Jump (Frame 5 Start)
+			if target_anim == "jump" and current_form == FormState.NORMAL:
+				skin.play_animation(target_anim)
+				if skin.animated_sprite:
+					skin.animated_sprite.frame = 5
+			else:
+				# Standard Play
+				skin.play_animation(target_anim)
 
-		# SPECIAL CASE: Skip windup frames for normal jump to match instant physics
-		if target_anim == "jump" and current_form == FormState.NORMAL:
-			if skin and skin.animated_sprite:
-				skin.animated_sprite.frame = 5
+			_last_played_anim = target_anim
+		elif target_anim == "walk" or target_anim.ends_with("idle") or target_anim == "idle":
+			# Ensure looping animations are playing (in case they stopped due to frame errors)
+			if skin.animated_sprite and not skin.animated_sprite.is_playing():
+				skin.animated_sprite.play()
 
-		_last_played_anim = target_anim
-	else:
-		# Continue playing (or ensure correct loop state if needed)
-		# Do NOT restart JUMP animation if it finished (it should be one-shot)
-		if state != BasePlayer.PlayerState.JUMP and skin and skin.animated_sprite and not skin.animated_sprite.is_playing() and state != BasePlayer.PlayerState.IDLE:
-			skin.play_animation(target_anim) # Resilience against accidental stops
-
+var _current_visual_rotation: float = 0.0
+var _last_valid_floor_normal: Vector2 = Vector2.UP
 
 func _update_rotation(delta: float) -> void:
 	# Lock rotation during attack to prevent visual desync of the pickaxe
 	if _is_attacking:
 		return
-	super._update_rotation(delta)
+
+	# OVERRIDE: Do not call super._update_rotation(delta)
+	# We handle rotation manually on the visuals (Skin/Hitbox) ONLY.
+	# Rotating the CharacterBody2D (self) causes floor detachment on slopes.
+
+	var is_grappling = grappling_feature and grappling_feature.is_active()
+	var is_underwater = current_terrain is UnderWaterTerrain
+	var target_rotation = 0.0
+
+	# --- RESTORE FACING DIRECTION LOGIC ---
+	# Handle flipping (standard platformer behavior)
+	# Prioritize Input direction for responsiveness
+	if not is_zero_approx(_direction):
+		_update_facing_direction(_direction < 0)
+	# Fallback to velocity if moving significantly (e.g. knockback or drift)
+	elif abs(velocity.x) > 10.0:
+		_update_facing_direction(velocity.x < 0)
+	# --------------------------------------
+
+	if is_grappling:
+		var current_nail = grappling_feature.get_target_nail()
+		if current_nail:
+			var rope_vector = current_nail.global_position - global_position
+			# Align head with rope (rope angle + 90 deg)
+			target_rotation = rope_vector.angle() + PI / 2.0
+	elif is_on_floor():
+		# Align with floor slope
+		var floor_normal = get_floor_normal()
+		target_rotation = floor_normal.angle() + PI / 2.0
+		_last_valid_floor_normal = floor_normal
+	elif is_underwater:
+		var close_to_floor = is_on_floor()
+		if not close_to_floor and velocity.y >= 0: # Only check if falling/sinking
+			close_to_floor = test_move(global_transform, Vector2(0, 16))
+
+		if close_to_floor:
+			target_rotation = 0.0
+		elif velocity.length() > 10.0:
+			var angle = velocity.angle() + PI / 2.0
+			angle = wrapf(angle, -PI, PI)
+
+			if skin.scale.x > 0:
+				target_rotation = clamp(angle, -PI/6, PI)
+			else:
+				if angle > PI/2: angle -= 2 * PI
+				target_rotation = clamp(angle, -PI, PI/6)
+	else:
+		# VISUAL FLICKER FIX:
+		# Use last known floor normal to maintain rotation during momentary flickers
+		target_rotation = _last_valid_floor_normal.angle() + PI / 2.0
+
+		# If we are really in the air for longer, slowly rotate back to 0
+		# But for quick flickers, this keeps it stable.
+		var target_air_rotation = 0.0
+		# Interpolate target towards 0 based on air time (heuristic) would be ideal,
+		# but simply reusing last normal prevents the hard snap to 0.
+
+	# Apply rotation with smoothing to the VISUAL ROTATION variable
+	if is_underwater and not is_grappling:
+		_current_visual_rotation = wrapf(_current_visual_rotation, -PI, PI)
+		_current_visual_rotation = lerp(_current_visual_rotation, target_rotation, 5.0 * delta)
+	else:
+		var rotate_speed = 15.0 if is_on_floor() else 5.0
+		_current_visual_rotation = lerp_angle(_current_visual_rotation, target_rotation, rotate_speed * delta)
+
+	# Apply to Skin
+	if skin:
+		skin.rotation = _current_visual_rotation
+
+		# Fix floating on slopes (Visual Offset)
+		# Improved: Rely on visual rotation (which handles flickers) to set offset
+		# This prevents the 'snap to 0' when is_on_floor() flickers false momentarily
+		var slope_offset = abs(sin(_current_visual_rotation)) * 10.0
+		skin.position.y = lerp(skin.position.y, slope_offset, 20.0 * delta)
+
+	# Apply to Hitbox Area (if exists)
+	if has_node("HitboxArea"):
+		$HitboxArea.rotation = _current_visual_rotation
+		if skin:
+			# Also sync position offset
+			$HitboxArea.position.y = skin.position.y
 
 func _update_shapes(animation_name: String) -> void:
 	# OPTIMIZATION: Only update shapes if animation actually changed.
@@ -382,6 +464,19 @@ func attack() -> void:
 	# Force a visual update immediately to clean up offset hacks
 	_update_pickaxe_visual()
 
+func _process_physics(delta: float) -> void:
+	super._process_physics(delta)
+
+	# Only reset jumping logic if we are actually on floor AND falling/standing (not moving up/jumping)
+	# This prevents resetting the jump flag immediately in the frame we jump (where is_on_floor is still true)
+	if is_on_floor() and velocity.y >= 0:
+		_is_jumping_active = false
+
+	# Increase floor snap length to handle steep slopes better at high speeds
+	# BUT: Only apply high snap if we didn't just jump. Otherwise we snap back to ground instantly.
+	if not _just_jumped:
+		floor_snap_length = 64.0
+
 func _update_pickaxe_visual() -> void:
 	if not pickaxe:
 		return
@@ -462,15 +557,18 @@ func _update_pickaxe_visual() -> void:
 		var dynamic_y = 0.0
 		var dynamic_r = 0.0
 
+		# Define visual grounded state (Use coyote timer to bridge physics flickers on slopes)
+		var is_visually_grounded = is_on_floor() or _coyote_timer > 0.0
+
 		# 1. Walking Bob (On Floor)
-		if is_on_floor() and abs(velocity.x) > 10.0:
+		if is_visually_grounded and abs(velocity.x) > 10.0:
 			# Bobbing up and down
 			dynamic_y = sin(time * 15.0) * 3.0
 			# Slight rotation sway
 			dynamic_r = cos(time * 15.0) * 0.1
 
 		# 2. Air Physics (Jumping/Falling)
-		if not is_on_floor():
+		if not is_visually_grounded:
 			# Tilt based on vertical velocity (lag behind movement)
 			# dragging behind -> rotates opposite to velocity direction visually
 			dynamic_r = clamp(velocity.y * 0.001, -0.3, 0.3)
@@ -483,6 +581,15 @@ func _update_pickaxe_visual() -> void:
 			pickaxe.rotation -= dynamic_r
 		else:
 			pickaxe.rotation += dynamic_r
+
+		# 3. Apply Visual Rotation (Slope) to Pickaxe
+		# Pickaxe is child of Wool (unrotated), so we must manually add the visual rotation
+		# to match the skin.
+		pickaxe.rotation += _current_visual_rotation
+
+		# Sync Position offset with skin (floating fix)
+		if skin:
+			pickaxe.position.y += skin.position.y
 		# ----------------------------------------
 
 ## Override to handle Wool-specific shape mirroring

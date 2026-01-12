@@ -23,7 +23,7 @@ size = Vector2(1074, 600)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sbygb"]
 resource_local_to_scene = true
-size = Vector2(3480, 1038)
+size = Vector2(3454, 1062)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7d3nu"]
 resource_local_to_scene = true
@@ -161,7 +161,7 @@ shape = SubResource("RectangleShape2D_lkn2k")
 position = Vector2(2680, 898)
 
 [node name="CollisionShape2D" parent="UnderwaterZone3/DetectionArea" index="0"]
-position = Vector2(3670, -415)
+position = Vector2(3657, -427)
 shape = SubResource("RectangleShape2D_sbygb")
 
 [node name="UpwindZone" parent="." instance=ExtResource("2_qsp8v")]
@@ -564,7 +564,7 @@ debug_color = Color(0, 0, 0, 1)
 position = Vector2(25856, -2644)
 
 [node name="Wool" parent="." instance=ExtResource("1_j2425")]
-position = Vector2(106.000244, -92.00006)
+position = Vector2(2547.9998, -344)
 
 [node name="Nail" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(1338, -570)
