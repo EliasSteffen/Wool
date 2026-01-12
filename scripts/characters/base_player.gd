@@ -36,6 +36,7 @@ var _current_prompt_interaction: Interaction = null
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 var _just_jumped: bool = false
 var _coyote_timer: float = 0.0 # Buffer to allow jumping shortly after leaving ground
+var _grapple_kick: float = 0.0 # Rotation impulse for grappling "Schwung holen"
 
 # Feature Management
 var _default_features: Array[Feature] = []
@@ -544,8 +545,21 @@ func _update_rotation(delta: float) -> void:
 	if not skin:
 		return
 
+	# FIND Active Grappling Feature
+	var active_grappling_feature: GrapplingFeature = null
+	for feature in _features:
+		if feature is GrapplingFeature and feature.is_active():
+			active_grappling_feature = feature
+			break
+
+	# DEBUG: Diagnose why rotation is skipped
+	# if Input.is_action_pressed("interact") and active_grappling_feature == null:
+	# 	print("DEBUG: [Rotation] Interact Held, but NO active grapple found.")
+
 	# Handle flipping (standard platformer behavior)
 	# Prioritize Input direction for responsiveness
+	# Exception: Don't flip while grappling if we are holding momentum,
+	# but actually we probably DO want to flip to face "forward" in the swing.
 	if not is_zero_approx(_direction):
 		_update_facing_direction(_direction < 0)
 	# Fallback to velocity if moving significantly (e.g. knockback or drift)
@@ -553,16 +567,48 @@ func _update_rotation(delta: float) -> void:
 		_update_facing_direction(velocity.x < 0)
 
 	# Check states
-	var is_grappling = grappling_feature and grappling_feature.is_active()
+	var is_grappling = active_grappling_feature != null
+
 	var is_underwater = current_terrain is UnderWaterTerrain
 	var target_rotation = 0.0
 
 	if is_grappling:
-		var current_nail = grappling_feature.get_target_nail()
+		var current_nail = active_grappling_feature.get_target_nail()
 		if current_nail:
 			var rope_vector = current_nail.global_position - global_position
-			# Align head with rope (rope angle + 90 deg)
-			target_rotation = rope_vector.angle() + PI / 2.0
+
+			# "Schwung holen" Animation Logic
+			# 1. Detect Impulse
+			if Input.is_action_just_pressed("move_left"):
+				_grapple_kick = deg_to_rad(-60.0) # Kick CCW (Left-Up)
+			elif Input.is_action_just_pressed("move_right"):
+				_grapple_kick = deg_to_rad(60.0)  # Kick CW (Right-Up)
+
+			# 2. Decay Impulse
+			_grapple_kick = move_toward(_grapple_kick, 0.0, delta * 4.0)
+
+			# 3. Sustained Lean (Hold direction to swing)
+			var target_lean = 0.0
+			if _direction < 0: # Left
+				target_lean = deg_to_rad(45.0)
+			elif _direction > 0: # Right
+				target_lean = deg_to_rad(-45.0)
+
+			# If facing Left, negate lean angles to match sprite flipping?
+			# Sprite flip handles local X scale -1.
+			# Mathematical rotation 0 is RIGHT. PI is LEFT.
+			# If flipped (scale.x < 0), then rotation usually points "forward" relative to flip.
+			# Godot rotation is Global. Flipping scale.x flips the local X axis.
+			# If we rotate 45 deg CW:
+			#  - Facing Right: Beak points down-right.
+			#  - Facing Left (Flipped): Beak points down-left?
+			# Let's keep calculation simple first.
+
+			# Align head with rope (rope angle + 90 deg) + Kick + Lean
+			target_rotation = rope_vector.angle() + PI / 2.0 + _grapple_kick + target_lean
+
+			# Print state
+			print("DEBUG: [Rotation] Active! RopeAngle: %.2f | Kick: %.2f | Lean: %.2f | Target: %.2f" % [rad_to_deg(rope_vector.angle()), rad_to_deg(_grapple_kick), rad_to_deg(target_lean), rad_to_deg(target_rotation)])
 	elif is_on_floor():
 		# Align with floor slope
 		target_rotation = get_floor_normal().angle() + PI / 2.0
@@ -607,6 +653,9 @@ func _update_rotation(delta: float) -> void:
 		# and forces the "long way" via the top (0) when switching sides.
 		rotation = wrapf(rotation, -PI, PI) # Normalize first
 		rotation = lerp(rotation, target_rotation, 5.0 * delta)
+	elif is_grappling:
+		# Very fast rotation for responsive swinging actions
+		rotation = lerp_angle(rotation, target_rotation, 20.0 * delta)
 	else:
 		# Faster rotation on floor to prevent floating visuals during slope changes
 		var rotate_speed = 15.0 if is_on_floor() else 5.0

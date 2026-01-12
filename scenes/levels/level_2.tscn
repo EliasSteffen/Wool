@@ -564,7 +564,7 @@ debug_color = Color(0, 0, 0, 1)
 position = Vector2(25856, -2644)
 
 [node name="Wool" parent="." instance=ExtResource("1_j2425")]
-position = Vector2(2547.9998, -344)
+position = Vector2(198.00049, -74.00003)
 
 [node name="Nail" parent="." instance=ExtResource("2_g2h2n")]
 position = Vector2(1338, -570)

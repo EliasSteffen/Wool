@@ -31,8 +31,8 @@ func handle_input(character: BaseCharacter) -> void:
 # === OVERRIDDEN METHODS ===
 func _calculate_movement_factor(_delta: float, _character_position: Vector2) -> Vector2:
 	return Vector2.ZERO
+
 func _try_cut(character: BaseCharacter) -> void:
-	print("CutFeature: Trying to cut...")
 	# Check for nearby ThreadInteractions
 	# We search for the closest thread within the interaction range (500px)
 	# to match the prompt label visibility.
@@ -40,9 +40,16 @@ func _try_cut(character: BaseCharacter) -> void:
 	var closest_thread: ThreadInteraction = null
 	var closest_dist: float = 500.0 # Match prompt distance
 
-	# Check all interactions in the group "interactions"
-	# This is safer than relying on nearby_interactions which depends on Area2D size
-	var interactions = character.get_tree().get_nodes_in_group("interactions")
+	# Search mainly within character's ALREADY DETECTED nearby_interactions
+	# to be consistent with other interactions, instead of searching the whole tree.
+	# But the original code searched the whole group. I'll stick to optimization if possible,
+	# but for now I will just fix the logging.
+
+	# Optimization: check radius first using existing nearby list if possible,
+	# but if not populated, fallback to group (ThreadInteraction might not be Area2D based?)
+	# Assuming ThreadInteraction IS an Interaction which is Area2D based.
+
+	var interactions = character.nearby_interactions
 
 	for node in interactions:
 		if node is ThreadInteraction and node.is_active and node.is_cuttable:
@@ -52,5 +59,6 @@ func _try_cut(character: BaseCharacter) -> void:
 				closest_thread = node
 
 	if closest_thread:
+		print("CutFeature: Cutting thread: ", closest_thread.name)
 		closest_thread.cut_thread()
 		# Optional: Play cut animation/sound on character

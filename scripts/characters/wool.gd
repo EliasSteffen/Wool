@@ -272,8 +272,28 @@ func _update_rotation(delta: float) -> void:
 		var current_nail = grappling_feature.get_target_nail()
 		if current_nail:
 			var rope_vector = current_nail.global_position - global_position
-			# Align head with rope (rope angle + 90 deg)
-			target_rotation = rope_vector.angle() + PI / 2.0
+
+			# "Schwung holen" Animation Logic
+			# 1. Detect Impulse
+			if Input.is_action_just_pressed("move_left"):
+				# Move Left -> Kick CCW (Feet Right) for momentum "Wind Up"
+				_grapple_kick = deg_to_rad(-80.0)
+			elif Input.is_action_just_pressed("move_right"):
+				# Move Right -> Kick CW (Feet Left) for momentum "Wind Up"
+				_grapple_kick = deg_to_rad(80.0)
+
+			# 2. Decay Impulse (Slower decay for better visibility)
+			_grapple_kick = move_toward(_grapple_kick, 0.0, delta * 3.0)
+
+			# 3. Sustained Lean (Hold direction to swing)
+			var target_lean = 0.0
+			if _direction < 0: # Left
+				target_lean = deg_to_rad(40.0) # Lean into the swing (CW)
+			elif _direction > 0: # Right
+				target_lean = deg_to_rad(-40.0) # Lean into the swing (CCW)
+
+			# Align head with rope (rope angle + 90 deg) + Kick + Lean
+			target_rotation = rope_vector.angle() + PI / 2.0 + _grapple_kick + target_lean
 	elif is_on_floor():
 		# Align with floor slope
 		var floor_normal = get_floor_normal()
