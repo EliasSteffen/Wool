@@ -26,6 +26,8 @@ var initial_pull_strength: float
 var _grapple_target: Vector2 = Vector2.ZERO
 var _target_nail: Interaction = null
 var _has_reached_rope_length: bool = false  # Track if we've reached the rope length once
+var _input_buffer_timer: float = 0.0
+const GRAPPLE_TOLERANCE: float = 20.0 # Extra pixels to allow grappling (compensates for character width)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -40,10 +42,20 @@ func _ready() -> void:
 		"initial_pull_strength": "initial_pull_strength"
 	})
 
+func _process(delta: float) -> void:
+	# Input Buffering: Retry grapple if button was pressed recently
+	if _input_buffer_timer > 0.0:
+		_input_buffer_timer -= delta
+		if _input_buffer_timer > 0.0 and not is_active():
+			var character = get_character()
+			if character:
+				_try_start_grapple(character)
+
 # === PUBLIC METHODS ===
 
 ## Set the grapple target position (called by character)
 func set_target(target_position: Vector2, nail: Interaction = null) -> void:
+	_input_buffer_timer = 0.0 # Reset buffer on success
 	_grapple_target = target_position
 	_target_nail = nail
 	_has_reached_rope_length = true  # Always true to enforce constraint immediately
@@ -108,7 +120,12 @@ func get_target_nail() -> Interaction:
 
 func handle_input(character: BaseCharacter) -> void:
 	if Input.is_action_just_pressed("interact"):
+		# Try immediately
 		_try_start_grapple(character)
+
+		# If not successful immediately, start buffer timer
+		if not is_active():
+			_input_buffer_timer = 0.15 # 150ms buffer
 
 	if Input.is_action_just_released("interact"):
 		release()
@@ -116,6 +133,7 @@ func handle_input(character: BaseCharacter) -> void:
 func _try_start_grapple(character: BaseCharacter) -> void:
 	var nail: Nail = _find_nearest_nail(character)
 	if nail:
+		print("DEBUG: [Grapple] Success! Target: ", nail.name)
 		set_target(nail.get_grapple_point(), nail)
 
 func _find_nearest_nail(character: BaseCharacter) -> Nail:
@@ -127,11 +145,14 @@ func _find_nearest_nail(character: BaseCharacter) -> Nail:
 		if not nail:
 			continue
 
-		# Strict distance check against detection radius
+		# Strict distance check against detection radius with TOLERANCE
 		var distance: float = character.global_position.distance_to(nail.global_position)
 		var radius: float = nail.get_detection_radius()
 
-		if radius > 0 and distance > radius:
+		# Allow if distance is within radius + tolerance
+		# This handles cases where character shape overlaps nail shape but centers are far
+		if radius > 0 and distance > (radius + GRAPPLE_TOLERANCE):
+			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE])
 			continue
 
 		if distance < nearest_distance:

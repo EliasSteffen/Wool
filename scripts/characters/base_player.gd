@@ -649,6 +649,10 @@ func _update_interaction_prompt() -> void:
 				closest_dist = dist
 				closest_interaction = interaction
 
+	if nearby_interactions.size() > 0:
+		pass
+		# print("DEBUG: [Prompt] Nearby: %d. Closest: %s" % [nearby_interactions.size(), closest_interaction.name if closest_interaction else "None"])
+
 	if closest_interaction != _current_prompt_interaction:
 		_current_prompt_interaction = closest_interaction
 		if closest_interaction:
