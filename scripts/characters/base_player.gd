@@ -9,7 +9,7 @@
 class_name BasePlayer
 extends BaseCharacter
 
-enum PlayerState { IDLE, WALK, GRAPPLE }
+enum PlayerState { IDLE, WALK, GRAPPLE, JUMP }
 
 var current_anim_state: PlayerState = PlayerState.IDLE
 
@@ -297,12 +297,16 @@ func _play_animation_for_state(state: PlayerState) -> void:
 	var target_anim = "idle"
 	if state == PlayerState.WALK:
 		target_anim = "walk"
+	elif state == PlayerState.JUMP:
+		target_anim = "jump"
 
 	if skin:
 		skin.play_animation(target_anim)
 
 # Virtual Methods for Override
 func _calculate_player_state() -> PlayerState:
+	if not is_on_floor():
+		return PlayerState.JUMP
 	if not is_zero_approx(velocity.x):
 		return PlayerState.WALK
 	return PlayerState.IDLE

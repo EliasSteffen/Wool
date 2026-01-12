@@ -29,6 +29,8 @@ var _initial_pickaxe_centered: bool = true
 var _initial_pickaxe_offset: Vector2 = Vector2.ZERO
 var _is_attacking: bool = false
 var _current_shape_animation: String = ""
+var _idle_timer: float = 0.0
+var _last_played_anim: String = ""
 
 enum FormState { NORMAL, BUNNY, FISH, EAGLE }
 var current_form: FormState = FormState.NORMAL
@@ -38,6 +40,7 @@ const ANIMATION_MAP = {
 		BasePlayer.PlayerState.IDLE: "idle",
 		BasePlayer.PlayerState.WALK: "walk",
 		BasePlayer.PlayerState.GRAPPLE: "grapple",
+		BasePlayer.PlayerState.JUMP: "jump",
 	},
 	FormState.BUNNY: {
 		BasePlayer.PlayerState.IDLE: "double-jump_idle",
@@ -55,6 +58,11 @@ const ANIMATION_MAP = {
 
 func _ready() -> void:
 	super._ready()
+
+	# Fix Jump Interaction
+	if skin and skin.animated_sprite and skin.animated_sprite.sprite_frames:
+		if skin.animated_sprite.sprite_frames.has_animation("jump"):
+			skin.animated_sprite.sprite_frames.set_animation_loop("jump", false)
 
 	# Initialize Pickaxe Data
 	if pickaxe:
@@ -92,6 +100,12 @@ func _update_skin_appearance() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+
+	if current_anim_state == PlayerState.IDLE:
+		_idle_timer += delta
+	else:
+		_idle_timer = 0.0
+
 	_update_pickaxe_visual()
 
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
@@ -136,6 +150,18 @@ func _calculate_player_state() -> PlayerState:
 	if grappling_feature and grappling_feature.is_active():
 		return PlayerState.GRAPPLE
 
+	# Immediate Jump Response on Input or Flag
+	var jump_just_pressed = Input.is_action_just_pressed("jump")
+
+	if current_form == FormState.NORMAL:
+		# Trigger JUMP if button pressed, flag set, or clearly in air
+		if jump_just_pressed or _just_jumped:
+			return PlayerState.JUMP
+
+	# Floating/Falling State
+	if not is_on_floor() and current_form != FormState.FISH:
+		return PlayerState.JUMP
+
 	if not is_zero_approx(velocity.x):
 		return PlayerState.WALK
 
@@ -145,8 +171,21 @@ func _calculate_player_state() -> PlayerState:
 
 	return PlayerState.IDLE
 
+var _last_rendered_form: FormState = FormState.NORMAL
+
 func _should_force_animation_update() -> bool:
-	return true # Always check in Wool to handle form changes immediately (legacy behavior)
+	# Only force update if Form changed, to avoid per-frame logic interfering with running animations
+	if current_form != _last_rendered_form:
+		_last_rendered_form = current_form
+		return true
+
+	# FORCE UPDATE FOR IDLE DELAY
+	if current_anim_state == PlayerState.IDLE:
+		# If timer just crossed threshold, force update to start playing animation
+		if _idle_timer >= CharacterConstants.IDLE_ANIMATION_DELAY and skin and skin.animated_sprite and not skin.animated_sprite.is_playing():
+			return true
+
+	return false
 
 func _play_animation_for_state(state: PlayerState) -> void:
 	var target_anim = "default"
@@ -154,9 +193,25 @@ func _play_animation_for_state(state: PlayerState) -> void:
 	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
 		target_anim = ANIMATION_MAP[current_form][state]
 
+	# IDLE DELAY: If waiting, use "stand" frame or pause animation
+	if state == BasePlayer.PlayerState.IDLE and _idle_timer < CharacterConstants.IDLE_ANIMATION_DELAY:
+		if skin and skin.animated_sprite:
+			# Play the animation but pause on first frame (assuming frame 0 is the "stand" pose)
+			skin.play_animation(target_anim)
+			skin.animated_sprite.set_frame_and_progress(0, 0.0)
+			skin.animated_sprite.pause()
+			_last_played_anim = target_anim
+			return
+
 	if skin and skin.animated_sprite:
+		# If we were paused (from idle delay), resume
+		if skin.animated_sprite.is_playing() == false and state != BasePlayer.PlayerState.IDLE: # Only resume if moving, or if idle timer passed (implicit by not entering above if)
+			skin.animated_sprite.play()
+		elif state == BasePlayer.PlayerState.IDLE and _idle_timer >= CharacterConstants.IDLE_ANIMATION_DELAY and not skin.animated_sprite.is_playing():
+			skin.animated_sprite.play()
+
 		if not skin.animated_sprite.sprite_frames.has_animation(target_anim):
-			# 1. Try generic "idle" for unset idle animations
+			# 1. Try generic "idle" for unset idle animations (fallback)
 			if target_anim.ends_with("_idle"):
 				var base_name = target_anim.replace("_idle", "")
 				# Try "double-jump" instead of "double-jump_idle"
@@ -171,7 +226,22 @@ func _play_animation_for_state(state: PlayerState) -> void:
 				if current_form == FormState.NORMAL:
 					target_anim = "walk" if state == BasePlayer.PlayerState.WALK else "idle"
 
-	skin.play_animation(target_anim)
+	# Optimized Play with Windup Skip
+	if target_anim != _last_played_anim:
+		skin.play_animation(target_anim)
+
+		# SPECIAL CASE: Skip windup frames for normal jump to match instant physics
+		if target_anim == "jump" and current_form == FormState.NORMAL:
+			if skin and skin.animated_sprite:
+				skin.animated_sprite.frame = 5
+
+		_last_played_anim = target_anim
+	else:
+		# Continue playing (or ensure correct loop state if needed)
+		# Do NOT restart JUMP animation if it finished (it should be one-shot)
+		if state != BasePlayer.PlayerState.JUMP and skin and skin.animated_sprite and not skin.animated_sprite.is_playing() and state != BasePlayer.PlayerState.IDLE:
+			skin.play_animation(target_anim) # Resilience against accidental stops
+
 
 func _update_rotation(delta: float) -> void:
 	# Lock rotation during attack to prevent visual desync of the pickaxe

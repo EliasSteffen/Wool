@@ -1,6 +1,7 @@
 extends BaseConstants
 
 const DEFAULT_MOVE_SPEED: float = 400.0
+const IDLE_ANIMATION_DELAY: float = 2.0
 
 func _ready() -> void:
 	settings = {
