@@ -354,12 +354,13 @@ func _handle_input() -> void:
 
 	# Jump (only if not underwater) -> Uses coyote time or floor check
 	if not is_underwater and Input.is_action_just_pressed("jump"):
+		# print("DEBUG: Jump input. OnFloor: %s, Coyote: %s, JustJumped: %s, VelY: %s" % [is_on_floor(), _coyote_timer, _just_jumped, velocity.y])
 		if is_on_floor() or _coyote_timer > 0.0:
 			_jump()
 		else:
-			# Debug why jump failed
-			# print("Jump failed: OnFloor=%s, Coyote=%s" % [is_on_floor(), _coyote_timer])
 			pass
+			# print("Jump failed: OnFloor=%s, Coyote=%s" % [is_on_floor(), _coyote_timer])
+
 
 	# Swim Up with Jump button
 	if is_underwater and Input.is_action_pressed("jump"):
@@ -497,10 +498,16 @@ func _handle_ground_air_movement(delta: float) -> void:
 
 		# Apply a tiny downward force to ensure 'is_on_floor()' remains true and snapping works reliably
 		# This prevents "floating" when moving down slopes rapidly
+		# print("DEBUG: Applying stick-to-floor force")
 		velocity.y += 2.0
 	else:
 		# Global movement in air
 		velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
+
+		# Allow jumping immediately even if floor_snap_length was set to 0 previously
+		if _just_jumped:
+			floor_snap_length = 0.0
+
 
 	# Apply push slowdown if pushing
 	if push_feature and push_feature.is_pushing():
@@ -534,10 +541,14 @@ func _jump() -> void:
 	if wings_feature and wings_feature.enabled and wings_feature.is_active():
 		jump_power *= wings_feature.get_jump_boost()
 
+	# Apply directly, ignoring previous frame overwrites
 	velocity.y = jump_power
 
 	# Disable floor snapping for this frame to allow takeoff
 	floor_snap_length = 0.0
+	# Nudge up slightly to break floor contact immediately
+	position.y -= 2.0  # Increased nudge to ensure we clear the ground collision
+
 	_just_jumped = true
 	_coyote_timer = 0.0 # Consume coyote time
 

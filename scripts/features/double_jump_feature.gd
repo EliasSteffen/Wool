@@ -24,6 +24,11 @@ func _ready() -> void:
 		"max_air_jumps": "max_air_jumps",
 		"air_jump_power_multiplier": "air_jump_power_multiplier"
 	})
+
+	# Fallback if config failed/returned 0, ensure at least 1 jump
+	if max_air_jumps <= 0:
+		max_air_jumps = 1
+
 	activate()
 
 # === PUBLIC METHODS ===
@@ -96,6 +101,10 @@ func _perform_air_jump(character: BaseCharacter) -> void:
 		# Negate jump_velocity because Y-up is negative in Godot
 		var jump_power: float = -jump_vel * air_jump_power_multiplier
 		character.velocity.y = jump_power
+
+		# Reset floor snapping to ensure we detach from any surfaces immediately
+		character.floor_snap_length = 0.0
+
 		_jumps_remaining -= 1
 		# print("DoubleJump: Performed air jump! New Velocity Y: %s, Remaining: %s" % [character.velocity.y, _jumps_remaining])
 	else:

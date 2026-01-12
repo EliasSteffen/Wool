@@ -78,10 +78,6 @@ func _physics_process(delta: float) -> void:
 	# Apply movement
 	move_and_slide()
 
-	# Apply rope constraint AFTER movement (if grappling)
-	_apply_grapple_constraint()
-
-# === PUBLIC METHODS ===
 
 ## Setup tweakable values from Autoload
 func _setup_tweakables() -> void:
