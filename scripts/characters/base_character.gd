@@ -370,4 +370,14 @@ func _apply_grapple_constraint() -> void:
 		# Project velocity to be tangent to rope (remove radial component)
 		var velocity_radial: float = velocity.dot(direction)
 		if velocity_radial < 0:  # Only remove outward velocity
-			velocity -= direction * velocity_radial
+			var tangential_velocity: Vector2 = velocity - (direction * velocity_radial)
+			# Redirect full speed into tangential direction (frictionless rope)
+			# preventing speed loss on impact, but avoiding energy generation.
+			var current_speed: float = velocity.length()
+			var tangential_dir: Vector2 = tangential_velocity.normalized()
+
+			if tangential_velocity.length_squared() > 1.0:
+				velocity = tangential_dir * current_speed
+			else:
+				# Fallback if falling perfectly straight down: standard inelastic stop
+				velocity = tangential_velocity
