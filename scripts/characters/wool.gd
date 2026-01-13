@@ -138,13 +138,36 @@ func _play_animation_for_state(state: PlayerState) -> void:
 	match state:
 		PlayerState.IDLE: target_anim = "idle"
 		PlayerState.WALK: target_anim = "walk"
-		PlayerState.GRAPPLE: target_anim = "grapple"
+		PlayerState.GRAPPLE:
+			# Determine directional grapple animation
+			target_anim = "grapple" # Default (idle grapple)
+
+			if grappling_feature and grappling_feature.is_active():
+				var nail = grappling_feature.get_target_nail()
+				if nail:
+					# Calculate angular velocity/direction relative to nail
+					# A simple cross product of Rope Vector and Velocity gives swing direction
+					var rope_vector = nail.global_position - global_position
+					# 2D Cross Product: (Ax * By) - (Ay * Bx)
+					# R x V > 0 => CW (in Godot Y-Down)
+					# R x V < 0 => CCW
+					var cross = rope_vector.cross(velocity)
+
+					# Threshold to prevent flickering near apex of swing
+					var swing_threshold = 5000.0 # Adjust based on scale/speed observation
+
+					if cross > swing_threshold:
+						target_anim = "grapple_cw"
+					elif cross < -swing_threshold:
+						target_anim = "grapple_ccw"
+					else:
+						target_anim = "grapple"
+
 		PlayerState.JUMP: target_anim = "jump"
 
 	if skin:
 		# PLAY ANIMATION
 		# Only play if the animation actually changed.
-		# This allows non-looping animations (like Jump) to finish properly without being restarted.
 		if target_anim != _last_played_anim:
 			# SPECIAL CASE: Skip windup for Jump (Frame 5 Start)
 			if target_anim == "jump":
@@ -194,12 +217,12 @@ func _update_rotation(delta: float) -> void:
 
 			# "Schwung holen" Animation Logic
 			# 1. Detect Impulse
-			if Input.is_action_just_pressed("move_left"):
-				# Move Left -> Kick CCW (Feet Right) for momentum "Wind Up"
-				_grapple_kick = deg_to_rad(-80.0)
-			elif Input.is_action_just_pressed("move_right"):
-				# Move Right -> Kick CW (Feet Left) for momentum "Wind Up"
-				_grapple_kick = deg_to_rad(80.0)
+			# if Input.is_action_just_pressed("move_left"):
+			# 	# Move Left -> Kick CCW (Feet Right) for momentum "Wind Up"
+			# 	_grapple_kick = deg_to_rad(-80.0)
+			# elif Input.is_action_just_pressed("move_right"):
+			# 	# Move Right -> Kick CW (Feet Left) for momentum "Wind Up"
+			# 	_grapple_kick = deg_to_rad(80.0)
 
 			# 2. Decay Impulse (Slower decay for better visibility)
 			_grapple_kick = move_toward(_grapple_kick, 0.0, delta * 3.0)

@@ -47,10 +47,6 @@ var _picked_up_features: Array[Feature] = []
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
-@onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
-@onready var double_jump_feature: DoubleJumpFeature = get_feature_by_type(DoubleJumpFeature)
-@onready var glide_feature: GlideFeature = get_feature_by_type(GlideFeature)
-@onready var swim_feature: SwimFeature = get_feature_by_type(SwimFeature)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -73,7 +69,7 @@ func _ready() -> void:
 	call_deferred("_update_form_state")
 
 	# Setup debug UI
-	call_deferred("_setup_debug_ui")
+	# call_deferred("_setup_debug_ui")
 	call_deferred("_setup_interaction_prompt_label")
 
 func die() -> void:
@@ -138,10 +134,6 @@ func _setup_player_features() -> void:
 
 	# First, get references to known feature types for easy access
 	grappling_feature = get_feature_by_type(GrapplingFeature)
-	wings_feature = get_feature_by_type(WingsFeature)
-	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
-	glide_feature = get_feature_by_type(GlideFeature)
-	swim_feature = get_feature_by_type(SwimFeature)
 
 	# Clear lists
 	_default_features.clear()
@@ -212,6 +204,13 @@ func _process(delta: float) -> void:
 	_update_rotation(delta) # Update facing first
 	_update_interaction_prompt()
 
+	# --- ANIMATION STATE MACHINE ---
+	var new_state = _calculate_player_state()
+	if new_state != current_anim_state or _should_force_animation_update():
+		current_anim_state = new_state
+		_play_animation_for_state(current_anim_state)
+	# -------------------------------
+
 # === OVERRIDDEN METHODS ===
 
 func _process_physics(delta: float) -> void:
@@ -236,9 +235,11 @@ func _process_physics(delta: float) -> void:
 # === PRIVATE METHODS ===
 
 func _handle_input() -> void:
-	_direction = Input.get_axis("move_left", "move_right")
+	# _direction = Input.get_axis("move_left", "move_right")
+	_direction = 0.0
 	# Use ui_up/down as default vertical controls since move_up/down are not defined
-	_vertical_direction = Input.get_axis("ui_up", "ui_down")
+	# _vertical_direction = Input.get_axis("ui_up", "ui_down")
+	_vertical_direction = 0.0
 
 	var is_underwater := false
 	if get_active_terrain_of_type(UnderWaterTerrain) != null:
@@ -254,14 +255,12 @@ func _handle_input() -> void:
 			# print("Jump failed: OnFloor=%s, Coyote=%s" % [is_on_floor(), _coyote_timer])
 
 
-	# Swim Up with Jump button
-	if is_underwater and Input.is_action_pressed("jump"):
-		_vertical_direction = -1.0
+
 
 	# Attack
 	# "attack" action is mapped to input (e.g. mouse click or key)
-	if Input.is_action_just_pressed("attack"):
-		attack()
+	# if Input.is_action_just_pressed("attack"):
+	# 	attack()
 
 	# Debug: Toggle features with number keys
 	_handle_debug_feature_toggle()
@@ -272,12 +271,6 @@ func _toggle_feature(key: int, feature_ref: Feature, feature_name: String) -> vo
 			_debug_key_pressed[key] = true
 			if feature_ref:
 				feature_ref.enabled = not feature_ref.enabled
-				# Reactivate wings if re-enabled
-				if feature_ref is WingsFeature:
-					if feature_ref.enabled:
-						feature_ref.activate()
-					else:
-						feature_ref.deactivate()
 				print("%s: %s" % [feature_name, "ON" if feature_ref.enabled else "OFF"])
 			else:
 				print("%s: NOT FOUND (add to Features container)" % feature_name)
@@ -285,10 +278,7 @@ func _toggle_feature(key: int, feature_ref: Feature, feature_name: String) -> vo
 		_debug_key_pressed[key] = false
 
 func _handle_debug_feature_toggle() -> void:
-	_toggle_feature(KEY_1, double_jump_feature, "DoubleJump")
-	_toggle_feature(KEY_2, glide_feature, "Glide")
 	_toggle_feature(KEY_3, grappling_feature, "Grappling")
-	_toggle_feature(KEY_4, wings_feature, "Wings")
 
 func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
@@ -346,9 +336,7 @@ func _handle_underwater_movement(delta: float, underwater_terrain: UnderWaterTer
 
 	var speed: float = move_speed * underwater_terrain.slowdown_factor
 
-	# Apply swim boost if available
-	if swim_feature and swim_feature.is_active():
-		speed *= swim_feature.get_swim_speed_multiplier()
+
 
 	# Horizontal movement (always controlled)
 	var target_velocity_x: float = _direction * speed
@@ -423,9 +411,7 @@ func _jump() -> void:
 
 	var jump_power: float = -effective_jump_velocity
 
-	# Apply wings boost if available
-	if wings_feature and wings_feature.enabled and wings_feature.is_active():
-		jump_power *= wings_feature.get_jump_boost()
+
 
 	# Apply directly, ignoring previous frame overwrites
 	velocity.y = jump_power

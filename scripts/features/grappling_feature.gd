@@ -144,16 +144,17 @@ func get_target_nail() -> Interaction:
 # === OVERRIDDEN METHODS ===
 
 func handle_input(character: BaseCharacter) -> void:
-	if Input.is_action_just_pressed("interact"):
-		# Try immediately
-		_try_start_grapple(character)
-
-		# If not successful immediately, start buffer timer
-		if not is_active():
-			_input_buffer_timer = 0.15 # 150ms buffer
-
-	if Input.is_action_just_released("interact"):
-		release()
+	pass
+	# if Input.is_action_just_pressed("interact"):
+	# 	# Try immediately
+	# 	_try_start_grapple(character)
+	#
+	# 	# If not successful immediately, start buffer timer
+	# 	if not is_active():
+	# 		_input_buffer_timer = 0.15 # 150ms buffer
+	#
+	# if Input.is_action_just_released("interact"):
+	# 	release()
 
 func _try_start_grapple(character: BaseCharacter) -> void:
 	var nail: Nail = _find_nearest_nail(character)

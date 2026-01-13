@@ -27,11 +27,7 @@ func _ready() -> void:
 		body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node2D) -> void:
-	print("KillZone detected body: ", body.name)
-
-	# Check if the body is a character (Player or Enemy)
 	if body is BaseCharacter:
-		print("Character entered KillZone! Killing...")
 		body.die()
 
 func _reset_game() -> void:
