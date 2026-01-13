@@ -33,8 +33,6 @@ func update_ui() -> void:
 	text += _get_feature_status_text(KEY_3, _player.grappling_feature, "Grappling")
 	# 4. Wings
 	text += _get_feature_status_text(KEY_4, _player.wings_feature, "Wings")
-	# 5. Cut
-	text += _get_feature_status_text(KEY_5, _player.cut_feature, "Cut", "F")
 
 	# Terrain
 	if _player.current_terrain:

@@ -86,29 +86,10 @@ func _on_enemy_tweakable_changed(category: String, key: String, value: Variant) 
 
 func die() -> void:
 	# Drop features if any
-	if features_node:
-		_drop_features()
+	# (Feature dropping removed)
 
 	# Play death animation if available (TODO)
 	queue_free()
-
-func _drop_features() -> void:
-	var pickup_scene = preload("res://scenes/interactions/feature_pickup.tscn")
-
-	for child in features_node.get_children():
-		if child is Feature:
-			print("Dropping feature: ", child.feature_name)
-			var pickup = pickup_scene.instantiate()
-
-			# Setup pickup synchronously BEFORE adding to tree
-			# This ensures data is copied before the feature/enemy is freed
-			pickup.setup(child)
-
-			# Set position (since it will be a sibling, global_position works, or position = position)
-			pickup.global_position = global_position
-
-			# Add to the world (parent of the enemy)
-			get_parent().call_deferred("add_child", pickup)
 
 # === OVERRIDDEN METHODS ===
 

@@ -9,17 +9,9 @@ extends BasePlayer
 
 # Physics Shapes
 @onready var physics_shape_default: CollisionShape2D = $PhysicsShape
-@onready var physics_shape_double_jump: CollisionShape2D = $PhysicsShape_DoubleJump
-@onready var physics_shape_glide: CollisionShape2D = $PhysicsShape_Glide
-@onready var physics_shape_swim: CollisionShape2D = $PhysicsShape_Swim
-@onready var physics_shape_wings: CollisionShape2D = $PhysicsShape_Glide # Alias for compatibility
 
 # Hitbox Shapes
 @onready var hitbox_shape_default: CollisionShape2D = $HitboxArea/HitboxShape
-@onready var hitbox_shape_double_jump: CollisionShape2D = $HitboxArea/HitboxShape_DoubleJump
-@onready var hitbox_shape_glide: CollisionShape2D = $HitboxArea/HitboxShape_Glide
-@onready var hitbox_shape_swim: CollisionShape2D = $HitboxArea/HitboxShape_Swim
-@onready var hitbox_shape_wings: CollisionShape2D = $HitboxArea/HitboxShape_Glide # Alias for compatibility
 
 # Pickaxe State
 var _initial_pickaxe_position: Vector2
@@ -29,33 +21,10 @@ var _initial_pickaxe_centered: bool = true
 var _initial_pickaxe_offset: Vector2 = Vector2.ZERO
 var _is_attacking: bool = false
 var _is_jumping_active: bool = false # Tracks if a jump was voluntarily initiated
+var _game_started: bool = false # Tracks if the game has started
 var _current_shape_animation: String = ""
 var _idle_timer: float = 0.0
 var _last_played_anim: String = ""
-
-enum FormState { NORMAL, BUNNY, FISH, EAGLE }
-var current_form: FormState = FormState.NORMAL
-
-const ANIMATION_MAP = {
-	FormState.NORMAL: {
-		BasePlayer.PlayerState.IDLE: "idle",
-		BasePlayer.PlayerState.WALK: "walk",
-		BasePlayer.PlayerState.GRAPPLE: "grapple",
-		BasePlayer.PlayerState.JUMP: "jump",
-	},
-	FormState.BUNNY: {
-		BasePlayer.PlayerState.IDLE: "double-jump_idle",
-		BasePlayer.PlayerState.WALK: "double-jump"
-	},
-	FormState.FISH: {
-		BasePlayer.PlayerState.IDLE: "swim_idle",
-		BasePlayer.PlayerState.WALK: "swim"
-	},
-	FormState.EAGLE: {
-		BasePlayer.PlayerState.IDLE: "glide_idle",
-		BasePlayer.PlayerState.WALK: "glide"
-	}
-}
 
 func _ready() -> void:
 	super._ready()
@@ -82,22 +51,11 @@ func _ready() -> void:
 			if not pickaxe_hitbox.body_entered.is_connected(_on_pickaxe_hit_body):
 				pickaxe_hitbox.body_entered.connect(_on_pickaxe_hit_body)
 
-	_update_shapes("default")
-
 func _on_pickaxe_hit_body(body: Node2D) -> void:
 	if body is BaseEnemy and body.has_method("take_damage"):
 		body.take_damage(100) # Instakill for now purely based on request context? Or typical damage?
 		# Apply knockback?
 		# print("Hit enemy: ", body.name)
-
-func _update_skin_appearance() -> void:
-	super._update_skin_appearance()
-
-	# Use the actual animation being played by the skin to update shapes
-	if skin and skin.animated_sprite:
-		_update_shapes(skin.animated_sprite.animation)
-	else:
-		_update_shapes("default")
 
 func _process(delta: float) -> void:
 	super._process(delta)
@@ -107,49 +65,11 @@ func _process(delta: float) -> void:
 	else:
 		_idle_timer = 0.0
 
-	_update_pickaxe_visual()
-
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
 
 func _jump() -> void:
 	super._jump()
 	_is_jumping_active = true
-
-func checkpoint_reached() -> void:
-	super.checkpoint_reached()
-
-	# Reset picked up features
-	for feature in _picked_up_features:
-		feature.enabled = false
-		feature.deactivate()
-
-	_picked_up_features.clear()
-
-	current_form = FormState.NORMAL
-
-	# Update appearances
-	_update_feature_references()
-	_update_form_state()
-	_update_skin_appearance()
-	_update_debug_ui()
-
-func _update_form_state() -> void:
-	# Determine form based on active/enabled pickupable features
-	# Priority: SWIM > GLIDE > DOUBLE_JUMP > NORMAL
-
-	var old_form = current_form
-
-	if swim_feature and swim_feature.enabled:
-		current_form = FormState.FISH
-	elif glide_feature and glide_feature.enabled:
-		current_form = FormState.EAGLE
-	elif double_jump_feature and double_jump_feature.enabled:
-		current_form = FormState.BUNNY
-	else:
-		current_form = FormState.NORMAL
-
-	if old_form != current_form:
-		print("Wool: Form Update -> ", FormState.keys()[current_form])
 
 func _calculate_player_state() -> PlayerState:
 	if grappling_feature and grappling_feature.is_active():
@@ -158,19 +78,12 @@ func _calculate_player_state() -> PlayerState:
 	# Immediate Jump Response on Input or Flag
 	var jump_just_pressed = Input.is_action_just_pressed("jump")
 
-	if current_form == FormState.NORMAL:
-		if _is_jumping_active or jump_just_pressed:
-			return PlayerState.JUMP
+	if _is_jumping_active or jump_just_pressed:
+		return PlayerState.JUMP
 
 	# Floating/Falling State
-	if not is_on_floor() and current_form != FormState.FISH:
-		if current_form != FormState.NORMAL:
-			return PlayerState.JUMP
-		# For Normal Form: Fall through to check movement (WALK)
-		# This prevents JUMP animation flickering when running down slopes
-
-	if current_form == FormState.FISH and not is_zero_approx(velocity.y):
-		return PlayerState.WALK
+	if not is_on_floor():
+		return PlayerState.JUMP
 
 	# Check for horizontal movement (Walking)
 	if not is_zero_approx(velocity.x):
@@ -178,14 +91,7 @@ func _calculate_player_state() -> PlayerState:
 
 	return PlayerState.IDLE
 
-var _last_rendered_form: FormState = FormState.NORMAL
-
 func _should_force_animation_update() -> bool:
-	# Only force update if Form changed, to avoid per-frame logic interfering with running animations
-	if current_form != _last_rendered_form:
-		_last_rendered_form = current_form
-		return true
-
 	# FORCE UPDATE FOR IDLE DELAY
 	if current_anim_state == PlayerState.IDLE:
 		# If timer just crossed threshold, force update to start playing animation
@@ -203,32 +109,21 @@ func _should_force_animation_update() -> bool:
 	return false
 
 func _play_animation_for_state(state: PlayerState) -> void:
-	var target_anim = "default"
+	var target_anim = "idle"
 
-	if ANIMATION_MAP.has(current_form) and ANIMATION_MAP[current_form].has(state):
-		target_anim = ANIMATION_MAP[current_form][state]
+	match state:
+		PlayerState.IDLE: target_anim = "idle"
+		PlayerState.WALK: target_anim = "walk"
+		PlayerState.GRAPPLE: target_anim = "grapple"
+		PlayerState.JUMP: target_anim = "jump"
 
 	if skin:
-		# FALLBACK LOGIC for missing animations
-		if skin.animated_sprite and not skin.animated_sprite.sprite_frames.has_animation(target_anim):
-			# 1. Try generic "idle" for unset idle animations (fallback)
-			if target_anim.ends_with("_idle"):
-				var base_name = target_anim.replace("_idle", "")
-				if skin.animated_sprite.sprite_frames.has_animation(base_name):
-					target_anim = base_name
-				elif skin.animated_sprite.sprite_frames.has_animation("idle"):
-					target_anim = "idle"
-			# 2. Last resort fallback
-			elif not skin.animated_sprite.sprite_frames.has_animation(target_anim):
-				if current_form == FormState.NORMAL:
-					target_anim = "walk" if state == BasePlayer.PlayerState.WALK else "idle"
-
 		# PLAY ANIMATION
 		# Only play if the animation actually changed.
 		# This allows non-looping animations (like Jump) to finish properly without being restarted.
 		if target_anim != _last_played_anim:
 			# SPECIAL CASE: Skip windup for Jump (Frame 5 Start)
-			if target_anim == "jump" and current_form == FormState.NORMAL:
+			if target_anim == "jump":
 				skin.play_animation(target_anim)
 				if skin.animated_sprite:
 					skin.animated_sprite.frame = 5
@@ -237,7 +132,7 @@ func _play_animation_for_state(state: PlayerState) -> void:
 				skin.play_animation(target_anim)
 
 			_last_played_anim = target_anim
-		elif target_anim == "walk" or target_anim.ends_with("idle") or target_anim == "idle":
+		elif target_anim == "walk" or target_anim == "idle":
 			# Ensure looping animations are playing (in case they stopped due to frame errors)
 			if skin.animated_sprite and not skin.animated_sprite.is_playing():
 				skin.animated_sprite.play()
@@ -351,49 +246,7 @@ func _update_rotation(delta: float) -> void:
 			# Also sync position offset
 			$HitboxArea.position.y = skin.position.y
 
-func _update_shapes(animation_name: String) -> void:
-	# OPTIMIZATION: Only update shapes if animation actually changed.
-	# Prevents physics engine flicker where shapes are disabled/enabled every frame.
-	if _current_shape_animation == animation_name:
-		return
 
-	_current_shape_animation = animation_name
-
-	# Disable all shapes first
-	_disable_all_shapes()
-
-	# Enable specific shapes based on animation (handle both moving and idle variants)
-	var base_anim = animation_name.replace("_idle", "")
-
-	match base_anim:
-		"wings":
-			if physics_shape_wings: physics_shape_wings.set_deferred("disabled", false)
-			if hitbox_shape_wings: hitbox_shape_wings.set_deferred("disabled", false)
-		"swim":
-			if physics_shape_swim: physics_shape_swim.set_deferred("disabled", false)
-			if hitbox_shape_swim: hitbox_shape_swim.set_deferred("disabled", false)
-		"glide":
-			if physics_shape_glide: physics_shape_glide.set_deferred("disabled", false)
-			if hitbox_shape_glide: hitbox_shape_glide.set_deferred("disabled", false)
-		"double-jump":
-			if physics_shape_double_jump: physics_shape_double_jump.set_deferred("disabled", false)
-			if hitbox_shape_double_jump: hitbox_shape_double_jump.set_deferred("disabled", false)
-		_:
-			if physics_shape_default: physics_shape_default.set_deferred("disabled", false)
-			if hitbox_shape_default: hitbox_shape_default.set_deferred("disabled", false)
-
-func _disable_all_shapes() -> void:
-	if physics_shape_default: physics_shape_default.set_deferred("disabled", true)
-	if physics_shape_double_jump: physics_shape_double_jump.set_deferred("disabled", true)
-	if physics_shape_glide: physics_shape_glide.set_deferred("disabled", true)
-	if physics_shape_swim: physics_shape_swim.set_deferred("disabled", true)
-	if physics_shape_wings: physics_shape_wings.set_deferred("disabled", true)
-
-	if hitbox_shape_default: hitbox_shape_default.set_deferred("disabled", true)
-	if hitbox_shape_double_jump: hitbox_shape_double_jump.set_deferred("disabled", true)
-	if hitbox_shape_glide: hitbox_shape_glide.set_deferred("disabled", true)
-	if hitbox_shape_swim: hitbox_shape_swim.set_deferred("disabled", true)
-	if hitbox_shape_wings: hitbox_shape_wings.set_deferred("disabled", true)
 
 func attack() -> void:
 	if _is_attacking or not pickaxe:
@@ -613,51 +466,86 @@ func _update_pickaxe_visual() -> void:
 		# ----------------------------------------
 
 ## Override to handle Wool-specific shape mirroring
+# Use BasePlayer logic primarily, but force pickaxe update
 func _update_facing_direction(is_facing_left: bool) -> void:
 	# Call base to update skin and hitbox scale
 	super._update_facing_direction(is_facing_left)
 
-	# Manually update PhysicsShapes positions
-	_update_physics_shapes_facing(is_facing_left)
-
 	# Force pickaxe visual update immediately
 	_update_pickaxe_visual()
 
-## Helper to flip PhysicsShapes positions
-func _update_physics_shapes_facing(is_facing_left: bool) -> void:
-	# Default shape (usually centered, but strictness is good)
-	if physics_shape_default: _flip_shape_pos(physics_shape_default, is_facing_left)
 
-	# Feature shapes (often offset)
-	if physics_shape_double_jump: _flip_shape_pos(physics_shape_double_jump, is_facing_left)
-	if physics_shape_glide: _flip_shape_pos(physics_shape_glide, is_facing_left)
-	if physics_shape_swim: _flip_shape_pos(physics_shape_swim, is_facing_left)
-	if physics_shape_wings: _flip_shape_pos(physics_shape_wings, is_facing_left)
+# === MOBILE / ONE-BUTTON GAMEPLAY LOGIC ===
+# Overrides BasePlayer input handling for the requested mobile loop.
 
-## Helper to flip a single shape's position based on direction
-## Assumes positive X in editor is "Right"
-func _flip_shape_pos(shape: Node2D, is_facing_left: bool) -> void:
-	if not shape: return
+func _handle_input() -> void:
+	# 1. Unified Input Action: "jump" (Space / Touch / Click)
+	# We treat any main action as the single input.
+	var input_pressed: bool = Input.is_action_pressed("jump")
+	var input_just_pressed: bool = Input.is_action_just_pressed("jump")
 
-	# We use ABS to always restore 'Right' side magnitude, then negate for 'Left'
-	var current_x = shape.position.x
+	if not _game_started:
+		_direction = 0.0
+		if input_just_pressed:
+			_game_started = true
+			_jump()
+			_direction = 1.0
+			velocity.x = move_speed # Instant burst to right
+		return
 
-	# Heuristic: If we don't store initial positions, we might get drift if we just flip sign.
-	# But if we assume the shape is currently correct for *some* direction, we can't be sure which.
-	# HACK: We assume the shape's ABSOLUTE x position is correct for one side.
-	# Since shapes are usually saved in "Right" facing state in editor (positive X or whatever offset).
+	# Auto-run right
+	_direction = 1.0
 
-	# Better approach: We should have stored initial positions in _ready.
-	# But since I didn't want to add 10 variables, let's use the dictionary approach NOW.
-	if not _initial_shape_positions.has(shape):
-		_initial_shape_positions[shape] = shape.position
+	# 2. Ground Logic: Tap to Jump
+	if is_on_floor():
+		if input_just_pressed:
+			_jump()
 
-	var initial_pos = _initial_shape_positions[shape]
-
-	if is_facing_left:
-		# Mirror X relative to parent (Root/0)
-		shape.position.x = -initial_pos.x
+	# 3. Air Logic: Hold to Grapple / Release to Fly
 	else:
-		shape.position.x = initial_pos.x
+		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
 
-var _initial_shape_positions: Dictionary = {}
+		# Allow grapple activation only if we are NOT in the initial jump frame
+		# (Though typically distinct taps are handled, a hold is needed)
+		if input_pressed:
+			# HOLDING
+			if not is_grappling:
+				var best_nail: Interaction = _find_best_grapple_target()
+				if best_nail:
+					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
+		else:
+			# RELEASED
+			if is_grappling:
+				grappling_feature.release()
+
+	# 4. Vertical Input (Swim/Climb) - currently zeroed for one-button simplicity
+	_vertical_direction = 0.0
+
+func _find_best_grapple_target() -> Interaction:
+	var best_target: Interaction = null
+	var min_dist: float = 9999999.0 # Squared distance
+
+	# Use built-in nearby_interactions from BaseCharacter
+	for interaction in nearby_interactions:
+		if interaction is Nail and not interaction.is_being_used():
+			var dist_sq = global_position.distance_squared_to(interaction.global_position)
+			if dist_sq < min_dist:
+				min_dist = dist_sq
+				best_target = interaction
+
+	return best_target
+
+func _handle_grapple_swing_pump(delta: float) -> void:
+	# "Character should automatically swing left and right"
+	# We override the pump logic to be automatic based on momentum orientation.
+
+	# If we have speed, pump in that direction to maintain momentum
+	if abs(velocity.x) > 10.0:
+		_direction = sign(velocity.x)
+	else:
+		# If stalled or starting, nudge forward (Right) or based on position relative to nail?
+		# Nudge Right by default for progress
+		_direction = 1.0
+
+	# Store the auto-direction so super() can use it
+	super._handle_grapple_swing_pump(delta)

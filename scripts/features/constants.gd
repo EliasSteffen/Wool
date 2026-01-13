@@ -21,10 +21,6 @@ func _ready() -> void:
 			"max_air_jumps": { "value": 1, "min": 0, "max": 5, "step": 1 },
 			"air_jump_power_multiplier": { "value": 0.9, "min": 0.1, "max": 2.0, "step": 0.1 }
 		},
-		"Push": {
-			"push_slowdown_factor": { "value": 0.5, "min": 0.1, "max": 1.0, "step": 0.1 },
-			"push_force_multiplier": { "value": 1.0, "min": 0.1, "max": 5.0, "step": 0.1 }
-		},
 		"Wings": {
 			"jump_boost_multiplier": { "value": WINGS_JUMP_BOOST_MULTIPLIER, "min": 1.0, "max": 3.0, "step": 0.1 },
 			"fall_speed_multiplier": { "value": WINGS_FALL_SPEED_MULTIPLIER, "min": 0.1, "max": 1.0, "step": 0.05 },

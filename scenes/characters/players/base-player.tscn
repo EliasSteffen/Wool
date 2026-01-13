@@ -8,7 +8,6 @@ collision_layer = 2
 collision_mask = 5
 script = ExtResource("2_base_player")
 can_control = true
+max_picked_up_features = 1
 
 [node name="Camera2D" type="Camera2D" parent="." index="3"]
-
-[node name="PickupableFeatures" type="Node" parent="." index="4"]

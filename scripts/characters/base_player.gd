@@ -18,7 +18,6 @@ var current_anim_state: PlayerState = PlayerState.IDLE
 
 # === EXPORTED VARIABLES ===
 @export var can_control: bool = true
-@export var max_picked_up_features: int = 1
 
 # === PUBLIC VARIABLES ===
 var acceleration: float
@@ -41,22 +40,17 @@ var _grapple_kick: float = 0.0 # Rotation impulse for grappling "Schwung holen"
 # Feature Management
 var _default_features: Array[Feature] = []
 var _picked_up_features: Array[Feature] = []
-
 # Pickaxe initial state - REMOVED (Specific to Wool)
 # var _initial_pickaxe_position: Vector2
 # ...
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
-@onready var pickupable_features_node: Node = $PickupableFeatures if has_node("PickupableFeatures") else null
-
 @onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
-@onready var push_feature: PushFeature = get_feature_by_type(PushFeature)
 @onready var wings_feature: WingsFeature = get_feature_by_type(WingsFeature)
 @onready var double_jump_feature: DoubleJumpFeature = get_feature_by_type(DoubleJumpFeature)
 @onready var glide_feature: GlideFeature = get_feature_by_type(GlideFeature)
 @onready var swim_feature: SwimFeature = get_feature_by_type(SwimFeature)
-var cut_feature: CutFeature
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -141,18 +135,16 @@ func _setup_player_features() -> void:
 	# Identify default features (those already enabled in the scene)
 	# and picked up features (initially none, unless we save/load state)
 
+
 	# First, get references to known feature types for easy access
 	grappling_feature = get_feature_by_type(GrapplingFeature)
-	push_feature = get_feature_by_type(PushFeature)
 	wings_feature = get_feature_by_type(WingsFeature)
 	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
 	glide_feature = get_feature_by_type(GlideFeature)
 	swim_feature = get_feature_by_type(SwimFeature)
-	cut_feature = get_feature_by_type(CutFeature)
 
 	# Clear lists
 	_default_features.clear()
-	_picked_up_features.clear()
 
 	# 1. Base Features (Always Active)
 	# Features in the main "Features" node are considered default/base features
@@ -167,22 +159,6 @@ func _setup_player_features() -> void:
 				if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
 					child.enabled_changed.connect(_on_feature_enabled_changed)
 
-	# 2. Pickupable Features
-	# Features in "PickupableFeatures" are considered picked up
-	if pickupable_features_node:
-		for child in pickupable_features_node.get_children():
-			if child is Feature:
-				# Ensure feature is registered with BaseCharacter
-				if child not in get_features():
-					add_feature(child)
-
-				# Only track enabled features as "picked up" active features
-				# Disabled features in this node might be placeholders or inactive
-				if child.enabled:
-					_picked_up_features.append(child)
-					if not child.enabled_changed.is_connected(_on_feature_enabled_changed):
-						child.enabled_changed.connect(_on_feature_enabled_changed)
-
 	_update_skin_appearance()
 
 ## Called when a checkpoint is reached.
@@ -192,102 +168,10 @@ func checkpoint_reached() -> void:
 
 ## Called when a new feature is picked up (e.g. from FeaturePickup)
 func pickup_feature(new_feature: Feature) -> void:
-	if not new_feature:
-		return
-
-	print("Player: Attempting to pickup feature type: ", new_feature.get_script().resource_path)
-
-	var feature_to_activate: Feature = null
-
-	# Check if we have this feature in our "pickupable" list
-	if pickupable_features_node:
-		for child in pickupable_features_node.get_children():
-			if child.get_script() == new_feature.get_script():
-				feature_to_activate = child
-				break
-
-	if feature_to_activate:
-		# We found a pre-existing version, so we don't need the new instance
+	# Deprecated: Feature picking up is simplified.
+	# Features should be pre-added to the player scena or enabled via other means.
+	if new_feature:
 		new_feature.queue_free()
-	else:
-		# We don't have this feature yet, so we accept the new instance!
-		print("Player acquiring NEW feature instance: %s" % new_feature.feature_name)
-		feature_to_activate = new_feature
-
-		# Parent it to the appropriate container
-		if pickupable_features_node:
-			pickupable_features_node.add_child(new_feature)
-		elif features_container:
-			features_container.add_child(new_feature)
-		else:
-			push_error("Player has no container to hold new feature!")
-			new_feature.queue_free()
-			return
-
-	# Manage picked up features limit
-	if _picked_up_features.size() >= max_picked_up_features:
-		var old_feature = _picked_up_features.pop_front()
-		if old_feature:
-			old_feature.enabled = false
-			# Make sure we don't accidentally remove a feature we just re-picked up
-			if old_feature == feature_to_activate:
-				_picked_up_features.append(old_feature)
-
-	if feature_to_activate not in _picked_up_features:
-		_picked_up_features.append(feature_to_activate)
-
-	feature_to_activate.enabled = true
-	feature_to_activate.activate() # Explicitly activate the feature
-	_update_form_state()
-
-	# Ensure it is in the main features list for processing
-	if feature_to_activate not in get_features():
-		print("Adding picked up feature to main list: %s" % feature_to_activate.feature_name)
-		add_feature(feature_to_activate)
-
-	# Connect signal if not already connected
-	if not feature_to_activate.enabled_changed.is_connected(_on_feature_enabled_changed):
-		feature_to_activate.enabled_changed.connect(_on_feature_enabled_changed)	# Update references if needed
-	_update_feature_references()
-	_update_skin_appearance()
-	_update_debug_ui()
-
-func _deactivate_picked_up_feature(feature: Feature) -> void:
-	if not feature:
-		return
-	feature.enabled = false
-	feature.deactivate() # Explicitly deactivate
-
-func _drop_feature(feature: Feature) -> void:
-	# Legacy wrapper
-	_deactivate_picked_up_feature(feature)
-
-func _update_feature_references() -> void:
-	# Refresh references to specific features
-	grappling_feature = get_feature_by_type(GrapplingFeature)
-	push_feature = get_feature_by_type(PushFeature)
-	wings_feature = get_feature_by_type(WingsFeature)
-	double_jump_feature = get_feature_by_type(DoubleJumpFeature)
-	glide_feature = get_feature_by_type(GlideFeature)
-	swim_feature = get_feature_by_type(SwimFeature)
-	cut_feature = get_feature_by_type(CutFeature)
-
-func _on_feature_enabled_changed(_enabled: bool) -> void:
-	_update_skin_appearance()
-	_update_debug_ui()
-
-func _update_skin_appearance() -> void:
-	if not skin:
-		return
-
-	# Determine State
-	var new_state = _calculate_player_state()
-
-	# Apply Animation only if state changed (or forced by logic like form change)
-	if current_anim_state != new_state or _should_force_animation_update():
-		current_anim_state = new_state
-		_play_animation_for_state(new_state)
-
 
 func _update_form_state() -> void:
 	# Override in child classes (e.g. Wool)
@@ -303,6 +187,14 @@ func _play_animation_for_state(state: PlayerState) -> void:
 
 	if skin:
 		skin.play_animation(target_anim)
+
+func _update_skin_appearance() -> void:
+	# Virtual method to be overridden by subclasses
+	pass
+
+func _on_feature_enabled_changed(enabled: bool) -> void:
+	_update_skin_appearance()
+	_update_debug_ui()
 
 # Virtual Methods for Override
 func _calculate_player_state() -> PlayerState:
@@ -397,7 +289,6 @@ func _handle_debug_feature_toggle() -> void:
 	_toggle_feature(KEY_2, glide_feature, "Glide")
 	_toggle_feature(KEY_3, grappling_feature, "Grappling")
 	_toggle_feature(KEY_4, wings_feature, "Wings")
-	_toggle_feature(KEY_5, cut_feature, "Cut")
 
 func _handle_feature_inputs() -> void:
 	# Let all features handle their own input
@@ -507,11 +398,6 @@ func _handle_ground_air_movement(delta: float) -> void:
 		# Allow jumping immediately even if floor_snap_length was set to 0 previously
 		if _just_jumped:
 			floor_snap_length = 0.0
-
-
-	# Apply push slowdown if pushing
-	if push_feature and push_feature.is_pushing():
-		velocity.x *= push_feature.get_push_slowdown()
 
 func _apply_slope_velocity_adjustment() -> void:
 	# Deprecated/Unused for movement driving, but kept if needed for other adjustments
