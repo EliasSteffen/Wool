@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="2_4aftr"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
-radius = 104.0
+radius = 1000.0
 
 [node name="Nail" type="Area2D"]
 collision_layer = 4

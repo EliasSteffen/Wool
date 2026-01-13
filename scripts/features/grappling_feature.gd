@@ -179,10 +179,10 @@ func _find_nearest_nail(character: BaseCharacter) -> Nail:
 		# This prevents rejection when a large character is touching the zone edge but their center is far out
 		var scaled_tolerance: float = GRAPPLE_TOLERANCE * max(character.scale.x, character.scale.y)
 
-		# Allow if distance is within radius + tolerance
+		# Allow if distance is within radius + tolerance AND within max_rope_length
 		# This handles cases where character shape overlaps nail shape but centers are far
-		if radius > 0 and distance > (radius + scaled_tolerance):
-			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE])
+		if (radius > 0 and distance > (radius + scaled_tolerance)) or distance > max_rope_length:
+			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f or > MaxLen: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE, max_rope_length])
 			continue
 
 		if distance < nearest_distance:
