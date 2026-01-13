@@ -431,18 +431,7 @@ func _update_pickaxe_visual() -> void:
 		# Scale Y to match distance in local space
 		pickaxe.scale = Vector2(1.0, dist_in_parent / height)
 
-		# Debug
-		print("Nail Global: ", c_nail)
-		print("Pivot Global: ", c_player)
-		print("Pickaxe Rot (deg): ", rad_to_deg(pickaxe.global_rotation))
-		print("Parent Scale: ", scale)
-		
-		# Verification Points
-		var pt_bottom_visual = Vector2(0, 0)
-		var pt_top_visual = Vector2(0, -height)
 
-		print("Edge Top (Global): ", pickaxe.to_global(pt_top_visual))
-		print("Edge Bottom (Global): ", pickaxe.to_global(pt_bottom_visual))
 
 		# Ensure visibility
 		pickaxe.visible = true

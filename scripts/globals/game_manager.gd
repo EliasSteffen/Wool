@@ -26,6 +26,10 @@ var _pause_menu_instance: Node = null
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+	# Add Generic Touch/Click support to "jump" action
+	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
+	# Note: Now also added to project.godot directly for redundancy and export stability.
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if current_state == GameState.PLAYING:

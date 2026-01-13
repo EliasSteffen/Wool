@@ -579,11 +579,10 @@ shape = SubResource("RectangleShape2D_hitbox")
 position = Vector2(219.99998, 39.999996)
 
 [node name="Camera2D" parent="." index="5"]
-limit_enabled = false
 limit_left = 0
-limit_top = 0
-limit_right = 6975
-limit_bottom = 1100
+limit_top = -1170
+limit_right = 2532
+limit_bottom = 0
 limit_smoothed = true
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]

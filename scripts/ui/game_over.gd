@@ -23,9 +23,9 @@ func _input(event: InputEvent) -> void:
 	   (event is InputEventMouseButton and event.pressed) or \
 	   (event is InputEventScreenTouch and event.pressed) or \
 	   (event is InputEventJoypadButton and event.pressed):
-		_return_to_main_menu()
+		_restart_game()
 
-func _return_to_main_menu() -> void:
+func _restart_game() -> void:
 	# Prevent double firing
 	_can_interact = false
 	# Reset time scale
@@ -37,4 +37,5 @@ func _return_to_main_menu() -> void:
 	else:
 		queue_free()
 
-	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
+	# Restart the level
+	GameManager.start_game()

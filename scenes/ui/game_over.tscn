@@ -43,5 +43,5 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 32
 text = "Drücke einen Knopf oder auf den Bildschirm,
-um zum Hauptmenü zurückzukehren"
+um das Level neu zu starten"
 horizontal_alignment = 1

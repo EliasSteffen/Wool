@@ -8,6 +8,7 @@
 size = Vector2(448, 192)
 
 [node name="level_1" type="Node2D"]
+position = Vector2(192, -192)
 
 [node name="Platforms" type="Node2D" parent="."]
 
@@ -26,7 +27,19 @@ position = Vector2(384, 192)
 [node name="Nails" type="Node" parent="."]
 
 [node name="Nail" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(384, -200)
+position = Vector2(576, -392)
 
 [node name="Nail2" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(752, -160)
+position = Vector2(944, -352)
+
+[node name="Nail3" parent="Nails" instance=ExtResource("7_oc4kc")]
+position = Vector2(1312, -400)
+
+[node name="Nail4" parent="Nails" instance=ExtResource("7_oc4kc")]
+position = Vector2(840, -744)
+
+[node name="Nail6" parent="Nails" instance=ExtResource("7_oc4kc")]
+position = Vector2(1120, -544)
+
+[node name="Nail5" parent="Nails" instance=ExtResource("7_oc4kc")]
+position = Vector2(1416, -856)
