@@ -11,7 +11,12 @@ signal grapple_started(target: Vector2)
 signal grapple_ended()
 
 # === EXPORTED VARIABLES ===
-# Removed exports in favor of Tweakables
+
+## Max Rope Length
+## Limits how long the "rope" (pickaxe reach) can extend.
+## If distance to target > max_rope_length, the grapple will connect
+## but constrain the player to this length immediately (pulling them in).
+@export var max_rope_length: float = 300.0
 
 # === PUBLIC VARIABLES ===
 var rope_length: float
@@ -39,8 +44,9 @@ func _ready() -> void:
 		"tension_strength": "tension_strength",
 		"swing_pump_force": "swing_pump_force",
 		"damping": "damping",
-		"initial_pull_strength": "initial_pull_strength"
-	})
+		"initial_pull_strength": "initial_pull_strength",
+		"max_rope_length": "max_rope_length"
+	}, "", ["max_rope_length"])
 
 func _process(delta: float) -> void:
 	# Input Buffering: Retry grapple if button was pressed recently
@@ -68,6 +74,25 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	# This means the rope will be as long as the max grapple distance
 	if nail is Nail:
 		rope_length = nail.get_detection_radius()
+
+		# Adapt rope length to current distance if we are further out (due to scale/tolerance)
+		# This prevents snapping the character into the circle if they grapple from the edge
+		if character:
+			var current_dist: float = character.global_position.distance_to(target_position)
+			if current_dist > rope_length:
+				rope_length = current_dist
+
+		# === LIMIT MAX ROPE LENGTH ===
+		# Override everything if it exceeds the hard limit.
+		# This ensures that even if we are far away, the physics target radius is capped.
+		if rope_length > max_rope_length:
+			rope_length = max_rope_length
+
+			# FORCE IMMEDIATE CONSTRAINT:
+			# If we are clamping, the character is likely far away.
+			# We must ensure the Character is aware that the legal rope is shorter.
+			_has_reached_rope_length = true
+
 		# Safety check: if radius is invalid (0), fallback to distance
 		if rope_length <= 1.0:
 			push_warning("GrapplingFeature: Nail returned invalid radius, falling back to distance.")
@@ -149,9 +174,13 @@ func _find_nearest_nail(character: BaseCharacter) -> Nail:
 		var distance: float = character.global_position.distance_to(nail.global_position)
 		var radius: float = nail.get_detection_radius()
 
+		# Scale tolerance by character scale to support larger characters
+		# This prevents rejection when a large character is touching the zone edge but their center is far out
+		var scaled_tolerance: float = GRAPPLE_TOLERANCE * max(character.scale.x, character.scale.y)
+
 		# Allow if distance is within radius + tolerance
 		# This handles cases where character shape overlaps nail shape but centers are far
-		if radius > 0 and distance > (radius + GRAPPLE_TOLERANCE):
+		if radius > 0 and distance > (radius + scaled_tolerance):
 			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE])
 			continue
 

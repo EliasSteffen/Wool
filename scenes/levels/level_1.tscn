@@ -18,7 +18,7 @@ position = Vector2(32, 96)
 shape = SubResource("RectangleShape2D_ksju7")
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(56, -55.999996)
+position = Vector2(7.9999924, -64)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
 position = Vector2(384, 192)
@@ -26,7 +26,7 @@ position = Vector2(384, 192)
 [node name="Nails" type="Node" parent="."]
 
 [node name="Nail" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(384, -184)
+position = Vector2(384, -200)
 
 [node name="Nail2" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(640, -184)
+position = Vector2(752, -160)

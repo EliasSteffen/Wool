@@ -39,12 +39,17 @@ func _ready() -> void:
 ## Setup tweakable values from Autoload using a dictionary mapping
 ## @param config: A Dictionary mapping "settings_key" -> "script_property_name"
 ## @param category: The category name in FeatureConstants (defaults to feature_name)
-func setup_tweakables_generic(config: Dictionary, category: String = "") -> void:
+## @param skip_initial_load_keys: List of config keys to exclude from initial value loading (preserves Inspector values)
+func setup_tweakables_generic(config: Dictionary, category: String = "", skip_initial_load_keys: Array[String] = []) -> void:
 	if category == "":
 		category = feature_name
 
 	# Initial Load
 	for key in config:
+		# Skip keys explicitly requested to preserve Inspector values
+		if key in skip_initial_load_keys:
+			continue
+
 		var property_name: String = config[key]
 		var val = FeatureConstants.get_value(category, key)
 		if val != null:

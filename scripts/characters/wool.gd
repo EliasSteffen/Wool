@@ -26,6 +26,10 @@ var _current_shape_animation: String = ""
 var _idle_timer: float = 0.0
 var _last_played_anim: String = ""
 
+# Pickaxe Grapple Configuration
+# Assign a Marker2D node here (e.g. child of Pickaxe) to visually define the grapple connection point.
+@export var grapple_marker: Marker2D
+
 func _ready() -> void:
 	super._ready()
 
@@ -65,7 +69,27 @@ func _process(delta: float) -> void:
 	else:
 		_idle_timer = 0.0
 
+	# Keep pickaxe visual updated if grappling (rope effect)
+	if grappling_feature and grappling_feature.is_active():
+		_update_pickaxe_visual()
+	else:
+		# Also update visual when NOT grappling to handle the "restore state" logic continuously
+		# This prevents the pickaxe from getting stuck in a weird state if grapple ends abruptly
+		_update_pickaxe_visual()
+
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
+
+func get_grapple_offset() -> Vector2:
+	# Use the visual marker if assigned
+	if grapple_marker:
+		return grapple_marker.global_position - global_position
+
+	# Fallback: Calculate from pickaxe center if it exists
+	if pickaxe:
+		# Default to pickaxe center/origin
+		return pickaxe.global_position - global_position
+
+	return Vector2.ZERO
 
 func _jump() -> void:
 	super._jump()
@@ -376,31 +400,64 @@ func _update_pickaxe_visual() -> void:
 		# Original Sprite Dimensions
 		var texture_size: Vector2 = pickaxe.texture.get_size()
 
-		# Stretch along X axis to fit length, preserve Y (thickness)
-		# Assuming the needle sprite is roughly horizontal.
-		var scale_x: float = rope_distance / texture_size.x
-		# Use absolute scale X but keep Y 1.0
-		pickaxe.scale = Vector2(scale_x, 1.0)
+		# --- VISUAL SCALING LOGIC ---
+		# User Request: Stretch along X axis (Width) to reach the nail
 
-		# Position at midpoint
-		var midpoint: Vector2 = c_player + rope_vector * 0.5
-		pickaxe.global_position = midpoint
+		# 1. Position: Pivot (Spielerhand)
+		pickaxe.global_position = c_player
 
-		# Align to rope direction.
-		# Adjusted rotation based on user feedback (-90 deg from previous state)
+		# 2. Richtung: Vektor von Pivot zu Nail (bereits oben definiert)
+		# rope_vector, rope_distance, rope_angle sind schon vorhanden!
+
+		# 3. Rotation: Sprite-Y (-Y Axis) should point to Nail
+		# Standard Sprite points UP (-Y). So we align -Y with rope_vector.
+		# rope_angle is angle of X axis. To make -Y align with X, we rotate +90 deg.
 		pickaxe.global_rotation = rope_angle + PI / 2.0
 
-		# Center sprite
+		# 4. Offset: Ursprung an unteren Rand (EdgeBottom)
+		var height: float = texture_size.y
+		if height < 1.0: height = 1.0
+		# We want the Bottom of the sprite (max Y) to be at (0,0).
+		pickaxe.offset = Vector2(0, -height * 0.5)
 		pickaxe.centered = true
-		pickaxe.offset = Vector2.ZERO
+
+		# 5. Skalierung: Y so, dass EdgeTop = Nail
+		# IMPORTANT: We must calculate distance in PARENT LOCAL SPACE to account for Parent Scaling (e.g. 0.1)
+		# to_local converts Global -> Parent Local (since script is on Parent)
+		var local_start = to_local(c_player)
+		var local_end = to_local(c_nail)
+		var dist_in_parent = local_start.distance_to(local_end)
+
+		# Scale Y to match distance in local space
+		pickaxe.scale = Vector2(1.0, dist_in_parent / height)
+
+		# Debug
+		print("Nail Global: ", c_nail)
+		print("Pivot Global: ", c_player)
+		print("Pickaxe Rot (deg): ", rad_to_deg(pickaxe.global_rotation))
+		print("Parent Scale: ", scale)
+		
+		# Verification Points
+		var pt_bottom_visual = Vector2(0, 0)
+		var pt_top_visual = Vector2(0, -height)
+
+		print("Edge Top (Global): ", pickaxe.to_global(pt_top_visual))
+		print("Edge Bottom (Global): ", pickaxe.to_global(pt_bottom_visual))
+
+		# Ensure visibility
+		pickaxe.visible = true
+		pickaxe.z_index = 10
 	else:
 		if _is_attacking:
 			return
 
 		# Restore initial state
-		pickaxe.visible = true
-		pickaxe.centered = _initial_pickaxe_centered
-		pickaxe.offset = _initial_pickaxe_offset
+		if pickaxe:
+			pickaxe.visible = true
+			pickaxe.centered = _initial_pickaxe_centered
+			pickaxe.offset = _initial_pickaxe_offset
+			pickaxe.scale = _initial_pickaxe_scale
+			pickaxe.z_index = 0
 
 		# Facings
 		var facing_left = skin.scale.x < 0
@@ -472,7 +529,10 @@ func _update_facing_direction(is_facing_left: bool) -> void:
 	super._update_facing_direction(is_facing_left)
 
 	# Force pickaxe visual update immediately
-	_update_pickaxe_visual()
+	# But wrap in check to ensure pickaxe is valid, as this might be called during setup
+	if pickaxe:
+		_update_pickaxe_visual()
+
 
 
 # === MOBILE / ONE-BUTTON GAMEPLAY LOGIC ===
@@ -493,16 +553,20 @@ func _handle_input() -> void:
 			velocity.x = move_speed # Instant burst to right
 		return
 
-	# Auto-run right
-	_direction = 1.0
-
-	# 2. Ground Logic: Tap to Jump
+	# 2. Ground Logic: Auto-run & Tap to Jump
 	if is_on_floor():
+		_direction = 1.0 # Always run right on ground
 		if input_just_pressed:
 			_jump()
 
 	# 3. Air Logic: Hold to Grapple / Release to Fly
 	else:
+		# Preserve momentum direction in air (handle back-swings)
+		if abs(velocity.x) > 10.0:
+			_direction = sign(velocity.x)
+		else:
+			_direction = 1.0
+
 		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
 
 		# Allow grapple activation only if we are NOT in the initial jump frame

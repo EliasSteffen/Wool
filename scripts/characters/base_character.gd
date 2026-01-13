@@ -337,6 +337,10 @@ func _calculate_all_movement_factors(delta: float) -> Vector2:
 
 	return total_factor
 
+## Virtual method to get the local offset for grappling (can be overridden)
+func get_grapple_offset() -> Vector2:
+	return Vector2.ZERO
+
 ## Apply rope constraint when grappling (prevents going beyond rope length)
 func _apply_grapple_constraint() -> void:
 	# Find active grappling feature
@@ -357,14 +361,21 @@ func _apply_grapple_constraint() -> void:
 	if not grappling._has_reached_rope_length:
 		return
 
+	# Calculate offset-adjusted position
+	var offset: Vector2 = get_grapple_offset()
+	var pivot_global_position: Vector2 = global_position + offset
+
 	# Check if beyond rope length
-	var to_grapple: Vector2 = grapple_point - global_position
+	var to_grapple: Vector2 = grapple_point - pivot_global_position
 	var distance: float = to_grapple.length()
 
 	if distance > grappling.rope_length:
 		# Constrain position to rope_length
 		var direction: Vector2 = to_grapple.normalized()
-		global_position = grapple_point - direction * grappling.rope_length
+		var constrained_pivot_pos: Vector2 = grapple_point - direction * grappling.rope_length
+
+		# Move character so pivot is at constrained position
+		global_position = constrained_pivot_pos - offset
 
 		# Project velocity to be tangent to rope (remove radial component)
 		var velocity_radial: float = velocity.dot(direction)

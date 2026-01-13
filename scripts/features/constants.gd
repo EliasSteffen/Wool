@@ -12,7 +12,8 @@ func _ready() -> void:
 			"tension_strength": { "value": 2000.0, "min": 100.0, "max": 5000.0, "step": 100.0 },
 			"swing_pump_force": { "value": 400.0, "min": 0.0, "max": 2000.0, "step": 50.0 },
 			"damping": { "value": 0.995, "min": 0.9, "max": 1.0, "step": 0.001 },
-			"initial_pull_strength": { "value": 1500.0, "min": 100.0, "max": 5000.0, "step": 100.0 }
+			"initial_pull_strength": { "value": 1500.0, "min": 100.0, "max": 5000.0, "step": 100.0 },
+			"max_rope_length": { "value": 300.0, "min": 1.0, "max": 500.0, "step": 1.0 }
 		},
 		"Glide": {
 			"glide_fall_multiplier": { "value": 0.3, "min": 0.05, "max": 1.0, "step": 0.05 }

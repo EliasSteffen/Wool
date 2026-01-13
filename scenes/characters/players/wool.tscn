@@ -1,15 +1,12 @@
-[gd_scene load_steps=87 format=3 uid="uid://b6ta6xfdcfr3h"]
+[gd_scene load_steps=84 format=3 uid="uid://b6ta6xfdcfr3h"]
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Script" uid="uid://cyc3rpi35h3nx" path="res://scripts/characters/wool.gd" id="2_wool"]
 [ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
-[ext_resource type="Script" uid="uid://hyomrndp86lr" path="res://scripts/features/double_jump_feature.gd" id="6_double_jump"]
 [ext_resource type="Texture2D" uid="uid://boanqhx2bn1hp" path="res://assets/character/animation-3.png" id="7_4q7dq"]
-[ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="7_glide"]
 [ext_resource type="Texture2D" uid="uid://c682uuf6dvscc" path="res://assets/character/jump.png" id="8_2rcj1"]
 [ext_resource type="Texture2D" uid="uid://ce57q1uiebii0" path="res://assets/character/walk-3.png" id="9_2rcj1"]
-[ext_resource type="Script" uid="uid://biu4s0f5akfsu" path="res://scripts/features/swim_feature.gd" id="9_58tpp"]
 [ext_resource type="Texture2D" uid="uid://bordbegqbbr6g" path="res://assets/character/idle.png" id="9_whd81"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
@@ -542,11 +539,11 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
 size = Vector2(560.00037, 840.00085)
 
-[node name="Wool" instance=ExtResource("1_base_player")]
+[node name="Wool" node_paths=PackedStringArray("grapple_marker") instance=ExtResource("1_base_player")]
 position = Vector2(2.1175824e-22, 0)
 scale = Vector2(0.1, 0.1)
 script = ExtResource("2_wool")
-max_picked_up_features = 1
+grapple_marker = NodePath("")
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(-7.748603e-06, 3.0517564e-05)
@@ -554,9 +551,9 @@ scale = Vector2(0.9999989, 0.9999989)
 shape = SubResource("RectangleShape2D_codar")
 
 [node name="Pickaxe" type="Sprite2D" parent="." index="1"]
-position = Vector2(90.00001, -160)
+position = Vector2(89.99999, -159.99997)
 rotation = 0.5235988
-scale = Vector2(1.0356653, 1.0356653)
+scale = Vector2(1.0356652, 1.0356652)
 texture = ExtResource("3_bs72m")
 
 [node name="Hitbox" type="Area2D" parent="Pickaxe" index="0"]
@@ -588,21 +585,6 @@ limit_top = 0
 limit_right = 6975
 limit_bottom = 1100
 limit_smoothed = true
-
-[node name="DoubleJumpFeature" type="Node2D" parent="PickupableFeatures" index="0"]
-position = Vector2(1.847744e-06, 0)
-script = ExtResource("6_double_jump")
-enabled = false
-
-[node name="GlideFeature" type="Node2D" parent="PickupableFeatures" index="1"]
-position = Vector2(1.847744e-06, 0)
-script = ExtResource("7_glide")
-enabled = false
-
-[node name="SwimFeature" type="Node2D" parent="PickupableFeatures" index="2"]
-position = Vector2(1.847744e-06, 0)
-script = ExtResource("9_58tpp")
-enabled = false
 
 [node name="GrapplingFeature" type="Node2D" parent="Features" index="0"]
 position = Vector2(1.847744e-06, 0)
