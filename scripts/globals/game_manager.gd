@@ -12,7 +12,7 @@ signal state_changed(new_state: GameState)
 enum GameState { MENU, PLAYING, PAUSED }
 
 # === PUBLIC VARIABLES ===
-var current_state: GameState = GameState.MENU
+var current_state: GameState = GameState.PLAYING
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"

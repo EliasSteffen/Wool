@@ -21,6 +21,7 @@ func _build_ui() -> void:
 	# Add Export Button
 	var export_btn = Button.new()
 	export_btn.text = "Export Settings as JSON"
+	export_btn.custom_minimum_size.y = 60 # Mobile touch target
 	export_btn.pressed.connect(_on_export_pressed)
 	container.add_child(export_btn)
 
@@ -56,6 +57,9 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	if type == "bool" or typeof(value) == TYPE_BOOL:
 		var check = CheckBox.new()
 		check.button_pressed = value
+		check.custom_minimum_size = Vector2(60, 60) # Mobile touch target
+		# Scale up the icon visual if possible, or just the container click area
+		check.scale = Vector2(1.5, 1.5) # Slight visual scale
 		check.toggled.connect(func(toggled):
 			registry.set_value(category, key, toggled)
 		)
@@ -64,7 +68,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	elif type == "color" or typeof(value) == TYPE_COLOR:
 		var picker = ColorPickerButton.new()
 		picker.color = value
-		picker.custom_minimum_size.x = 50
+		picker.custom_minimum_size = Vector2(80, 60) # Mobile touch target
 		picker.color_changed.connect(func(col):
 			registry.set_value(category, key, col)
 		)
@@ -74,6 +78,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.custom_minimum_size.y = 60 # Touch height for slider
 		slider.min_value = data.get("min", 0.0)
 		slider.max_value = data.get("max", 1000.0)
 		slider.step = data.get("step", 1.0)
@@ -84,7 +89,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		spinbox.max_value = data.get("max", 1000.0)
 		spinbox.step = data.get("step", 1.0)
 		spinbox.value = value
-		spinbox.custom_minimum_size.x = 80
+		spinbox.custom_minimum_size = Vector2(100, 60) # Larger spinbox
 
 		# Sync Slider -> SpinBox & Registry
 		slider.value_changed.connect(func(new_val):

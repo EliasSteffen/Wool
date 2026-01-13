@@ -26,10 +26,10 @@ func _ready() -> void:
 	_setup_tweakables()
 
 func _setup_tweakables() -> void:
-	slowdown_factor = TerrainConstants.get_value("Water", "slowdown_factor")
-	buoyancy_force = TerrainConstants.get_value("Water", "buoyancy_force")
-	water_resistance = TerrainConstants.get_value("Water", "water_resistance")
-	TerrainConstants.value_changed.connect(_on_tweakable_changed)
+	slowdown_factor = 0.5
+	buoyancy_force = -300.0
+	water_resistance = 0.8
+	# TerrainConstants.value_changed.connect(_on_tweakable_changed)
 
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
 	if category == "Water":

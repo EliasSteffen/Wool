@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://hud1234568aa"]
+
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud")
+
+[node name="PauseButton" type="Button" parent="."]
+custom_minimum_size = Vector2(80, 80)
+offset_left = 48.0
+offset_top = 48.0
+offset_right = 128.0
+offset_bottom = 128.0
+text = "||"

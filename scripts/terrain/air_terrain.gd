@@ -25,9 +25,9 @@ func _ready() -> void:
 	_setup_tweakables()
 
 func _setup_tweakables() -> void:
-	air_resistance = TerrainConstants.get_value("Air", "air_resistance")
-	applies_to_grappling = TerrainConstants.get_value("Air", "applies_to_grappling")
-	TerrainConstants.value_changed.connect(_on_tweakable_changed)
+	air_resistance = 0.98
+	applies_to_grappling = true
+	# TerrainConstants.value_changed.connect(_on_tweakable_changed)
 
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
 	if category == "Air":
