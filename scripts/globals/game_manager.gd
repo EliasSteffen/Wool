@@ -13,6 +13,7 @@ enum GameState { MENU, PLAYING, PAUSED }
 
 # === PUBLIC VARIABLES ===
 var current_state: GameState = GameState.PLAYING
+var current_seed: int = 0
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
@@ -25,6 +26,9 @@ var _pause_menu_instance: Node = null
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Initial seed
+	randomize()
+	current_seed = randi()
 
 	# Add Generic Touch/Click support to "jump" action
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
@@ -41,6 +45,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Start the game (load level 1)
 func start_game() -> void:
+	# If we are in the menu, generate a new seed for a fresh session
+	# If we are already playing (restarting after death), keep the same seed
+	if current_state == GameState.MENU:
+		current_seed = randi()
+		print("GameManager: New session started with seed: ", current_seed)
+	else:
+		print("GameManager: Restarting with existing seed: ", current_seed)
+
 	current_state = GameState.PLAYING
 	get_tree().paused = false
 	get_tree().change_scene_to_file(LEVEL_1_SCENE)

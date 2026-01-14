@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://cplatform1"]
+
+[ext_resource type="Texture2D" uid="uid://c6lslmg4acr3u" path="res://assets/maps/Generated Image January 14, 2026 - 7_38PM.png" id="1_texture"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(536, 160)
+
+[node name="Platform" type="StaticBody2D"]
+collision_layer = 1
+collision_mask = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(4, 160)
+texture = ExtResource("1_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_1")

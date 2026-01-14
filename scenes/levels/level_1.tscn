@@ -1,38 +1,15 @@
-[gd_scene load_steps=17 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=10 format=3 uid="uid://dys6tb5xur5kw"]
 
-[ext_resource type="Script" uid="uid://ew7bt006ouvk" path="res://scripts/utils/collision_visualizer.gd" id="1_6761a"]
 [ext_resource type="Texture2D" uid="uid://c6lslmg4acr3u" path="res://assets/maps/Generated Image January 14, 2026 - 7_38PM.png" id="2_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
 [ext_resource type="Texture2D" uid="uid://cr4f55nv40um1" path="res://assets/maps/background.png" id="6_sk5k4"]
-[ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://hud1234568aa" path="res://scenes/ui/hud.tscn" id="9_hud"]
+[ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
+[ext_resource type="Script" uid="uid://cgqevivipquwm" path="res://scripts/terrain/infinite_border.gd" id="11_border"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
-size = Vector2(536, 160)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_oc4kc"]
-load_path = "res://.godot/imported/Generated Image January 14, 2026 - 7_38PM.png-0c3405deff895e1b5b49957932e890bc.ctex"
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ksju7"]
-size = Vector2(208, 240)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dga24"]
-size = Vector2(942.5, 1005)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qxy0u"]
-size = Vector2(416, 360)
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_excbq"]
-radius = 176.0
-height = 544.0
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_iav0o"]
-radius = 56.0
-height = 171.86243
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_s8va5"]
-size = Vector2(240, 3248)
+size = Vector2(536, 568)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_excbq"]
 size = Vector2(240, 3248)
@@ -40,7 +17,12 @@ size = Vector2(240, 3248)
 [node name="level_1" type="Node2D"]
 position = Vector2(192, -192)
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_mirroring = Vector2(3268, 0)
+
+[node name="Background" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 z_index = -10
 position = Vector2(1442, -1434)
 scale = Vector2(3.1914065, 3.1757813)
@@ -57,193 +39,35 @@ scale = Vector2(0.9953875, 0.9953874)
 texture = ExtResource("2_oc4kc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform"]
-position = Vector2(-4, 112)
+position = Vector2(0, 320)
 shape = SubResource("RectangleShape2D_oc4kc")
 
-[node name="StartPlatform2" type="StaticBody2D" parent="Platforms"]
+[node name="Top Border" type="StaticBody2D" parent="Platforms"]
+position = Vector2(0, -3176)
+script = ExtResource("11_border")
 
-[node name="platform2" type="Sprite2D" parent="Platforms/StartPlatform2"]
-z_index = -1
-position = Vector2(-99.12506, -911.1649)
-scale = Vector2(0.423893, 0.42389292)
-texture = SubResource("CompressedTexture2D_oc4kc")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform2"]
-position = Vector2(-88, -896)
-shape = SubResource("RectangleShape2D_ksju7")
-script = ExtResource("1_6761a")
-debug_color = Color(0.8792867, 0.2630733, 0.5343249, 0.41960785)
-
-[node name="StartPlatform3" type="StaticBody2D" parent="Platforms"]
-position = Vector2(5, 0)
-
-[node name="platform2" type="Sprite2D" parent="Platforms/StartPlatform3"]
-z_index = -1
-position = Vector2(2826.9998, 344)
-scale = Vector2(1.7444654, 1.7444649)
-texture = SubResource("CompressedTexture2D_oc4kc")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform3"]
-position = Vector2(2827.75, 417.5)
-shape = SubResource("RectangleShape2D_dga24")
-
-[node name="StartPlatform4" type="StaticBody2D" parent="Platforms"]
-position = Vector2(8, 0)
-
-[node name="platform2" type="Sprite2D" parent="Platforms/StartPlatform4"]
-z_index = -1
-position = Vector2(1675, -1432)
-rotation = 1.5707964
-scale = Vector2(0.81180775, 0.8118075)
-texture = SubResource("CompressedTexture2D_oc4kc")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1675, -1436)
-shape = SubResource("RectangleShape2D_qxy0u")
-
-[node name="CollisionShape2D6" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1672, -1440)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_excbq")
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1864.0002, -1568.0001)
-rotation = -0.4537856
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1864, -1296)
-rotation = 0.4537856
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1488, -1304)
-rotation = -0.32463124
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Platforms/StartPlatform4"]
-position = Vector2(1488, -1559.9999)
-rotation = 0.51836276
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="StartPlatform5" type="StaticBody2D" parent="Platforms"]
-position = Vector2(-1056, -776)
-
-[node name="platform2" type="Sprite2D" parent="Platforms/StartPlatform5"]
-z_index = -1
-position = Vector2(1675, -1432)
-rotation = 1.5707964
-scale = Vector2(0.81180775, 0.8118075)
-texture = SubResource("CompressedTexture2D_oc4kc")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1675, -1436)
-shape = SubResource("RectangleShape2D_qxy0u")
-
-[node name="CollisionShape2D6" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1672, -1440)
-rotation = 1.5707964
-shape = SubResource("CapsuleShape2D_excbq")
-
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1864.0002, -1568.0001)
-rotation = -0.4537856
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1864, -1296)
-rotation = 0.4537856
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D4" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1488, -1304)
-rotation = -0.32463124
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="CollisionShape2D5" type="CollisionShape2D" parent="Platforms/StartPlatform5"]
-position = Vector2(1488, -1559.9999)
-rotation = 0.51836276
-shape = SubResource("CapsuleShape2D_iav0o")
-
-[node name="Left Border" type="StaticBody2D" parent="Platforms"]
-position = Vector2(5, 0)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Left Border"]
-position = Vector2(-317, -1432)
-shape = SubResource("RectangleShape2D_s8va5")
-
-[node name="Left Border2" type="StaticBody2D" parent="Platforms"]
-position = Vector2(5, 0)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Left Border2"]
-position = Vector2(1427, -3176)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Top Border"]
+position = Vector2(1392, 216)
 rotation = 1.5707964
 shape = SubResource("RectangleShape2D_excbq")
 
+[node name="Left Border" type="StaticBody2D" parent="Platforms"]
+position = Vector2(-312, -1184)
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Left Border"]
+shape = SubResource("RectangleShape2D_excbq")
+
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(15.999992, -152)
+position = Vector2(152, -48)
 scale = Vector2(0.15, 0.15)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
-position = Vector2(384, 192)
+position = Vector2(0, 500)
 
 [node name="HUD" parent="." instance=ExtResource("9_hud")]
 
+[node name="LevelGenerator" type="Node2D" parent="."]
+script = ExtResource("10_gen")
+
 [node name="Nails" type="Node" parent="."]
-
-[node name="Nail" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(688, -384)
-
-[node name="Nail7" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(576, -696)
-
-[node name="Nail2" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1120, -400)
-
-[node name="Nail3" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1488, -448)
-
-[node name="Nail8" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1840, -576)
-
-[node name="Nail9" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(2128, -840)
-
-[node name="Nail10" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(2240, -456)
-
-[node name="Nail11" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(2520, -976)
-
-[node name="Nail12" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1952, -1232)
-
-[node name="Nail13" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(2904, -632)
-
-[node name="Nail14" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(3088, -1080)
-
-[node name="Nail15" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1168, -1224)
-
-[node name="Nail16" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(720, -1496)
-
-[node name="Nail17" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(720, -1496)
-
-[node name="Nail18" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(2416, -2200)
-
-[node name="Nail19" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1424, -2912)
-
-[node name="Nail4" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1016, -792)
-
-[node name="Nail6" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1296, -592)
-
-[node name="Nail5" parent="Nails" instance=ExtResource("7_oc4kc")]
-position = Vector2(1592, -904)
