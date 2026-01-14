@@ -21,7 +21,8 @@ func _build_ui() -> void:
 	# Add Export Button
 	var export_btn = Button.new()
 	export_btn.text = "Export Settings as JSON"
-	export_btn.custom_minimum_size.y = 60 # Mobile touch target
+	export_btn.custom_minimum_size.y = 100 # Larger mobile touch target
+	export_btn.add_theme_font_size_override("font_size", 32)
 	export_btn.pressed.connect(_on_export_pressed)
 	container.add_child(export_btn)
 
@@ -40,6 +41,7 @@ func _add_category_header(text: String) -> void:
 	label.text = "--- " + text + " ---"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", Color.YELLOW)
+	label.add_theme_font_size_override("font_size", 36)
 	container.add_child(label)
 
 func _add_setting_row(registry: BaseConstants, category: String, key: String, data: Dictionary) -> void:
@@ -49,6 +51,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	label.text = key
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 28)
 	hbox.add_child(label)
 
 	var value = data["value"]
@@ -57,9 +60,9 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	if type == "bool" or typeof(value) == TYPE_BOOL:
 		var check = CheckBox.new()
 		check.button_pressed = value
-		check.custom_minimum_size = Vector2(60, 60) # Mobile touch target
+		check.custom_minimum_size = Vector2(80, 80) # Larger touch target
 		# Scale up the icon visual if possible, or just the container click area
-		check.scale = Vector2(1.5, 1.5) # Slight visual scale
+		check.scale = Vector2(1.8, 1.8) # Larger visual scale
 		check.toggled.connect(func(toggled):
 			registry.set_value(category, key, toggled)
 		)
@@ -75,10 +78,12 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		hbox.add_child(picker)
 
 	elif typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
+		var inner_vbox = VBoxContainer.new()
+		inner_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		slider.custom_minimum_size.y = 60 # Touch height for slider
+		slider.custom_minimum_size.y = 80 # Touch height for slider
 		slider.min_value = data.get("min", 0.0)
 		slider.max_value = data.get("max", 1000.0)
 		slider.step = data.get("step", 1.0)
@@ -89,7 +94,8 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		spinbox.max_value = data.get("max", 1000.0)
 		spinbox.step = data.get("step", 1.0)
 		spinbox.value = value
-		spinbox.custom_minimum_size = Vector2(100, 60) # Larger spinbox
+		spinbox.custom_minimum_size = Vector2(150, 80) # Larger spinbox
+		spinbox.get_line_edit().add_theme_font_size_override("font_size", 28)
 
 		# Sync Slider -> SpinBox & Registry
 		slider.value_changed.connect(func(new_val):
@@ -105,8 +111,9 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 			registry.set_value(category, key, new_val)
 		)
 
-		hbox.add_child(slider)
-		hbox.add_child(spinbox)
+		inner_vbox.add_child(slider)
+		inner_vbox.add_child(spinbox)
+		hbox.add_child(inner_vbox)
 
 	container.add_child(hbox)
 

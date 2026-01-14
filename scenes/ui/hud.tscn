@@ -6,9 +6,10 @@
 script = ExtResource("1_hud")
 
 [node name="PauseButton" type="Button" parent="."]
-custom_minimum_size = Vector2(80, 80)
-offset_left = 48.0
-offset_top = 48.0
-offset_right = 128.0
-offset_bottom = 128.0
+custom_minimum_size = Vector2(120, 120)
+offset_left = 60.0
+offset_top = 60.0
+offset_right = 180.0
+offset_bottom = 180.0
+theme_override_font_sizes/font_size = 48
 text = "||"
