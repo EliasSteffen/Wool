@@ -40,6 +40,7 @@ var _grapple_kick: float = 0.0 # Rotation impulse for grappling "Schwung holen"
 # Feature Management
 var _default_features: Array[Feature] = []
 var _picked_up_features: Array[Feature] = []
+var _last_camera_x: float = -INF
 # Pickaxe initial state - REMOVED (Specific to Wool)
 # var _initial_pickaxe_position: Vector2
 # ...
@@ -59,6 +60,10 @@ func _ready() -> void:
 
 	# Ensure essential nodes exist
 	assert(skin != null, "BasePlayer: Skin node is missing!")
+
+	if camera:
+		camera.top_level = true
+		_last_camera_x = camera.global_position.x
 
 	# Connect terrain signals for debug UI
 	terrain_entered.connect(func(_t): _update_debug_ui())
@@ -203,6 +208,7 @@ func _process(delta: float) -> void:
 	_update_skin_appearance() # Check for changes every frame
 	_update_rotation(delta) # Update facing first
 	_update_interaction_prompt()
+	_update_camera_and_bounds()
 
 	# --- ANIMATION STATE MACHINE ---
 	var new_state = _calculate_player_state()
@@ -231,6 +237,37 @@ func _process_physics(delta: float) -> void:
 	_handle_feature_inputs()
 	# Specific feature inputs are now handled via _handle_feature_inputs calling feature.handle_input()
 	_handle_movement(delta)
+
+
+func _update_camera_and_bounds() -> void:
+	if not camera or not can_control:
+		return
+
+	# 1. Update Camera Position (Only move RIGHT)
+	# Target is player's current X position
+	var target_x = global_position.x
+	
+	# Monotonic check: Only update if target is further right than last position
+	if target_x > _last_camera_x:
+		camera.global_position.x = target_x
+		_last_camera_x = target_x
+	else:
+		# Lock camera to the furthest right point reached
+		camera.global_position.x = _last_camera_x
+	
+	# Also sync Y (camera usually follows Y normally, unless requested otherwise)
+	camera.global_position.y = global_position.y
+
+	# 2. Check Left Edge Death
+	# Get the viewport width to calculate the left edge
+	var viewport_rect = get_viewport_rect()
+	var half_width = (viewport_rect.size.x / camera.zoom.x) * 0.5
+	var left_edge = camera.global_position.x - half_width
+	
+	# If player's X (plus some padding/margin if needed) is less than left_edge
+	if global_position.x < left_edge:
+		print("BasePlayer: Character touched left camera edge! Game Over.")
+		die()
 
 # === PRIVATE METHODS ===
 
