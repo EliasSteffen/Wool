@@ -29,6 +29,7 @@ signal terrain_exited(terrain: Terrain)
 var max_health: int
 var move_speed: float
 var gravity: float = WorldConstants.DEFAULT_GRAVITY
+var _is_grapple_initialized: bool = false
 var current_health: int = 100
 var nearby_interactions: Array[Interaction] = []
 var current_terrain: Terrain = null
@@ -81,6 +82,15 @@ func _physics_process(delta: float) -> void:
 	# Apply movement
 	move_and_slide()
 
+func _on_grapple_started(_target: Vector2) -> void:
+	_is_grapple_initialized = false # Reset on start to force impulse on first constraint frame
+
+func _on_grapple_ended() -> void:
+	_is_grapple_initialized = false
+	# The original diff had `current_anim_state = CharacterConstants.PlayerState.IDLE` here,
+	# but `current_anim_state` and `CharacterConstants.PlayerState` are not defined in this BaseCharacter.
+	# Assuming this line was intended for a child class (e.g., PlayerCharacter) and removing it
+	# to keep the BaseCharacter syntactically correct and faithful to the provided context.
 
 ## Setup tweakable values from Autoload
 func _setup_tweakables() -> void:
@@ -113,6 +123,14 @@ func add_feature(feature: Feature) -> void:
 
 	_features.append(feature)
 	_physics_changers.append(feature)
+	
+	# Connect grappling signals
+	if feature is GrapplingFeature:
+		if not feature.grapple_started.is_connected(_on_grapple_started):
+			feature.grapple_started.connect(_on_grapple_started)
+		if not feature.grapple_ended.is_connected(_on_grapple_ended):
+			feature.grapple_ended.connect(_on_grapple_ended)
+			
 	feature_added.emit(feature)
 
 ## Remove a feature from this character
@@ -380,17 +398,28 @@ func _apply_grapple_constraint() -> void:
 		
 	# FORCE CONTINUOUS VELOCITY REDIRECTION (Rigid Rod Physics)
 	# This ensures the distance stays fixed by removing any radial velocity components
-	# and directing the motion strictly along the CCW tangent (Pushing Right).
 	
 	# Project velocity to be strictly tangent to rope
 	var velocity_radial: float = velocity.dot(direction)
-	var ccw_tangent: Vector2 = direction.rotated(PI / 2.0)
+	var tangential_velocity: Vector2 = velocity - direction * velocity_radial
 	
-	# Redirect full speed into CCW direction
+	# Redirect current movement into the tangent (frictionless rod)
 	var current_speed: float = velocity.length()
 	
-	# Tiny nudge if stationary to start the motion
-	if current_speed < 1.0:
-		current_speed = 10.0
+	# INITIAL IMPULSE: Always start CCW (Forward/Right)
+	if not _is_grapple_initialized:
+		var ccw_tangent: Vector2 = direction.rotated(PI / 2.0)
 		
-	velocity = ccw_tangent * current_speed
+		# Give a decent starting speed if dropping or stationary
+		if current_speed < 100.0:
+			current_speed = 400.0 
+		
+		velocity = ccw_tangent * current_speed
+		_is_grapple_initialized = true
+	else:
+		# FREE SWINGING: Preserve momentum direction (CW or CCW)
+		if tangential_velocity.length_squared() > 10.0:
+			velocity = tangential_velocity.normalized() * current_speed
+		else:
+			# If somehow stalled, just keep the projection
+			velocity = tangential_velocity

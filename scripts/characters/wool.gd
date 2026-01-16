@@ -139,8 +139,17 @@ func _play_animation_for_state(state: PlayerState) -> void:
 		PlayerState.IDLE: target_anim = "idle"
 		PlayerState.WALK: target_anim = "walk"
 		PlayerState.GRAPPLE:
-			# ALWAYS CCW to push right
-			target_anim = "grapple_ccw"
+			# DYNAMIC: Detect swing direction for visual feedback
+			var is_ccw_swing = true
+			var current_nail = grappling_feature.get_target_nail()
+			if current_nail:
+				var rope_vector = current_nail.global_position - global_position
+				# Cross product in 2D to determine rotation direction
+				# (rope.x * vel.y - rope.y * vel.x)
+				var cross = rope_vector.x * velocity.y - rope_vector.y * velocity.x
+				is_ccw_swing = cross > 0
+			
+			target_anim = "grapple_ccw" if is_ccw_swing else "grapple_cw"
 
 		PlayerState.JUMP: target_anim = "jump"
 
@@ -191,8 +200,10 @@ func _update_rotation(delta: float) -> void:
 			# Decay Impulse (Slower decay for better visibility)
 			_grapple_kick = move_toward(_grapple_kick, 0.0, delta * 3.0)
 
-			# ALWAYS CCW Lean (pushing right)
-			var target_lean = deg_to_rad(-40.0) 
+			# DYNAMIC Lean based on swing direction
+			var cross = rope_vector.x * velocity.y - rope_vector.y * velocity.x
+			var is_ccw = cross > 0
+			var target_lean = deg_to_rad(-40.0) if is_ccw else deg_to_rad(40.0)
 
 			# Align head with rope (rope angle + 90 deg) + Kick + Lean
 			target_rotation = rope_vector.angle() + PI / 2.0 + _grapple_kick + target_lean
