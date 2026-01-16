@@ -6,6 +6,10 @@ extends Node2D
 @export var cleanup_distance: float = 2000.0
 @export var chunk_width: float = 2000.0
 
+## Vertical generation range
+@export var gen_min_y: float = -3000.0
+@export var gen_max_y: float = 0.0
+
 @onready var nails_container: Node = get_node_or_null("../Nails")
 
 var _player: Node2D = null
@@ -23,12 +27,13 @@ func _ready() -> void:
 	if _player:
 		_last_spawn_x = _player.global_position.x + 300.0
 		# Move initial nails MUCH closer (within reach)
-		_last_nail_pos_high = _player.global_position + Vector2(150, -250)
-		_last_nail_pos_mid = _player.global_position + Vector2(200, -100)
+		_last_nail_pos_high = _player.global_position + Vector2(200, -200)
+		_last_nail_pos_mid = _player.global_position + Vector2(400, -100)
 		
-		# Spawn initial nails for both paths
+		# Spawn initial nails
 		_spawn_nail(_last_nail_pos_high)
 		_spawn_nail(_last_nail_pos_mid)
+		_spawn_nail(_player.global_position + Vector2(600, -150))
 
 func _process(_delta: float) -> void:
 	if not _player:
@@ -44,15 +49,21 @@ func _process(_delta: float) -> void:
 	_cleanup()
 
 func _generate_next_segment() -> void:
-	# High Path (near top border)
-	_last_nail_pos_high = _spawn_path_step(_last_nail_pos_high, -2200.0, -1200.0)
+	# Calculate path heights based on total range
+	var height = abs(gen_max_y - gen_min_y)
+	var segment = height / 3.0
 	
-	# Mid Path (central area)
-	_last_nail_pos_mid = _spawn_path_step(_last_nail_pos_mid, -1000.0, -400.0)
+	# High Path (top third)
+	_last_nail_pos_high = _spawn_path_step(_last_nail_pos_high, gen_min_y, gen_min_y + segment)
 	
-	# Extra Low Path (bottom area) for even more density
-	var low_x = max(_last_nail_pos_high.x, _last_nail_pos_mid.x) + _rng.randf_range(100.0, 300.0)
-	var low_y = _rng.randf_range(-400.0, 0.0)
+	# Mid Path (middle third)
+	_last_nail_pos_mid = _spawn_path_step(_last_nail_pos_mid, gen_min_y + segment, gen_min_y + 2 * segment)
+	
+	# Low Path (bottom third) - treated as a proper path now for full coverage
+	# We use a temporary variable so we don't have to manage a third _last_nail_pos if not strictly needed for progress check,
+	# but for consistency we just spawn directly in the range.
+	var low_x = max(_last_nail_pos_high.x, _last_nail_pos_mid.x) + _rng.randf_range(50.0, 200.0)
+	var low_y = _rng.randf_range(gen_min_y + 2 * segment, gen_max_y)
 	_spawn_nail(Vector2(low_x, low_y))
 
 func _spawn_path_step(last_pos: Vector2, min_y: float, max_y: float) -> Vector2:

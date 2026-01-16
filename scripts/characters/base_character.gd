@@ -369,25 +369,28 @@ func _apply_grapple_constraint() -> void:
 	var to_grapple: Vector2 = grapple_point - pivot_global_position
 	var distance: float = to_grapple.length()
 
+	var direction: Vector2 = to_grapple.normalized()
+	
 	if not is_equal_approx(distance, grappling.rope_length):
 		# Constrain position to exactly rope_length
-		var direction: Vector2 = to_grapple.normalized()
 		var constrained_pivot_pos: Vector2 = grapple_point - direction * grappling.rope_length
 		
 		# Move character so pivot is at constrained position
 		global_position = constrained_pivot_pos - offset
 		
-		# Project velocity to be strictly tangent to rope (remove both inward and outward radial components)
-		var velocity_radial: float = velocity.dot(direction)
-		var tangential_velocity: Vector2 = velocity - direction * velocity_radial
-
-		# Redirect full speed into tangential direction (frictionless rod)
-		# preventing speed loss on impact, but avoiding energy generation.
-		var current_speed: float = velocity.length()
-		var tangential_dir: Vector2 = tangential_velocity.normalized()
+	# FORCE CONTINUOUS VELOCITY REDIRECTION (Rigid Rod Physics)
+	# This ensures the distance stays fixed by removing any radial velocity components
+	# and directing the motion strictly along the CCW tangent (Pushing Right).
+	
+	# Project velocity to be strictly tangent to rope
+	var velocity_radial: float = velocity.dot(direction)
+	var ccw_tangent: Vector2 = direction.rotated(PI / 2.0)
+	
+	# Redirect full speed into CCW direction
+	var current_speed: float = velocity.length()
+	
+	# Tiny nudge if stationary to start the motion
+	if current_speed < 1.0:
+		current_speed = 10.0
 		
-		if tangential_velocity.length_squared() > 1.0:
-			velocity = tangential_dir * current_speed
-		else:
-			# Fallback if falling perfectly straight down or up
-			velocity = tangential_velocity
+	velocity = ccw_tangent * current_speed

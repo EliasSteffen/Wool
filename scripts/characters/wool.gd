@@ -139,29 +139,8 @@ func _play_animation_for_state(state: PlayerState) -> void:
 		PlayerState.IDLE: target_anim = "idle"
 		PlayerState.WALK: target_anim = "walk"
 		PlayerState.GRAPPLE:
-			# Determine directional grapple animation
-			target_anim = "grapple" # Default (idle grapple)
-
-			if grappling_feature and grappling_feature.is_active():
-				var nail = grappling_feature.get_target_nail()
-				if nail:
-					# Calculate angular velocity/direction relative to nail
-					# A simple cross product of Rope Vector and Velocity gives swing direction
-					var rope_vector = nail.global_position - global_position
-					# 2D Cross Product: (Ax * By) - (Ay * Bx)
-					# R x V > 0 => CW (in Godot Y-Down)
-					# R x V < 0 => CCW
-					var cross = rope_vector.cross(velocity)
-
-					# Threshold to prevent flickering near apex of swing
-					var swing_threshold = 5000.0 # Adjust based on scale/speed observation
-
-					if cross > swing_threshold:
-						target_anim = "grapple_cw"
-					elif cross < -swing_threshold:
-						target_anim = "grapple_ccw"
-					else:
-						target_anim = "grapple"
+			# ALWAYS CCW to push right
+			target_anim = "grapple_ccw"
 
 		PlayerState.JUMP: target_anim = "jump"
 
@@ -200,39 +179,20 @@ func _update_rotation(delta: float) -> void:
 	var is_underwater = current_terrain is UnderWaterTerrain
 	var target_rotation = 0.0
 
-	# --- RESTORE FACING DIRECTION LOGIC ---
-	# Handle flipping (standard platformer behavior)
-	# Prioritize Input direction for responsiveness
-	if not is_zero_approx(_direction):
-		_update_facing_direction(_direction < 0)
-	# Fallback to velocity if moving significantly (e.g. knockback or drift)
-	elif abs(velocity.x) > 10.0:
-		_update_facing_direction(velocity.x < 0)
-	# --------------------------------------
+	# --- FORCE RIGHT FACING ---
+	_update_facing_direction(false) # Always face right
+	# ---------------------------
 
 	if is_grappling:
 		var current_nail = grappling_feature.get_target_nail()
 		if current_nail:
 			var rope_vector = current_nail.global_position - global_position
 
-			# "Schwung holen" Animation Logic
-			# 1. Detect Impulse
-			# if Input.is_action_just_pressed("move_left"):
-			# 	# Move Left -> Kick CCW (Feet Right) for momentum "Wind Up"
-			# 	_grapple_kick = deg_to_rad(-80.0)
-			# elif Input.is_action_just_pressed("move_right"):
-			# 	# Move Right -> Kick CW (Feet Left) for momentum "Wind Up"
-			# 	_grapple_kick = deg_to_rad(80.0)
-
-			# 2. Decay Impulse (Slower decay for better visibility)
+			# Decay Impulse (Slower decay for better visibility)
 			_grapple_kick = move_toward(_grapple_kick, 0.0, delta * 3.0)
 
-			# 3. Sustained Lean (Hold direction to swing)
-			var target_lean = 0.0
-			if _direction < 0: # Left
-				target_lean = deg_to_rad(40.0) # Lean into the swing (CW)
-			elif _direction > 0: # Right
-				target_lean = deg_to_rad(-40.0) # Lean into the swing (CCW)
+			# ALWAYS CCW Lean (pushing right)
+			var target_lean = deg_to_rad(-40.0) 
 
 			# Align head with rope (rope angle + 90 deg) + Kick + Lean
 			target_rotation = rope_vector.angle() + PI / 2.0 + _grapple_kick + target_lean
