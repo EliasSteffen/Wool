@@ -1,14 +1,12 @@
 extends Node2D
 
 @export var nail_scene: PackedScene = preload("res://scenes/interactions/nail.tscn")
-@export var platform_scene: PackedScene = preload("res://scenes/terrain/platform.tscn")
 
 @export var spawn_distance: float = 3000.0
 @export var cleanup_distance: float = 2000.0
 @export var chunk_width: float = 2000.0
 
 @onready var nails_container: Node = get_node_or_null("../Nails")
-@onready var platforms_container: Node = get_node_or_null("../Platforms")
 
 var _player: Node2D = null
 var _last_spawn_x: float = 0.0
@@ -50,22 +48,15 @@ func _generate_next_segment() -> void:
 	_last_nail_pos_high = _spawn_path_step(_last_nail_pos_high, -2200.0, -1200.0)
 	
 	# Mid Path (central area)
-	# Stagger Mid Path significantly from High Path
-	var mid_base_x = _last_nail_pos_high.x - 400.0 # Staggered horizontally
-	var next_mid_x = mid_base_x + _rng.randf_range(300.0, 500.0)
-	var next_mid_y = clamp(_last_nail_pos_mid.y + _rng.randf_range(-300.0, 300.0), -1000.0, -400.0)
+	_last_nail_pos_mid = _spawn_path_step(_last_nail_pos_mid, -1000.0, -400.0)
 	
-	_last_nail_pos_mid = Vector2(next_mid_x, next_mid_y)
-	_spawn_nail(_last_nail_pos_mid)
-	
-	# Randomly spawn platforms at various heights
-	if _rng.randf() > 0.5:
-		var x_pos = max(_last_nail_pos_high.x, _last_nail_pos_mid.x)
-		var platform_y = _rng.randf_range(-1200.0, -400.0)
-		_spawn_platform(Vector2(x_pos + _rng.randf_range(-150, 150), platform_y))
+	# Extra Low Path (bottom area) for even more density
+	var low_x = max(_last_nail_pos_high.x, _last_nail_pos_mid.x) + _rng.randf_range(100.0, 300.0)
+	var low_y = _rng.randf_range(-400.0, 0.0)
+	_spawn_nail(Vector2(low_x, low_y))
 
 func _spawn_path_step(last_pos: Vector2, min_y: float, max_y: float) -> Vector2:
-	var x_offset = _rng.randf_range(400.0, 600.0)
+	var x_offset = _rng.randf_range(250.0, 450.0) # Reduced from 400-600
 	var y_offset = _rng.randf_range(-400.0, 400.0)
 	
 	var next_pos = last_pos + Vector2(x_offset, y_offset)
@@ -73,19 +64,18 @@ func _spawn_path_step(last_pos: Vector2, min_y: float, max_y: float) -> Vector2:
 	
 	_spawn_nail(next_pos)
 	
-	# High chance (50%) for extra nail - with even stricter spacing
-	if _rng.randf() > 0.5:
-		var x_extra = _rng.randf_range(300.0, 450.0) # Larger horizontal gap
+	# High chance (75%) for extra nail - with tighter spacing
+	if _rng.randf() > 0.25:
+		var x_extra = _rng.randf_range(150.0, 300.0) # Reduced from 300-450
 		if _rng.randf() > 0.5: x_extra *= -1
 		
-		var y_extra = _rng.randf_range(-400.0, -200.0)
-		if _rng.randf() > 0.7: y_extra *= -1
+		var y_extra = _rng.randf_range(-300.0, 300.0)
 		
 		var extra_pos = next_pos + Vector2(x_extra, y_extra)
 		extra_pos.y = clamp(extra_pos.y, min_y, max_y)
 		
 		# Ensure we don't spawn too close to ANY existing path point here
-		if extra_pos.distance_to(next_pos) > 300.0:
+		if extra_pos.distance_to(next_pos) > 150.0: # Reduced from 300
 			_spawn_nail(extra_pos)
 		
 	return next_pos
@@ -98,24 +88,11 @@ func _spawn_nail(pos: Vector2) -> void:
 		add_child(nail)
 	nail.global_position = pos
 
-func _spawn_platform(pos: Vector2) -> void:
-	var platform = platform_scene.instantiate()
-	if platforms_container:
-		platforms_container.add_child(platform)
-	else:
-		add_child(platform)
-	
-	platform.global_position = pos
-	# Random scale
-	var s = _rng.randf_range(0.5, 1.5)
-	platform.scale = Vector2(s, s)
-
 func _cleanup() -> void:
 	var cleanup_x = _player.global_position.x - cleanup_distance
 	
 	var containers = [self]
 	if nails_container: containers.append(nails_container)
-	if platforms_container: containers.append(platforms_container)
 	
 	for container in containers:
 		for child in container.get_children():

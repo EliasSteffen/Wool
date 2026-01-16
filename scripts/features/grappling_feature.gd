@@ -70,42 +70,15 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	# The "max range" is determined by the Nail's detection area (CollisionShape)
 	var character: BaseCharacter = get_character()
 
-	# If we have a nail, use its detection radius as the rope length
-	# This means the rope will be as long as the max grapple distance
-	if nail is Nail:
-		rope_length = nail.get_detection_radius()
-
-		# Adapt rope length to current distance if we are further out (due to scale/tolerance)
-		# This prevents snapping the character into the circle if they grapple from the edge
-		if character:
-			var current_dist: float = character.global_position.distance_to(target_position)
-			if current_dist > rope_length:
-				rope_length = current_dist
-
-		# === LIMIT MAX ROPE LENGTH ===
-		# Override everything if it exceeds the hard limit.
-		# This ensures that even if we are far away, the physics target radius is capped.
-		if rope_length > max_rope_length:
-			rope_length = max_rope_length
-
-			# FORCE IMMEDIATE CONSTRAINT:
-			# If we are clamping, the character is likely far away.
-			# We must ensure the Character is aware that the legal rope is shorter.
-			_has_reached_rope_length = true
-
-		# Safety check: if radius is invalid (0), fallback to distance
-		if rope_length <= 1.0:
-			push_warning("GrapplingFeature: Nail returned invalid radius, falling back to distance.")
-			if character:
-				rope_length = character.global_position.distance_to(target_position)
-			else:
-				rope_length = 100.0 # Absolute fallback
+	# Set rope length to current distance for a fixed rigid connection (no shrinking/stretching)
+	if character:
+		rope_length = character.global_position.distance_to(target_position)
 	else:
-		# Fallback: use current distance if no nail (shouldn't happen normally)
-		if character:
-			rope_length = character.global_position.distance_to(target_position)
-		else:
-			rope_length = 100.0 # Absolute fallback
+		rope_length = 100.0 # Absolute fallback
+	
+	# Clamp to hard maximum if defined
+	if rope_length > max_rope_length:
+		rope_length = max_rope_length
 
 	if nail:
 		nail.set_used(true)

@@ -45,13 +45,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Start the game (load level 1)
 func start_game() -> void:
-	# If we are in the menu, generate a new seed for a fresh session
-	# If we are already playing (restarting after death), keep the same seed
-	if current_state == GameState.MENU:
-		current_seed = randi()
-		print("GameManager: New session started with seed: ", current_seed)
-	else:
-		print("GameManager: Restarting with existing seed: ", current_seed)
+	# Always generate a new seed for every session/restart to ensure new level layout
+	current_seed = randi()
+	print("GameManager: Session started/restarted with seed: ", current_seed)
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false
