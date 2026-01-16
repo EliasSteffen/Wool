@@ -13,6 +13,11 @@ func _ready() -> void:
 
 	_build_ui()
 	
+	# Configure ScrollContainer for mobile scrolling
+	var scroll_container = $Panel/ScrollContainer
+	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	
 	# Add Safe Area Padding for notches (Landscape)
 	$Panel.set_begin(Vector2(200, 0)) # offset_left
 	$Panel.set_end(Vector2(-200, 0)) # offset_right
