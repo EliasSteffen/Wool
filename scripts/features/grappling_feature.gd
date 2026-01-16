@@ -10,15 +10,8 @@ extends Feature
 signal grapple_started(target: Vector2)
 signal grapple_ended()
 
-# === EXPORTED VARIABLES ===
-
-## Max Rope Length
-## Limits how long the "rope" (pickaxe reach) can extend.
-## If distance to target > max_rope_length, the grapple will connect
-## but constrain the player to this length immediately (pulling them in).
-@export var max_rope_length: float = 300.0
-
 # === PUBLIC VARIABLES ===
+var fixed_rope_length: float
 var rope_length: float
 var max_boost_force: float
 var max_swing_speed_for_boost: float
@@ -45,8 +38,9 @@ func _ready() -> void:
 		"swing_pump_force": "swing_pump_force",
 		"damping": "damping",
 		"initial_pull_strength": "initial_pull_strength",
-		"max_rope_length": "max_rope_length"
-	}, "", ["max_rope_length"])
+		"fixed_rope_length": "fixed_rope_length"
+	})
+	fixed_rope_length = FeatureConstants.get_value("Grappling", "fixed_rope_length")
 
 func _process(delta: float) -> void:
 	# Input Buffering: Retry grapple if button was pressed recently
@@ -66,19 +60,8 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	_target_nail = nail
 	_has_reached_rope_length = true  # Always true to enforce constraint immediately
 
-	# Set rope length to the Nail's detection radius
-	# The "max range" is determined by the Nail's detection area (CollisionShape)
-	var character: BaseCharacter = get_character()
-
-	# Set rope length to current distance for a fixed rigid connection (no shrinking/stretching)
-	if character:
-		rope_length = character.global_position.distance_to(target_position)
-	else:
-		rope_length = 100.0 # Absolute fallback
-	
-	# Clamp to hard maximum if defined
-	if rope_length > max_rope_length:
-		rope_length = max_rope_length
+	# ALWAYS use the fixed rope length (Rigid Rod behavior)
+	rope_length = fixed_rope_length
 
 	if nail:
 		nail.set_used(true)
@@ -152,9 +135,9 @@ func _find_nearest_nail(character: BaseCharacter) -> Nail:
 		# This prevents rejection when a large character is touching the zone edge but their center is far out
 		var scaled_tolerance: float = GRAPPLE_TOLERANCE * max(character.scale.x, character.scale.y)
 
-		# Allow if distance is within radius + tolerance AND within max_rope_length
+		# Allow if distance is within radius + tolerance AND within fixed_rope_length
 		# This handles cases where character shape overlaps nail shape but centers are far
-		if (radius > 0 and distance > (radius + scaled_tolerance)) or distance > max_rope_length:
+		if (radius > 0 and distance > (radius + scaled_tolerance)) or distance > fixed_rope_length:
 			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f or > MaxLen: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE, max_rope_length])
 			continue
 

@@ -8,7 +8,7 @@ extends Node2D
 
 ## Vertical generation range
 @export var gen_min_y: float = -3000.0
-@export var gen_max_y: float = 0.0
+@export var gen_max_y: float = -250.0
 
 @onready var nails_container: Node = get_node_or_null("../Nails")
 
