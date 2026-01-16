@@ -390,10 +390,20 @@ func _handle_underwater_movement(delta: float, underwater_terrain: UnderWaterTer
 		pass
 
 func _handle_grapple_swing_pump(delta: float) -> void:
-	# Swing pumping: Add force in direction of input to build momentum
+	# Swing pumping: Add force in direction of movement (tangential) to build momentum
 	var speed_multiplier: float = move_speed / CharacterConstants.DEFAULT_MOVE_SPEED
-	var pump_force: float = _direction * grappling_feature.swing_pump_force * speed_multiplier * delta
-	velocity.x += pump_force
+	var force_magnitude: float = grappling_feature.swing_pump_force * speed_multiplier * delta
+	
+	# Only pump if we have movement and input matches general direction
+	# Or if we're just starting and want to push in the input direction
+	if velocity.length() > 10.0:
+		var move_dir = velocity.normalized()
+		# Only apply if input direction matches the horizontal component of movement
+		if sign(_direction) == sign(move_dir.x) or _direction == 0:
+			velocity += move_dir * force_magnitude * (1.0 if _direction != 0 else 0.0)
+	else:
+		# Initial push if nearly stationary
+		velocity.x += _direction * force_magnitude
 
 func _handle_ground_air_movement(delta: float) -> void:
 	if is_on_floor() and not _just_jumped:
@@ -408,9 +418,18 @@ func _handle_ground_air_movement(delta: float) -> void:
 		# Calculate new speed along the tangent
 		# (Current velocity projected onto tangent)
 		var current_speed = velocity.dot(tangent)
-		var new_speed = move_toward(current_speed, _direction * move_speed, acceleration * delta)
+		var target_speed = _direction * move_speed
+		
+		# Momentum Preservation: Only accelerate/decelerate towards target if we are not already
+		# moving faster than the target in that direction.
+		if _direction != 0 and sign(current_speed) == sign(target_speed) and abs(current_speed) > abs(target_speed):
+			# Already over-speed in the right direction, don't use move_toward (which would brake us)
+			# Energy will be lost naturally via terrain damping
+			pass
+		else:
+			current_speed = move_toward(current_speed, target_speed, acceleration * delta)
 
-		velocity = tangent * new_speed
+		velocity = tangent * current_speed
 
 		# Apply a tiny downward force to ensure 'is_on_floor()' remains true and snapping works reliably
 		# This prevents "floating" when moving down slopes rapidly
@@ -418,7 +437,14 @@ func _handle_ground_air_movement(delta: float) -> void:
 		velocity.y += 2.0
 	else:
 		# Global movement in air
-		velocity.x = move_toward(velocity.x, _direction * move_speed, acceleration * delta)
+		var target_x = _direction * move_speed
+		
+		# Momentum Preservation in air
+		if _direction != 0 and sign(velocity.x) == sign(target_x) and abs(velocity.x) > abs(target_x):
+			# Over-speed in air, let damping handle it
+			pass
+		else:
+			velocity.x = move_toward(velocity.x, target_x, acceleration * delta)
 
 		# Allow jumping immediately even if floor_snap_length was set to 0 previously
 		if _just_jumped:

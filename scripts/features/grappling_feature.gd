@@ -32,14 +32,17 @@ func _ready() -> void:
 	super._ready()
 	feature_name = "Grappling"
 	setup_tweakables_generic({
-		"max_boost_force": "max_boost_force",
-		"max_swing_speed": "max_swing_speed_for_boost",
-		"tension_strength": "tension_strength",
 		"swing_pump_force": "swing_pump_force",
-		"damping": "damping",
-		"initial_pull_strength": "initial_pull_strength",
+		"max_boost_force": "max_boost_force",
 		"fixed_rope_length": "fixed_rope_length"
 	})
+	
+	# Set internal defaults for parameters removed from the UI
+	max_swing_speed_for_boost = 800.0
+	tension_strength = 2000.0
+	damping = 0.995
+	initial_pull_strength = 1500.0
+	
 	fixed_rope_length = FeatureConstants.get_value("Grappling", "fixed_rope_length")
 
 func _process(delta: float) -> void:

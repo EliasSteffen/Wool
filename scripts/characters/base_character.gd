@@ -26,11 +26,11 @@ signal terrain_exited(terrain: Terrain)
 @export var skin_resource: CharacterSkin
 
 # === PUBLIC VARIABLES ===
-var max_health: int
+var max_health: int = 1
 var move_speed: float
 var gravity: float = WorldConstants.DEFAULT_GRAVITY
 var _is_grapple_initialized: bool = false
-var current_health: int = 100
+var current_health: int = 1
 var nearby_interactions: Array[Interaction] = []
 var current_terrain: Terrain = null
 
@@ -96,7 +96,7 @@ func _on_grapple_ended() -> void:
 func _setup_tweakables() -> void:
 	# Initial load
 	move_speed = CharacterConstants.get_value("Player", "move_speed")
-	max_health = int(CharacterConstants.get_value("Player", "max_health"))
+	max_health = 1
 	gravity = WorldConstants.get_value("Physics", "gravity")
 
 	# Listen for changes
@@ -410,9 +410,8 @@ func _apply_grapple_constraint() -> void:
 	if not _is_grapple_initialized:
 		var ccw_tangent: Vector2 = direction.rotated(PI / 2.0)
 		
-		# Give a decent starting speed if dropping or stationary
-		if current_speed < 100.0:
-			current_speed = 400.0 
+		# Give a strong starting pulse regardless of current speed
+		current_speed = max(current_speed, 700.0)
 		
 		velocity = ccw_tangent * current_speed
 		_is_grapple_initialized = true

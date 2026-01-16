@@ -84,6 +84,24 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slider.custom_minimum_size.y = 80 # Touch height for slider
+		
+		# Define a thicker style for the slider track
+		var slider_style = StyleBoxFlat.new()
+		slider_style.bg_color = Color(0.3, 0.3, 0.3)
+		slider_style.expand_margin_top = 10
+		slider_style.expand_margin_bottom = 10
+		slider_style.corner_radius_top_left = 10
+		slider_style.corner_radius_top_right = 10
+		slider_style.corner_radius_bottom_left = 10
+		slider_style.corner_radius_bottom_right = 10
+		
+		var slider_active_style = slider_style.duplicate()
+		slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Highlight blue
+		
+		slider.add_theme_stylebox_override("slider", slider_style)
+		slider.add_theme_stylebox_override("grabber_area", slider_active_style)
+		slider.add_theme_stylebox_override("grabber_area_highlight", slider_active_style)
+
 		slider.min_value = data.get("min", 0.0)
 		slider.max_value = data.get("max", 1000.0)
 		slider.step = data.get("step", 1.0)

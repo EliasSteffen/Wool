@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=9 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Texture2D" uid="uid://c6lslmg4acr3u" path="res://assets/maps/Generated Image January 14, 2026 - 7_38PM.png" id="2_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
@@ -6,13 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://hud1234568aa" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
-[ext_resource type="Script" uid="uid://cgqevivipquwm" path="res://scripts/terrain/infinite_border.gd" id="11_border"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
 size = Vector2(536, 568)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_excbq"]
-size = Vector2(240, 3248)
+size = Vector2(240, 7184)
 
 [node name="level_1" type="Node2D"]
 position = Vector2(192, -192)
@@ -24,8 +23,8 @@ motion_mirroring = Vector2(3268, 0)
 
 [node name="Background" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 z_index = -10
-position = Vector2(1442, -1434)
-scale = Vector2(3.1914065, 3.1757813)
+position = Vector2(1434, -1441.9608)
+scale = Vector2(3.2070315, 3.1913297)
 texture = ExtResource("6_sk5k4")
 
 [node name="Platforms" type="Node2D" parent="."]
@@ -42,20 +41,12 @@ texture = ExtResource("2_oc4kc")
 position = Vector2(0, 320)
 shape = SubResource("RectangleShape2D_oc4kc")
 
-[node name="Top Border" type="StaticBody2D" parent="Platforms"]
-position = Vector2(0, -3176)
-script = ExtResource("11_border")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Top Border"]
-position = Vector2(1392, 216)
-rotation = 1.5707964
-shape = SubResource("RectangleShape2D_excbq")
-
 [node name="Left Border" type="StaticBody2D" parent="Platforms"]
 position = Vector2(-312, -1184)
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/Left Border"]
+position = Vector2(0, -1968)
 shape = SubResource("RectangleShape2D_excbq")
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
