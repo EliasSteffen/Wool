@@ -223,11 +223,12 @@ func _update_rotation(delta: float) -> void:
 			var angle = velocity.angle() + PI / 2.0
 			angle = wrapf(angle, -PI, PI)
 
-			if skin.scale.x > 0:
-				target_rotation = clamp(angle, -PI/6, PI)
-			else:
-				if angle > PI/2: angle -= 2 * PI
-				target_rotation = clamp(angle, -PI, PI/6)
+			if skin:
+				if skin.scale.x > 0:
+					target_rotation = clamp(angle, -PI/6, PI)
+				else:
+					if angle > PI/2: angle -= 2 * PI
+					target_rotation = clamp(angle, -PI, PI/6)
 	else:
 		# VISUAL FLICKER FIX:
 		# Use last known floor normal to maintain rotation during momentary flickers
@@ -443,7 +444,9 @@ func _update_pickaxe_visual() -> void:
 			pickaxe.z_index = 0
 
 		# Facings
-		var facing_left = skin.scale.x < 0
+		var facing_left = false
+		if skin:
+			facing_left = skin.scale.x < 0
 
 		# Define base position/rotation
 		var base_pos = _initial_pickaxe_position
@@ -490,7 +493,7 @@ func _update_pickaxe_visual() -> void:
 		pickaxe.position.y += dynamic_y
 
 		# Apply rotation correctly based on facing
-		if facing_left:
+		if skin and skin.scale.x < 0:
 			pickaxe.rotation -= dynamic_r
 		else:
 			pickaxe.rotation += dynamic_r

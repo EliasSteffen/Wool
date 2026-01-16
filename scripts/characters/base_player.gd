@@ -620,14 +620,13 @@ func _update_rotation(delta: float) -> void:
 ## Update visual facing direction
 ## Can be overridden by child classes to handle specialized shapes
 func _update_facing_direction(is_facing_left: bool) -> void:
-	if is_facing_left:
-		skin.scale.x = -abs(skin.scale.x)
-		if has_node("HitboxArea"): $HitboxArea.scale.x = -abs($HitboxArea.scale.x)
-		# Note: We do NOT flip PhysicsShape scale here, as it doesn't handle offset positions.
-		# Child classes should handle offset physics shapes manually.
-	else:
-		skin.scale.x = abs(skin.scale.x)
-		if has_node("HitboxArea"): $HitboxArea.scale.x = abs($HitboxArea.scale.x)
+	if skin:
+		if is_facing_left:
+			skin.scale.x = -abs(skin.scale.x)
+			if has_node("HitboxArea"): $HitboxArea.scale.x = -abs($HitboxArea.scale.x)
+		else:
+			skin.scale.x = abs(skin.scale.x)
+			if has_node("HitboxArea"): $HitboxArea.scale.x = abs($HitboxArea.scale.x)
 
 func _update_interaction_prompt() -> void:
 	var closest_interaction: Interaction = null

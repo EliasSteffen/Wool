@@ -389,36 +389,24 @@ func _apply_grapple_constraint() -> void:
 
 	var direction: Vector2 = to_grapple.normalized()
 	
+	# Constrain position to exactly rope_length
 	if not is_equal_approx(distance, grappling.rope_length):
-		# Constrain position to exactly rope_length
-		var constrained_pivot_pos: Vector2 = grapple_point - direction * grappling.rope_length
-		
-		# Move character so pivot is at constrained position
-		global_position = constrained_pivot_pos - offset
+		global_position = grapple_point - direction * grappling.rope_length - offset
 		
 	# FORCE CONTINUOUS VELOCITY REDIRECTION (Rigid Rod Physics)
-	# This ensures the distance stays fixed by removing any radial velocity components
-	
 	# Project velocity to be strictly tangent to rope
 	var velocity_radial: float = velocity.dot(direction)
 	var tangential_velocity: Vector2 = velocity - direction * velocity_radial
 	
-	# Redirect current movement into the tangent (frictionless rod)
-	var current_speed: float = velocity.length()
-	
 	# INITIAL IMPULSE: Always start CCW (Forward/Right)
 	if not _is_grapple_initialized:
-		var ccw_tangent: Vector2 = direction.rotated(PI / 2.0)
-		
-		# Give a strong starting pulse regardless of current speed
-		current_speed = max(current_speed, 700.0)
-		
-		velocity = ccw_tangent * current_speed
+		# Use rotated direction for initial impulse
+		velocity = direction.rotated(PI / 2.0) * max(velocity.length(), 700.0)
 		_is_grapple_initialized = true
 	else:
 		# FREE SWINGING: Preserve momentum direction (CW or CCW)
 		if tangential_velocity.length_squared() > 10.0:
-			velocity = tangential_velocity.normalized() * current_speed
+			velocity = tangential_velocity.normalized() * velocity.length()
 		else:
 			# If somehow stalled, just keep the projection
 			velocity = tangential_velocity

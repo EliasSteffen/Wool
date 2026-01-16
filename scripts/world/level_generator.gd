@@ -35,7 +35,10 @@ func _ready() -> void:
 		_spawn_nail(_last_nail_pos_mid)
 		_spawn_nail(_player.global_position + Vector2(600, -150))
 
-func _process(_delta: float) -> void:
+var _cleanup_timer: float = 0.0
+const CLEANUP_INTERVAL: float = 0.5
+
+func _process(delta: float) -> void:
 	if not _player:
 		_player = get_tree().get_first_node_in_group("player")
 		return
@@ -45,8 +48,11 @@ func _process(_delta: float) -> void:
 	if _player.global_position.x + spawn_distance > last_x:
 		_generate_next_segment()
 
-	# Cleanup behind
-	_cleanup()
+	# Cleanup staggered
+	_cleanup_timer += delta
+	if _cleanup_timer >= CLEANUP_INTERVAL:
+		_cleanup_timer = 0.0
+		_cleanup()
 
 func _generate_next_segment() -> void:
 	# Calculate path heights based on total range
@@ -100,12 +106,17 @@ func _spawn_nail(pos: Vector2) -> void:
 	nail.global_position = pos
 
 func _cleanup() -> void:
+	if not _player: return
+	
 	var cleanup_x = _player.global_position.x - cleanup_distance
 	
-	var containers = [self]
+	var containers = []
 	if nails_container: containers.append(nails_container)
+	if get_child_count() > 0: containers.append(self)
 	
 	for container in containers:
 		for child in container.get_children():
 			if child is Node2D and child.global_position.x < cleanup_x:
-				child.queue_free()
+				# Use queue_free but with a small check to ensure it's not already exiting
+				if not child.is_queued_for_deletion():
+					child.queue_free()
