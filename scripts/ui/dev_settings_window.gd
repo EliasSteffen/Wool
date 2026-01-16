@@ -12,6 +12,10 @@ func _ready() -> void:
 	$Panel.add_theme_stylebox_override("panel", style)
 
 	_build_ui()
+	
+	# Add Safe Area Padding for notches (Landscape)
+	$Panel.set_begin(Vector2(200, 0)) # offset_left
+	$Panel.set_end(Vector2(-200, 0)) # offset_right
 
 func _build_ui() -> void:
 	# Clear existing
