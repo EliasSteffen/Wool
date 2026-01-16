@@ -119,7 +119,11 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		spinbox.custom_minimum_size = Vector2(180, 70)
 		spinbox.get_line_edit().add_theme_font_size_override("font_size", 26)
 		spinbox.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
-		top_hbox.add_child(spinbox)
+		# top_hbox.add_child(spinbox) # REMOVED from top row
+		
+		# Slider with a "Scroll Lane" (spacer) and the numerical Value
+		var slider_hbox = HBoxContainer.new()
+		slider_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -155,7 +159,18 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 			slider.value = new_val
 			registry.set_value(category, key, new_val)
 		)
-		main_vbox.add_child(slider)
+		
+		slider_hbox.add_child(slider)
+		
+		# The Scroll Lane: 400px spacer for safe swiping
+		var scroll_lane = Control.new()
+		scroll_lane.custom_minimum_size.x = 400
+		slider_hbox.add_child(scroll_lane)
+		
+		# Move the numerical value here, after the spacer
+		slider_hbox.add_child(spinbox)
+		
+		main_vbox.add_child(slider_hbox)
 
 	container.add_child(panel)
 
