@@ -45,58 +45,93 @@ func _add_category_header(text: String) -> void:
 	container.add_child(label)
 
 func _add_setting_row(registry: BaseConstants, category: String, key: String, data: Dictionary) -> void:
-	var hbox = HBoxContainer.new()
+	# Create a PanelContainer wrapper for each block
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+	style.corner_radius_top_left = 12
+	style.corner_radius_top_right = 12
+	style.corner_radius_bottom_left = 12
+	style.corner_radius_bottom_right = 12
+	style.content_margin_left = 15
+	style.content_margin_right = 15
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	panel.add_theme_stylebox_override("panel", style)
+	
+	var main_vbox = VBoxContainer.new()
+	main_vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(main_vbox)
+
+	# TOP ROW: Name and Value Input
+	var top_hbox = HBoxContainer.new()
+	main_vbox.add_child(top_hbox)
 
 	var label = Label.new()
 	label.text = key
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 28)
-	hbox.add_child(label)
+	label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	top_hbox.add_child(label)
 
 	var value = data["value"]
 	var type = data.get("type", "")
 
+	# DESCRIPTION ROW (if any)
+	if data.has("description"):
+		var desc_label = Label.new()
+		desc_label.text = data["description"]
+		desc_label.add_theme_font_size_override("font_size", 18)
+		desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		main_vbox.add_child(desc_label)
+
+	# SLIDER / INPUT ROW
 	if type == "bool" or typeof(value) == TYPE_BOOL:
 		var check = CheckBox.new()
 		check.button_pressed = value
-		check.custom_minimum_size = Vector2(80, 80) # Larger touch target
-		# Scale up the icon visual if possible, or just the container click area
-		check.scale = Vector2(1.8, 1.8) # Larger visual scale
+		check.custom_minimum_size = Vector2(80, 80)
+		check.scale = Vector2(1.5, 1.5)
 		check.toggled.connect(func(toggled):
 			registry.set_value(category, key, toggled)
 		)
-		hbox.add_child(check)
+		top_hbox.add_child(check)
 
 	elif type == "color" or typeof(value) == TYPE_COLOR:
 		var picker = ColorPickerButton.new()
 		picker.color = value
-		picker.custom_minimum_size = Vector2(80, 60) # Mobile touch target
+		picker.custom_minimum_size = Vector2(120, 60)
 		picker.color_changed.connect(func(col):
 			registry.set_value(category, key, col)
 		)
-		hbox.add_child(picker)
+		top_hbox.add_child(picker)
 
 	elif typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
-		var inner_vbox = VBoxContainer.new()
-		inner_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var spinbox = SpinBox.new()
+		spinbox.min_value = data.get("min", 0.0)
+		spinbox.max_value = data.get("max", 1000.0)
+		spinbox.step = data.get("step", 1.0)
+		spinbox.value = value
+		spinbox.custom_minimum_size = Vector2(180, 70)
+		spinbox.get_line_edit().add_theme_font_size_override("font_size", 26)
+		spinbox.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
+		top_hbox.add_child(spinbox)
 		
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		slider.custom_minimum_size.y = 80 # Touch height for slider
+		slider.custom_minimum_size.y = 100 # Large touch area
 		
-		# Define a thicker style for the slider track
 		var slider_style = StyleBoxFlat.new()
-		slider_style.bg_color = Color(0.3, 0.3, 0.3)
-		slider_style.expand_margin_top = 10
-		slider_style.expand_margin_bottom = 10
-		slider_style.corner_radius_top_left = 10
-		slider_style.corner_radius_top_right = 10
-		slider_style.corner_radius_bottom_left = 10
-		slider_style.corner_radius_bottom_right = 10
+		slider_style.bg_color = Color(0.25, 0.25, 0.25)
+		slider_style.expand_margin_top = 12
+		slider_style.expand_margin_bottom = 12
+		slider_style.corner_radius_top_left = 12
+		slider_style.corner_radius_top_right = 12
+		slider_style.corner_radius_bottom_left = 12
+		slider_style.corner_radius_bottom_right = 12
 		
 		var slider_active_style = slider_style.duplicate()
-		slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Highlight blue
+		slider_active_style.bg_color = Color(0.35, 0.55, 0.95) # Modern Blue
 		
 		slider.add_theme_stylebox_override("slider", slider_style)
 		slider.add_theme_stylebox_override("grabber_area", slider_active_style)
@@ -107,33 +142,18 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		slider.step = data.get("step", 1.0)
 		slider.value = value
 
-		var spinbox = SpinBox.new()
-		spinbox.min_value = data.get("min", 0.0)
-		spinbox.max_value = data.get("max", 1000.0)
-		spinbox.step = data.get("step", 1.0)
-		spinbox.value = value
-		spinbox.custom_minimum_size = Vector2(150, 80) # Larger spinbox
-		spinbox.get_line_edit().add_theme_font_size_override("font_size", 28)
-
-		# Sync Slider -> SpinBox & Registry
+		# Sync
 		slider.value_changed.connect(func(new_val):
-			if spinbox.value != new_val:
-				spinbox.value = new_val
+			spinbox.value = new_val
 			registry.set_value(category, key, new_val)
 		)
-
-		# Sync SpinBox -> Slider & Registry
 		spinbox.value_changed.connect(func(new_val):
-			if slider.value != new_val:
-				slider.value = new_val
+			slider.value = new_val
 			registry.set_value(category, key, new_val)
 		)
+		main_vbox.add_child(slider)
 
-		inner_vbox.add_child(slider)
-		inner_vbox.add_child(spinbox)
-		hbox.add_child(inner_vbox)
-
-	container.add_child(hbox)
+	container.add_child(panel)
 
 func open() -> void:
 	show()
