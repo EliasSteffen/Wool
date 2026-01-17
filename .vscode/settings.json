@@ -3,5 +3,6 @@
         {
             "file": ".github/commit-messages.md"
         }
-    ]
+    ],
+    "kiroAgent.configureMCP": "Disabled"
 }

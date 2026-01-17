@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6lslmg4acr3u"
-path="res://.godot/imported/Generated Image January 14, 2026 - 7_38PM.png-0c3405deff895e1b5b49957932e890bc.ctex"
+uid="uid://t8wrf3cl8prd"
+path="res://.godot/imported/nail.png-2e7eced7899a77654d83d1bcec5cd168.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/maps/Generated Image January 14, 2026 - 7_38PM.png"
-dest_files=["res://.godot/imported/Generated Image January 14, 2026 - 7_38PM.png-0c3405deff895e1b5b49957932e890bc.ctex"]
+source_file="res://assets/map/nail.png"
+dest_files=["res://.godot/imported/nail.png-2e7eced7899a77654d83d1bcec5cd168.ctex"]
 
 [params]
 
