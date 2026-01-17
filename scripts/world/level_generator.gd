@@ -3,8 +3,8 @@ extends Node2D
 @export var nail_scene: PackedScene = preload("res://scenes/interactions/nail.tscn")
 
 ## Vertical generation range
-@export var gen_min_y: float = -1500.0
-@export var gen_max_y: float = -250.0
+@export var gen_min_y: float = -1600.0
+@export var gen_max_y: float = -150.0
 
 const NAILS_PER_SEGMENT: int = 10
 
@@ -22,7 +22,6 @@ var _nails: Array[Node2D] = []
 func _ready() -> void:
 	# Initialize RNG with session seed from GameManager
 	_rng.seed = GameManager.current_seed
-	print("LevelGenerator: Initialized with seed: ", _rng.seed)
 
 	_player = get_tree().get_first_node_in_group("player")
 	if _player:

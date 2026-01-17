@@ -76,11 +76,11 @@ func get_character() -> Node:
 ## Activate this feature (called by Character)
 func activate() -> void:
 	if not enabled:
-		# print("Feature %s: Cannot activate because disabled" % feature_name)
+
 		return
 
 	_active = true
-	# print("Feature %s: Activated" % feature_name)
+
 	_on_activated()
 	feature_activated.emit()
 

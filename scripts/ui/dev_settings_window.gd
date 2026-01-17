@@ -12,12 +12,12 @@ func _ready() -> void:
 	$Panel.add_theme_stylebox_override("panel", style)
 
 	_build_ui()
-	
+
 	# Configure ScrollContainer for mobile scrolling
 	var scroll_container = $Panel/ScrollContainer
 	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	
+
 	# Add Safe Area Padding for notches (Landscape)
 	$Panel.set_begin(Vector2(200, 0)) # offset_left
 	$Panel.set_end(Vector2(-200, 0)) # offset_right
@@ -67,7 +67,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	style.content_margin_top = 10
 	style.content_margin_bottom = 10
 	panel.add_theme_stylebox_override("panel", style)
-	
+
 	var main_vbox = VBoxContainer.new()
 	main_vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(main_vbox)
@@ -125,15 +125,15 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		spinbox.get_line_edit().add_theme_font_size_override("font_size", 26)
 		spinbox.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
 		# top_hbox.add_child(spinbox) # REMOVED from top row
-		
+
 		# Slider with a "Scroll Lane" (spacer) and the numerical Value
 		var slider_hbox = HBoxContainer.new()
 		slider_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		
+
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slider.custom_minimum_size.y = 100 # Large touch area
-		
+
 		var slider_style = StyleBoxFlat.new()
 		slider_style.bg_color = Color(0.25, 0.25, 0.25)
 		slider_style.expand_margin_top = 12
@@ -142,10 +142,10 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		slider_style.corner_radius_top_right = 12
 		slider_style.corner_radius_bottom_left = 12
 		slider_style.corner_radius_bottom_right = 12
-		
+
 		var slider_active_style = slider_style.duplicate()
 		slider_active_style.bg_color = Color(0.35, 0.55, 0.95) # Modern Blue
-		
+
 		slider.add_theme_stylebox_override("slider", slider_style)
 		slider.add_theme_stylebox_override("grabber_area", slider_active_style)
 		slider.add_theme_stylebox_override("grabber_area_highlight", slider_active_style)
@@ -164,17 +164,17 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 			slider.value = new_val
 			registry.set_value(category, key, new_val)
 		)
-		
+
 		slider_hbox.add_child(slider)
-		
+
 		# The Scroll Lane: 400px spacer for safe swiping
 		var scroll_lane = Control.new()
 		scroll_lane.custom_minimum_size.x = 400
 		slider_hbox.add_child(scroll_lane)
-		
+
 		# Move the numerical value here, after the spacer
 		slider_hbox.add_child(spinbox)
-		
+
 		main_vbox.add_child(slider_hbox)
 
 	container.add_child(panel)
@@ -220,7 +220,6 @@ func _on_export_pressed() -> void:
 		if file:
 			file.store_string(json_string)
 			file.close()
-			print("Settings exported to: " + file_path)
 
 			# Visual feedback
 			var original_text = "Export Settings as JSON"

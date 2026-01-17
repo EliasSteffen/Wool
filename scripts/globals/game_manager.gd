@@ -48,8 +48,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func start_game() -> void:
 	# Always generate a new seed for every session/restart to ensure new level layout
 	current_seed = randi()
-	
-	print("GameManager: Session started/restarted with seed: ", current_seed, " (first start: ", is_first_game_start, ")")
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false

@@ -36,13 +36,13 @@ func _ready() -> void:
 		"max_boost_force": "max_boost_force",
 		"fixed_rope_length": "fixed_rope_length"
 	})
-	
+
 	# Set internal defaults for parameters removed from the UI
 	max_swing_speed_for_boost = 800.0
 	tension_strength = 2000.0
 	damping = 0.995
 	initial_pull_strength = 1500.0
-	
+
 	fixed_rope_length = FeatureConstants.get_value("Grappling", "fixed_rope_length")
 
 func _process(delta: float) -> void:
@@ -118,7 +118,6 @@ func handle_input(character: BaseCharacter) -> void:
 func _try_start_grapple(character: BaseCharacter) -> void:
 	var nail: Nail = _find_nearest_nail(character)
 	if nail:
-		print("DEBUG: [Grapple] Success! Target: ", nail.name)
 		set_target(nail.get_grapple_point(), nail)
 
 func _find_nearest_nail(character: BaseCharacter) -> Nail:
@@ -141,7 +140,7 @@ func _find_nearest_nail(character: BaseCharacter) -> Nail:
 		# Allow if distance is within radius + tolerance AND within fixed_rope_length
 		# This handles cases where character shape overlaps nail shape but centers are far
 		if (radius > 0 and distance > (radius + scaled_tolerance)) or distance > fixed_rope_length:
-			# print("DEBUG: [Grapple] Rejected %s (Dist: %.1f > Rad+Tol: %.1f or > MaxLen: %.1f)" % [nail.name, distance, radius + GRAPPLE_TOLERANCE, max_rope_length])
+
 			continue
 
 		if distance < nearest_distance:

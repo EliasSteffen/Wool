@@ -41,7 +41,7 @@ func _ready() -> void:
 		if mask & 2 == 0:
 			detection_area.collision_mask |= 2 # Add Layer 2
 
-		# print("Terrain '%s': Extended collision mask to include Player Layers (1+2). New Mask: %d" % [terrain_name, detection_area.collision_mask])
+
 
 		_move_collision_shapes_to_area()
 
@@ -50,7 +50,7 @@ func _ready() -> void:
 		for child in detection_area.get_children():
 			if child is CollisionShape2D or child is CollisionPolygon2D:
 				shape_count += 1
-		# print("Terrain '%s': DetectionArea configured with %d shapes. Global Pos: %s" % [terrain_name, shape_count, global_position])
+
 
 		# Ensure monitoring is on!
 		detection_area.monitoring = true
@@ -71,7 +71,7 @@ func _check_initial_overlaps() -> void:
 	# Manually force update to catch bodies
 	# Sometimes Area2D needs a frame to update overlapping bodies
 	var bodies = detection_area.get_overlapping_bodies()
-	# print("Terrain '%s' initial check: Found %d bodies" % [terrain_name, bodies.size()])
+
 
 	for body in bodies:
 		_on_body_entered(body)

@@ -246,7 +246,7 @@ func _update_camera_and_bounds() -> void:
 	# 1. Update Camera Position (Only move RIGHT)
 	# Target is player's current X position
 	var target_x = global_position.x
-	
+
 	# Monotonic check: Only update if target is further right than last position
 	if target_x > _last_camera_x:
 		camera.global_position.x = target_x
@@ -254,7 +254,7 @@ func _update_camera_and_bounds() -> void:
 	else:
 		# Lock camera to the furthest right point reached
 		camera.global_position.x = _last_camera_x
-	
+
 	# Also sync Y (camera usually follows Y normally, unless requested otherwise)
 	camera.global_position.y = global_position.y
 
@@ -263,10 +263,9 @@ func _update_camera_and_bounds() -> void:
 	var viewport_rect = get_viewport_rect()
 	var half_width = (viewport_rect.size.x / camera.zoom.x) * 0.5
 	var left_edge = camera.global_position.x - half_width
-	
+
 	# If player's X (plus some padding/margin if needed) is less than left_edge
 	if global_position.x < left_edge:
-		print("BasePlayer: Character touched left camera edge! Game Over.")
 		die()
 
 # === PRIVATE METHODS ===
@@ -284,12 +283,12 @@ func _handle_input() -> void:
 
 	# Jump (only if not underwater) -> Uses coyote time or floor check
 	if not is_underwater and Input.is_action_just_pressed("jump"):
-		# print("DEBUG: Jump input. OnFloor: %s, Coyote: %s, JustJumped: %s, VelY: %s" % [is_on_floor(), _coyote_timer, _just_jumped, velocity.y])
+
 		if is_on_floor() or _coyote_timer > 0.0:
 			_jump()
 		else:
 			pass
-			# print("Jump failed: OnFloor=%s, Coyote=%s" % [is_on_floor(), _coyote_timer])
+
 
 
 
@@ -308,9 +307,8 @@ func _toggle_feature(key: int, feature_ref: Feature, feature_name: String) -> vo
 			_debug_key_pressed[key] = true
 			if feature_ref:
 				feature_ref.enabled = not feature_ref.enabled
-				print("%s: %s" % [feature_name, "ON" if feature_ref.enabled else "OFF"])
 			else:
-				print("%s: NOT FOUND (add to Features container)" % feature_name)
+				pass
 	else:
 		_debug_key_pressed[key] = false
 
@@ -393,7 +391,7 @@ func _handle_grapple_swing_pump(delta: float) -> void:
 	# Swing pumping: Add force in direction of movement (tangential) to build momentum
 	var speed_multiplier: float = move_speed / CharacterConstants.DEFAULT_MOVE_SPEED
 	var force_magnitude: float = grappling_feature.swing_pump_force * speed_multiplier * delta
-	
+
 	# Only pump if we have movement and input matches general direction
 	# Or if we're just starting and want to push in the input direction
 	if velocity.length() > 10.0:
@@ -419,7 +417,7 @@ func _handle_ground_air_movement(delta: float) -> void:
 		# (Current velocity projected onto tangent)
 		var current_speed = velocity.dot(tangent)
 		var target_speed = _direction * move_speed
-		
+
 		# Momentum Preservation: Only accelerate/decelerate towards target if we are not already
 		# moving faster than the target in that direction.
 		if _direction != 0 and sign(current_speed) == sign(target_speed) and abs(current_speed) > abs(target_speed):
@@ -433,12 +431,12 @@ func _handle_ground_air_movement(delta: float) -> void:
 
 		# Apply a tiny downward force to ensure 'is_on_floor()' remains true and snapping works reliably
 		# This prevents "floating" when moving down slopes rapidly
-		# print("DEBUG: Applying stick-to-floor force")
+
 		velocity.y += 2.0
 	else:
 		# Global movement in air
 		var target_x = _direction * move_speed
-		
+
 		# Momentum Preservation in air
 		if _direction != 0 and sign(velocity.x) == sign(target_x) and abs(velocity.x) > abs(target_x):
 			# Over-speed in air, let damping handle it
@@ -500,7 +498,7 @@ func _update_rotation(delta: float) -> void:
 
 	# DEBUG: Diagnose why rotation is skipped
 	# if Input.is_action_pressed("interact") and active_grappling_feature == null:
-	# 	print("DEBUG: [Rotation] Interact Held, but NO active grapple found.")
+
 
 	# Handle flipping (standard platformer behavior)
 	# Prioritize Input direction for responsiveness
@@ -554,7 +552,7 @@ func _update_rotation(delta: float) -> void:
 			target_rotation = rope_vector.angle() + PI / 2.0 + _grapple_kick + target_lean
 
 			# Print state
-			print("DEBUG: [Rotation] Active! RopeAngle: %.2f | Kick: %.2f | Lean: %.2f | Target: %.2f" % [rad_to_deg(rope_vector.angle()), rad_to_deg(_grapple_kick), rad_to_deg(target_lean), rad_to_deg(target_rotation)])
+			# Rotation debug suppressed
 	elif is_on_floor():
 		# Align with floor slope
 		target_rotation = get_floor_normal().angle() + PI / 2.0
@@ -645,7 +643,7 @@ func _update_interaction_prompt() -> void:
 
 	if nearby_interactions.size() > 0:
 		pass
-		# print("DEBUG: [Prompt] Nearby: %d. Closest: %s" % [nearby_interactions.size(), closest_interaction.name if closest_interaction else "None"])
+
 
 	if closest_interaction != _current_prompt_interaction:
 		_current_prompt_interaction = closest_interaction

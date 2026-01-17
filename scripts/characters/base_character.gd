@@ -123,14 +123,14 @@ func add_feature(feature: Feature) -> void:
 
 	_features.append(feature)
 	_physics_changers.append(feature)
-	
+
 	# Connect grappling signals
 	if feature is GrapplingFeature:
 		if not feature.grapple_started.is_connected(_on_grapple_started):
 			feature.grapple_started.connect(_on_grapple_started)
 		if not feature.grapple_ended.is_connected(_on_grapple_ended):
 			feature.grapple_ended.connect(_on_grapple_ended)
-			
+
 	feature_added.emit(feature)
 
 ## Remove a feature from this character
@@ -222,7 +222,7 @@ func set_current_terrain(terrain: Terrain) -> void:
 			type_name = "Default Air"
 		else:
 			type_name = terrain.terrain_name
-		# print("BaseCharacter [%s]: Current Terrain switched to %s" % [name, type_name])
+
 
 	var old_terrain: Terrain = current_terrain
 	current_terrain = terrain
@@ -388,16 +388,16 @@ func _apply_grapple_constraint() -> void:
 	var distance: float = to_grapple.length()
 
 	var direction: Vector2 = to_grapple.normalized()
-	
+
 	# Constrain position to exactly rope_length
 	if not is_equal_approx(distance, grappling.rope_length):
 		global_position = grapple_point - direction * grappling.rope_length - offset
-		
+
 	# FORCE CONTINUOUS VELOCITY REDIRECTION (Rigid Rod Physics)
 	# Project velocity to be strictly tangent to rope
 	var velocity_radial: float = velocity.dot(direction)
 	var tangential_velocity: Vector2 = velocity - direction * velocity_radial
-	
+
 	# INITIAL IMPULSE: Always start CCW (Forward/Right)
 	if not _is_grapple_initialized:
 		# Use rotated direction for initial impulse
