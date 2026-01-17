@@ -5,8 +5,8 @@
 - **Language:** GDScript (Static Typed)
 - **Architecture:** Hybrid (Inheritance for Taxonomy, Composition for Functionality).
 - **Documentation:** DO NOT generate Markdown documentation or comments explaining the obvious. Code must be self-documenting.
-- **Errors:** Check with `godot --check-only` for syntax errors!
-
+- **Errors:** Check with `godot --check-only <SCRIPT_FILE_NAME>` for syntax errors!
+    - NEVER EVER USE `godot --check-only project.godot` as it only opens the GODOT Program and NOT the GAME!! (NEVER do this!!!)
 ## 2. GDScript Style Guide
 
 ### Type Safety (CRITICAL)
