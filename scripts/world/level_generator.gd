@@ -17,7 +17,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var minimal_nail_distance: float = 256.0
 @export var nail_distance_increase_interval: float = 512.0
 @export var nail_distance_increase_percent: float = 0.05
-@export var max_min_nail_distance: float = 768.0
+@export var max_min_nail_distance: float = 512.0
 var _nails: Array[Node2D] = []
 
 func _ready() -> void:
@@ -70,9 +70,11 @@ func _generate_nails_in_range(start_x: float, end_x: float) -> void:
 			var pos = Vector2(x, y)
 
 			# Check distance to existing nails (from other segments)
-			var ok = true
+			var ok: bool = true
 			for nail in _nails:
-				if pos.distance_to(nail.global_position) < current_min_distance:
+				# Reject if too close (use <= to be conservative)
+				if pos.distance_to(nail.global_position) <= current_min_distance:
+					ok = false
 					break
 
 			if ok:
