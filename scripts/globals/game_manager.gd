@@ -14,6 +14,7 @@ enum GameState { MENU, PLAYING, PAUSED }
 # === PUBLIC VARIABLES ===
 var current_state: GameState = GameState.PLAYING
 var current_seed: int = 0
+var is_first_game_start: bool = true  # Track if this is the first time starting the game
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
@@ -47,12 +48,17 @@ func _unhandled_input(event: InputEvent) -> void:
 func start_game() -> void:
 	# Always generate a new seed for every session/restart to ensure new level layout
 	current_seed = randi()
-	print("GameManager: Session started/restarted with seed: ", current_seed)
+	
+	print("GameManager: Session started/restarted with seed: ", current_seed, " (first start: ", is_first_game_start, ")")
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false
 	get_tree().change_scene_to_file(LEVEL_1_SCENE)
 	state_changed.emit(current_state)
+
+## Mark that the game has been started (called by level after first start)
+func mark_game_started() -> void:
+	is_first_game_start = false
 
 ## Quit the application
 func quit_game() -> void:

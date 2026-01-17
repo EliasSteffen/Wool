@@ -413,6 +413,15 @@ func _handle_input() -> void:
 	if not _game_started:
 		_direction = 0.0
 		if input_just_pressed:
+			# Check if start icons still exist - if yes, ignore this input (it's for the animation)
+			var level = get_parent()
+			var start_icons = level.get_node_or_null("Starticons") if level else null
+			
+			if start_icons and is_instance_valid(start_icons):
+				# Start icons still exist - this input is for the animation, not for jumping
+				return
+			
+			# Start icons are gone or don't exist - start the game
 			_game_started = true
 			_jump()
 			_direction = 1.0

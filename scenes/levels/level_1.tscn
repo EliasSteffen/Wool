@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=12 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="Texture2D" uid="uid://c6lslmg4acr3u" path="res://assets/map/Generated Image January 14, 2026 - 7_38PM.png" id="2_oc4kc"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://hud1234568aa" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
+[ext_resource type="Script" path="res://scripts/levels/level_1.gd" id="11_level1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
 size = Vector2(536, 568)
@@ -17,6 +18,7 @@ size = Vector2(240, 7184)
 
 [node name="level_1" type="Node2D"]
 position = Vector2(192, -192)
+script = ExtResource("11_level1")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
