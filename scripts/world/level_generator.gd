@@ -14,9 +14,10 @@ var _player: Node2D = null
 var _camera_width: float = 0.0
 var _last_generated_x: float = 0.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
-var _minimal_nail_distance: float = 256
-var _increase_min_nail_dist_distance: float = 5000
-var _nail_dist_step_size: float = 256
+@export var minimal_nail_distance: float = 256.0
+@export var nail_distance_increase_interval: float = 512.0
+@export var nail_distance_increase_percent: float = 0.05
+@export var max_min_nail_distance: float = 768.0
 var _nails: Array[Node2D] = []
 
 func _ready() -> void:
@@ -51,7 +52,10 @@ func _process(delta: float) -> void:
 	_cleanup(camera_left_border - 100.0)
 
 func _generate_nails_in_range(start_x: float, end_x: float) -> void:
-	var current_min_distance = _minimal_nail_distance + floor(start_x / _increase_min_nail_dist_distance) * _nail_dist_step_size
+	var steps: int = int(max(0.0, floor(start_x / nail_distance_increase_interval)))
+	var current_min_distance: float = minimal_nail_distance * pow(1.0 + nail_distance_increase_percent, steps)
+	if current_min_distance > max_min_nail_distance:
+		current_min_distance = max_min_nail_distance
 	var width = end_x - start_x
 	var height = gen_max_y - gen_min_y
 	var cells_x = ceil(width / current_min_distance)
