@@ -2,21 +2,22 @@ extends Node2D
 
 @export var nail_scene: PackedScene = preload("res://scenes/interactions/nail.tscn")
 
-@export var spawn_distance: float = 3000.0
-@export var cleanup_distance: float = 2000.0
-@export var chunk_width: float = 2000.0
-
 ## Vertical generation range
-@export var gen_min_y: float = -3000.0
+@export var gen_min_y: float = -1500.0
 @export var gen_max_y: float = -250.0
+
+const NAILS_PER_SEGMENT: int = 10
 
 @onready var nails_container: Node = get_node_or_null("../Nails")
 
 var _player: Node2D = null
-var _last_spawn_x: float = 0.0
-var _last_nail_pos_high: Vector2 = Vector2.ZERO
-var _last_nail_pos_mid: Vector2 = Vector2.ZERO
+var _camera_width: float = 0.0
+var _last_generated_x: float = 0.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _minimal_nail_distance: float = 256
+var _increase_min_nail_dist_distance: float = 5000
+var _nail_dist_step_size: float = 256
+var _nails: Array[Node2D] = []
 
 func _ready() -> void:
 	# Initialize RNG with session seed from GameManager
@@ -25,77 +26,54 @@ func _ready() -> void:
 
 	_player = get_tree().get_first_node_in_group("player")
 	if _player:
-		_last_spawn_x = _player.global_position.x + 300.0
-		# Move initial nails MUCH closer (within reach)
-		_last_nail_pos_high = _player.global_position + Vector2(200, -200)
-		_last_nail_pos_mid = _player.global_position + Vector2(400, -100)
-		
-		# Spawn initial nails
-		_spawn_nail(_last_nail_pos_high)
-		_spawn_nail(_last_nail_pos_mid)
-		_spawn_nail(_player.global_position + Vector2(600, -150))
+		_camera_width = get_viewport().get_visible_rect().size.x
 
-var _cleanup_timer: float = 0.0
-const CLEANUP_INTERVAL: float = 0.5
+		# Initial spawn: 0 <= x <= camera_width
+		_generate_nails_in_range(1024, _camera_width)
+
+		# Spawn next segment: camera_width <= x <= 2*camera_width
+		_generate_nails_in_range(_camera_width, 2.0 * _camera_width)
+		_last_generated_x = 2.0 * _camera_width
 
 func _process(delta: float) -> void:
 	if not _player:
 		_player = get_tree().get_first_node_in_group("player")
+	if not _player.camera:
 		return
 
-	# Spawn ahead based on the furthest progress of either path
-	var last_x = max(_last_nail_pos_high.x, _last_nail_pos_mid.x)
-	if _player.global_position.x + spawn_distance > last_x:
-		_generate_next_segment()
+	var camera_left_border = _player.camera.global_position.x - (_camera_width / 2.0) / _player.camera.zoom.x
 
-	# Cleanup staggered
-	_cleanup_timer += delta
-	if _cleanup_timer >= CLEANUP_INTERVAL:
-		_cleanup_timer = 0.0
-		_cleanup()
+	# Generate ahead
+	while _last_generated_x < camera_left_border + 2.0 * _camera_width:
+		_generate_nails_in_range(_last_generated_x, _last_generated_x + _camera_width)
+		_last_generated_x += _camera_width
 
-func _generate_next_segment() -> void:
-	# Calculate path heights based on total range
-	var height = abs(gen_max_y - gen_min_y)
-	var segment = height / 3.0
-	
-	# High Path (top third)
-	_last_nail_pos_high = _spawn_path_step(_last_nail_pos_high, gen_min_y, gen_min_y + segment)
-	
-	# Mid Path (middle third)
-	_last_nail_pos_mid = _spawn_path_step(_last_nail_pos_mid, gen_min_y + segment, gen_min_y + 2 * segment)
-	
-	# Low Path (bottom third) - treated as a proper path now for full coverage
-	# We use a temporary variable so we don't have to manage a third _last_nail_pos if not strictly needed for progress check,
-	# but for consistency we just spawn directly in the range.
-	var low_x = max(_last_nail_pos_high.x, _last_nail_pos_mid.x) + _rng.randf_range(50.0, 200.0)
-	var low_y = _rng.randf_range(gen_min_y + 2 * segment, gen_max_y)
-	_spawn_nail(Vector2(low_x, low_y))
+	# Cleanup nails left from the camera
+	_cleanup(camera_left_border - 100.0)
 
-func _spawn_path_step(last_pos: Vector2, min_y: float, max_y: float) -> Vector2:
-	var x_offset = _rng.randf_range(250.0, 450.0) # Reduced from 400-600
-	var y_offset = _rng.randf_range(-400.0, 400.0)
-	
-	var next_pos = last_pos + Vector2(x_offset, y_offset)
-	next_pos.y = clamp(next_pos.y, min_y, max_y)
-	
-	_spawn_nail(next_pos)
-	
-	# High chance (75%) for extra nail - with tighter spacing
-	if _rng.randf() > 0.25:
-		var x_extra = _rng.randf_range(150.0, 300.0) # Reduced from 300-450
-		if _rng.randf() > 0.5: x_extra *= -1
-		
-		var y_extra = _rng.randf_range(-300.0, 300.0)
-		
-		var extra_pos = next_pos + Vector2(x_extra, y_extra)
-		extra_pos.y = clamp(extra_pos.y, min_y, max_y)
-		
-		# Ensure we don't spawn too close to ANY existing path point here
-		if extra_pos.distance_to(next_pos) > 150.0: # Reduced from 300
-			_spawn_nail(extra_pos)
-		
-	return next_pos
+func _generate_nails_in_range(start_x: float, end_x: float) -> void:
+	var current_min_distance = _minimal_nail_distance + floor(start_x / _increase_min_nail_dist_distance) * _nail_dist_step_size
+	var width = end_x - start_x
+	var height = gen_max_y - gen_min_y
+	var cells_x = ceil(width / current_min_distance)
+	var cells_y = ceil(height / current_min_distance)
+
+	for i in range(cells_x):
+		for j in range(cells_y):
+			var cell_x = start_x + i * current_min_distance
+			var cell_y = gen_min_y + j * current_min_distance
+			var x = _rng.randf_range(cell_x, min(cell_x + current_min_distance, end_x))
+			var y = _rng.randf_range(cell_y, min(cell_y + current_min_distance, gen_max_y))
+			var pos = Vector2(x, y)
+
+			# Check distance to existing nails (from other segments)
+			var ok = true
+			for nail in _nails:
+				if pos.distance_to(nail.global_position) < current_min_distance:
+					break
+
+			if ok:
+				_spawn_nail(pos)
 
 func _spawn_nail(pos: Vector2) -> void:
 	var nail = nail_scene.instantiate()
@@ -104,19 +82,18 @@ func _spawn_nail(pos: Vector2) -> void:
 	else:
 		add_child(nail)
 	nail.global_position = pos
+	_nails.append(nail)
 
-func _cleanup() -> void:
-	if not _player: return
-	
-	var cleanup_x = _player.global_position.x - cleanup_distance
-	
+func _cleanup(cleanup_x: float) -> void:
 	var containers = []
-	if nails_container: containers.append(nails_container)
-	if get_child_count() > 0: containers.append(self)
-	
+	if nails_container:
+		containers.append(nails_container)
+	if get_child_count() > 0:
+		containers.append(self)
+
 	for container in containers:
 		for child in container.get_children():
 			if child is Node2D and child.global_position.x < cleanup_x:
-				# Use queue_free but with a small check to ensure it's not already exiting
 				if not child.is_queued_for_deletion():
+					_nails.erase(child)
 					child.queue_free()
