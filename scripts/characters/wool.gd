@@ -355,7 +355,7 @@ func _update_pickaxe_visual() -> void:
 			pickaxe.rotation -= dynamic_r
 		else:
 			pickaxe.rotation += dynamic_r
- 
+
 		# 3. Apply Visual Rotation (Slope) to Pickaxe
 		# Pickaxe is child of Wool (unrotated), so we must manually add the visual rotation
 		# to match the skin.
@@ -394,11 +394,11 @@ func _handle_input() -> void:
 			# Check if start icons still exist - if yes, ignore this input (it's for the animation)
 			var level = get_parent()
 			var start_icons = level.get_node_or_null("Starticons") if level else null
-			
+
 			if start_icons and is_instance_valid(start_icons):
 				# Start icons still exist - this input is for the animation, not for jumping
 				return
-			
+
 			# Start icons are gone or don't exist - start the game
 			_game_started = true
 			_jump()
@@ -440,14 +440,15 @@ func _handle_input() -> void:
 
 func _find_best_grapple_target() -> Interaction:
 	var best_target: Interaction = null
-	var min_dist: float = 9999999.0 # Squared distance
+	var best_x: float = -INF
 
 	# Use built-in nearby_interactions from BaseCharacter
 	for interaction in nearby_interactions:
 		if interaction is Nail and not interaction.is_being_used():
-			var dist_sq = global_position.distance_squared_to(interaction.global_position)
-			if dist_sq < min_dist:
-				min_dist = dist_sq
+			var x_pos: float = interaction.global_position.x
+			# Choose the nail with the largest X (most forward)
+			if x_pos > best_x:
+				best_x = x_pos
 				best_target = interaction
 
 	return best_target
