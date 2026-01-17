@@ -277,12 +277,9 @@ func _handle_input() -> void:
 	# _vertical_direction = Input.get_axis("ui_up", "ui_down")
 	_vertical_direction = 0.0
 
-	var is_underwater := false
-	if get_active_terrain_of_type(UnderWaterTerrain) != null:
-		is_underwater = true
 
-	# Jump (only if not underwater) -> Uses coyote time or floor check
-	if not is_underwater and Input.is_action_just_pressed("jump"):
+	# Jump -> Uses coyote time or floor check
+	if Input.is_action_just_pressed("jump"):
 
 		if is_on_floor() or _coyote_timer > 0.0:
 			_jump()
@@ -322,19 +319,8 @@ func _handle_feature_inputs() -> void:
 			feature.handle_input(self)
 
 func _handle_movement(delta: float) -> void:
-	# Explicitly check for Water terrain, regardless of what 'current_terrain' thinks (handling overlaps)
-	var water_terrain = get_active_terrain_of_type(UnderWaterTerrain)
+	# Water terrain support removed
 
-	if water_terrain:
-		# Disable floor snapping when swimming to allow free vertical movement
-		floor_snap_length = 0.0
-		# We need to temporarily force current_terrain to be the water terrain
-		# so the logic inside _handle_underwater_movement uses the correct params (buoyancy etc)
-		# NOTE: This does NOT change the global 'current_terrain' variable, just for this scope if we passed it.
-		# But _handle_underwater_movement uses 'current_terrain' property directly.
-		# Instead, let's pass the terrain instance to the function.
-		_handle_underwater_movement(delta, water_terrain)
-		return
 
 	if _direction != 0:
 		if grappling_feature and grappling_feature.is_active():
@@ -360,32 +346,7 @@ func _handle_movement(delta: float) -> void:
 			# Air friction
 			velocity.x = move_toward(velocity.x, 0, friction * delta)
 
-func _handle_underwater_movement(delta: float, underwater_terrain: UnderWaterTerrain = null) -> void:
-	# Fallback if called without argument (for backward compat or if used elsewhere)
-	if not underwater_terrain and current_terrain is UnderWaterTerrain:
-		underwater_terrain = current_terrain as UnderWaterTerrain
-
-	if not underwater_terrain:
-		push_error("BasePlayer: _handle_underwater_movement called without valid UnderWaterTerrain context")
-		return
-
-	var speed: float = move_speed * underwater_terrain.slowdown_factor
-
-
-
-	# Horizontal movement (always controlled)
-	var target_velocity_x: float = _direction * speed
-	velocity.x = move_toward(velocity.x, target_velocity_x, acceleration * delta)
-
-	# Vertical movement
-	if _vertical_direction != 0:
-		# Player is actively swimming up/down
-		var target_velocity_y: float = _vertical_direction * speed
-		velocity.y = move_toward(velocity.y, target_velocity_y, acceleration * delta)
-	else:
-		# Native terrain damping (handled in BaseCharacter) will limit velocity.
-		# We don't need additional manual damping here, otherwise we fight buoyancy.
-		pass
+# Underwater movement support removed
 
 func _handle_grapple_swing_pump(delta: float) -> void:
 	# Swing pumping: Add force in direction of movement (tangential) to build momentum
@@ -513,7 +474,6 @@ func _update_rotation(delta: float) -> void:
 	# Check states
 	var is_grappling = active_grappling_feature != null
 
-	var is_underwater = current_terrain is UnderWaterTerrain
 	var target_rotation = 0.0
 
 	if is_grappling:
@@ -556,49 +516,10 @@ func _update_rotation(delta: float) -> void:
 	elif is_on_floor():
 		# Align with floor slope
 		target_rotation = get_floor_normal().angle() + PI / 2.0
-	elif is_underwater:
-		# Check for floor or proximity to floor to force upright standing
-		# We use test_move to see if ground is immediately below us (e.g. within 16 pixels)
-		# This prevents jitter when rotating upright lifts the collision shape slightly off the ground
-		var close_to_floor = is_on_floor()
-		if not close_to_floor and velocity.y >= 0: # Only check if falling/sinking
-			close_to_floor = test_move(global_transform, Vector2(0, 16))
-
-		if close_to_floor:
-			target_rotation = 0.0
-		# Otherwise calculate rotation based on velocity
-		# We want the character to lean into the movement (Superman style)
-		# Sprite Up is (0, -1). Velocity Angle 0 is Right.
-		# So we need to add 90 degrees (PI/2) to align Up with Velocity.
-		elif velocity.length() > 10.0:
-			var angle = velocity.angle() + PI / 2.0
-			angle = wrapf(angle, -PI, PI)
-
-			if skin.scale.x > 0:
-				# Facing Right
-				# Allow rotation from slightly back (-30deg) to full down (180deg)
-				target_rotation = clamp(angle, -PI/6, PI)
-			else:
-				# Facing Left
-				# We expect angles in [-PI, 0].
-				# If angle is PI (straight down), wrapf might return PI.
-				# We want to treat positive PI as negative PI for clamping purposes.
-				if angle > PI/2:
-					angle -= 2 * PI
-
-				# Allow rotation from full down (-180deg) to slightly back (30deg)
-				target_rotation = clamp(angle, -PI, PI/6)
 
 	# Apply rotation with smoothing to the WHOLE PLAYER (including pickaxe)
-	# Lower value = smoother/slower rotation
-	if is_underwater and not is_grappling:
-		# Use lerp (linear) instead of lerp_angle (shortest path) for swimming
-		# This prevents the rotation from crossing the bottom (PI/-PI boundary)
-		# and forces the "long way" via the top (0) when switching sides.
-		rotation = wrapf(rotation, -PI, PI) # Normalize first
-		rotation = lerp(rotation, target_rotation, 5.0 * delta)
-	elif is_grappling:
-		# Very fast rotation for responsive swinging actions
+	# Very fast rotation while grappling
+	if is_grappling:
 		rotation = lerp_angle(rotation, target_rotation, 20.0 * delta)
 	else:
 		# Faster rotation on floor to prevent floating visuals during slope changes

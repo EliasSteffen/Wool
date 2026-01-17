@@ -157,7 +157,6 @@ func _update_rotation(delta: float) -> void:
 	# Rotating the CharacterBody2D (self) causes floor detachment on slopes.
 
 	var is_grappling = grappling_feature and grappling_feature.is_active()
-	var is_underwater = current_terrain is UnderWaterTerrain
 	var target_rotation = 0.0
 
 	# --- FORCE RIGHT FACING ---
@@ -184,23 +183,6 @@ func _update_rotation(delta: float) -> void:
 		var floor_normal = get_floor_normal()
 		target_rotation = floor_normal.angle() + PI / 2.0
 		_last_valid_floor_normal = floor_normal
-	elif is_underwater:
-		var close_to_floor = is_on_floor()
-		if not close_to_floor and velocity.y >= 0: # Only check if falling/sinking
-			close_to_floor = test_move(global_transform, Vector2(0, 16))
-
-		if close_to_floor:
-			target_rotation = 0.0
-		elif velocity.length() > 10.0:
-			var angle = velocity.angle() + PI / 2.0
-			angle = wrapf(angle, -PI, PI)
-
-			if skin:
-				if skin.scale.x > 0:
-					target_rotation = clamp(angle, -PI/6, PI)
-				else:
-					if angle > PI/2: angle -= 2 * PI
-					target_rotation = clamp(angle, -PI, PI/6)
 	else:
 		# VISUAL FLICKER FIX:
 		# Use last known floor normal to maintain rotation during momentary flickers
@@ -213,12 +195,8 @@ func _update_rotation(delta: float) -> void:
 		# but simply reusing last normal prevents the hard snap to 0.
 
 	# Apply rotation with smoothing to the VISUAL ROTATION variable
-	if is_underwater and not is_grappling:
-		_current_visual_rotation = wrapf(_current_visual_rotation, -PI, PI)
-		_current_visual_rotation = lerp(_current_visual_rotation, target_rotation, 5.0 * delta)
-	else:
-		var rotate_speed = 15.0 if is_on_floor() else 5.0
-		_current_visual_rotation = lerp_angle(_current_visual_rotation, target_rotation, rotate_speed * delta)
+	var rotate_speed = 15.0 if is_on_floor() else 5.0
+	_current_visual_rotation = lerp_angle(_current_visual_rotation, target_rotation, rotate_speed * delta)
 
 	# Apply to Skin
 	if skin:

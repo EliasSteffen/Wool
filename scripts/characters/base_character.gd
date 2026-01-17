@@ -161,7 +161,7 @@ func get_feature_by_type(feature_type: Variant) -> Feature:
 				found_feature = feature # Keep as fallback
 	return found_feature
 
-## Get the active terrain instance of a specific type (e.g. UnderWaterTerrain)
+## Get the active terrain instance of a specific type (e.g. Water terrain by name or specific subclass)
 ## Returns the most recently added terrain of that type, or null if none active.
 func get_active_terrain_of_type(terrain_type: Variant) -> Terrain:
 	# Iterate backwards to get the most recent one (standard stack behavior)
