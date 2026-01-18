@@ -7,12 +7,47 @@ extends Interaction
 
 # === EXPORTED VARIABLES ===
 @export var grapple_point_offset: Vector2 = Vector2.ZERO
+@export var is_rusty: bool = false
 
 # === OVERRIDDEN METHODS ===
 
 func _setup_interaction() -> void:
 	interaction_name = "Nail"
+
+	# Set colors based on type
+	if is_rusty:
+		normal_color = InteractionConstants.get_value("Visuals", "rusty_nail_color", InteractionConstants.DEFAULT_RUSTY_NAIL_COLOR)
+	else:
+		normal_color = InteractionConstants.get_value("Visuals", "nail_color", InteractionConstants.DEFAULT_NORMAL_COLOR)
+
+	highlight_color = InteractionConstants.get_value("Visuals", "highlight_nail_color", InteractionConstants.DEFAULT_HIGHLIGHT_COLOR)
+
 	# Nail-specific setup
+
+	_update_visual()
+
+## Setup tweakables
+func _setup_tweakables() -> void:
+	# Colors are set in _setup_interaction, no need to set again
+	if not InteractionConstants.value_changed.is_connected(_on_tweakable_changed):
+		InteractionConstants.value_changed.connect(_on_tweakable_changed)
+
+	_update_visual()
+
+func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
+	if category == "Visuals":
+		match key:
+			"highlight_nail_color":
+				highlight_color = value
+				_update_visual()
+			"nail_color":
+				if not is_rusty:
+					normal_color = value
+					_update_visual()
+			"rusty_nail_color":
+				if is_rusty:
+					normal_color = value
+					_update_visual()
 
 func _on_character_entered(character: CharacterBody2D) -> void:
 	# Notify character that this nail is available for grappling

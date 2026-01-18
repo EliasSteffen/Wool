@@ -1,6 +1,7 @@
 extends Node2D
 
 @export var nail_scene: PackedScene = preload("res://scenes/interactions/nail.tscn")
+@export var rusty_nail_scene: PackedScene = preload("res://scenes/interactions/rusty_nail.tscn")
 
 ## Vertical generation range
 @export var gen_min_y: float = -1600.0
@@ -18,6 +19,8 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var nail_distance_increase_interval: float = 512.0
 @export var nail_distance_increase_percent: float = 0.01
 @export var max_min_nail_distance: float = 512.0
+@export var rusty_nail_probability: float = 0.1
+@export var rusty_nail_probability_increase_percent: float = 0.1
 var _nails: Array[Node2D] = []
 
 func _ready() -> void:
@@ -78,10 +81,14 @@ func _generate_nails_in_range(start_x: float, end_x: float) -> void:
 					break
 
 			if ok:
-				_spawn_nail(pos)
+				var scene: PackedScene = nail_scene
+				var current_rusty_probability: float = rusty_nail_probability + steps * rusty_nail_probability_increase_percent
+				if _rng.randf() < current_rusty_probability:
+					scene = rusty_nail_scene
+				_spawn_nail(pos, scene)
 
-func _spawn_nail(pos: Vector2) -> void:
-	var nail = nail_scene.instantiate()
+func _spawn_nail(pos: Vector2, scene: PackedScene) -> void:
+	var nail = scene.instantiate()
 	if nails_container:
 		nails_container.add_child(nail)
 	else:

@@ -82,8 +82,8 @@ func _update_prompt_text() -> void:
 
 ## Setup tweakables
 func _setup_tweakables() -> void:
-	highlight_color = InteractionConstants.get_value("Visuals", "highlight_color")
-	normal_color = InteractionConstants.get_value("Visuals", "normal_color")
+	highlight_color = InteractionConstants.get_value("Visuals", "highlight_nail_color", Color(1.5, 1.5, 1.5, 1.0))
+	normal_color = InteractionConstants.get_value("Visuals", "nail_color", Color(1.0, 1.0, 1.0, 1.0))
 
 	if not InteractionConstants.value_changed.is_connected(_on_tweakable_changed):
 		InteractionConstants.value_changed.connect(_on_tweakable_changed)
@@ -93,12 +93,15 @@ func _setup_tweakables() -> void:
 func _on_tweakable_changed(category: String, key: String, value: Variant) -> void:
 	if category == "Visuals":
 		match key:
-			"highlight_color":
+			"highlight_nail_color":
 				highlight_color = value
 				_update_visual()
-			"normal_color":
+			"nail_color":
 				normal_color = value
 				_update_visual()
+			"rusty_nail_color":
+				# For rusty nails, but since this is base, maybe ignore or handle in subclass
+				pass
 
 ## Check if a specific character is in range
 func is_character_in_range(character: CharacterBody2D) -> bool:

@@ -28,6 +28,7 @@ var _has_reached_rope_length: bool = false  # Track if we've reached the rope le
 var _input_buffer_timer: float = 0.0
 var _animated_rope_length: float = 0.0  # Current animated rope length for smooth transition
 var _rope_animation_speed: float = 800.0  # Speed of rope length animation in pixels per second
+var _release_without_boost: bool = false  # Flag to prevent boost when releasing due to falling nail
 const GRAPPLE_TOLERANCE: float = 20.0 # Extra pixels to allow grappling (compensates for character width)
 
 # === BUILT-IN METHODS ===
@@ -48,6 +49,12 @@ func _ready() -> void:
 	initial_pull_strength = 1500.0
 
 func _physics_process(delta: float) -> void:
+	# Check if the target nail is falling (for rusty nails)
+	if is_active() and _target_nail is RustyNail and (_target_nail as RustyNail)._is_falling:
+		_release_without_boost = true
+		release()
+		return
+
 	# Animation is now handled in BaseCharacter
 	pass
 
@@ -83,15 +90,19 @@ func release() -> void:
 	if _target_nail:
 		_target_nail.set_used(false)
 
-	# Apply boost based on swing speed
-	var character: BaseCharacter = get_character()
-	if character:
-		var speed: float = character.velocity.length()
-		var boost_factor: float = clamp(speed / max_swing_speed_for_boost, 0.0, 1.0)
+	# Apply boost based on swing speed, but not if releasing due to falling nail
+	if not _release_without_boost:
+		var character: BaseCharacter = get_character()
+		if character:
+			var speed: float = character.velocity.length()
+			var boost_factor: float = clamp(speed / max_swing_speed_for_boost, 0.0, 1.0)
 
-		if speed > 0:
-			var boost_vector: Vector2 = character.velocity.normalized() * max_boost_force * boost_factor
-			character.velocity += boost_vector
+			if speed > 0:
+				var boost_vector: Vector2 = character.velocity.normalized() * max_boost_force * boost_factor
+				character.velocity += boost_vector
+
+	# Reset the flag
+	_release_without_boost = false
 
 	_target_nail = null
 	_has_reached_rope_length = false

@@ -15,7 +15,7 @@ script = ExtResource("1_script")
 shape = SubResource("CircleShape2D_detection")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(0.5, 0.5, 0.5, 1)
+modulate = Color(1, 1, 1, 1)
 position = Vector2(39.000004, -30)
 rotation = 3.3039083
 scale = Vector2(0.10315423, 0.10315423)
