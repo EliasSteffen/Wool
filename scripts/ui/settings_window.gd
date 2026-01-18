@@ -8,12 +8,21 @@ func _ready() -> void:
 
 	# Make panel less transparent (more opaque)
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.1, 0.1, 0.95) # Dark grey, almost opaque
+	style.bg_color = Color(0.2, 0.2, 0.25, 0.95) # Modern blue-grey
+	style.border_color = Color(0.3, 0.3, 0.4, 1.0)
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 16
+	style.corner_radius_top_right = 16
+	style.corner_radius_bottom_left = 16
+	style.corner_radius_bottom_right = 16
 	$Panel.add_theme_stylebox_override("panel", style)
 
 	# Apply modern rounded style to the close button (icon-like)
 	var UITheme = preload("res://scripts/ui/ui_theme.gd")
-	UITheme.apply_modern_button_style(close_button, Vector2(64, 64), true)
+	UITheme.apply_modern_button_style(close_button, Vector2(100, 100), true)
 	# Make close button background transparent (icon-only)
 	var flat_style := StyleBoxFlat.new()
 	flat_style.bg_color = Color(0,0,0,0)
@@ -44,16 +53,20 @@ func _ready() -> void:
 	var header = $Panel.get_node_or_null("Header")
 	if header:
 		var header_style = StyleBoxFlat.new()
-		header_style.bg_color = Color(0.06, 0.06, 0.06, 0.95)
-		header_style.corner_radius_top_left = 12
-		header_style.corner_radius_top_right = 12
-		header_style.content_margin_left = 12
-		header_style.content_margin_right = 12
+		header_style.bg_color = Color(0.15, 0.15, 0.2, 0.95) # Slightly lighter blue-grey
+		header_style.border_color = Color(0.25, 0.25, 0.35, 1.0)
+		header_style.border_width_bottom = 1
+		header_style.corner_radius_top_left = 16
+		header_style.corner_radius_top_right = 16
+		header_style.content_margin_left = 16
+		header_style.content_margin_right = 16
+		header_style.content_margin_top = 12
+		header_style.content_margin_bottom = 12
 		header.add_theme_stylebox_override("panel", header_style)
 		for child in header.get_children():
 			if child is Label:
-				child.add_theme_font_size_override("font_size", 28)
-				child.add_theme_color_override("font_color", Color(1, 1, 1))
+				child.add_theme_font_size_override("font_size", 40)
+				child.add_theme_color_override("font_color", Color(0.95, 0.95, 1.0))
 
 	_build_ui()
 
@@ -63,8 +76,8 @@ func _ready() -> void:
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
 	# Add Safe Area Padding for notches (Landscape)
-	$Panel.set_begin(Vector2(200, 0)) # offset_left
-	$Panel.set_end(Vector2(-200, 0)) # offset_right
+	$Panel.set_begin(Vector2(200, 75)) # offset_left and offset_top
+	$Panel.set_end(Vector2(-200, -75)) # offset_right and offset_bottom
 
 func _build_ui() -> void:
 	# Clear existing
@@ -74,8 +87,8 @@ func _build_ui() -> void:
 	# Add Export Button
 	var export_btn = Button.new()
 	export_btn.text = "Export Settings as JSON"
-	export_btn.custom_minimum_size.y = 100 # Larger mobile touch target
-	export_btn.add_theme_font_size_override("font_size", 32)
+	export_btn.custom_minimum_size.y = 120 # Larger mobile touch target
+	export_btn.add_theme_font_size_override("font_size", 48)
 	export_btn.pressed.connect(_on_export_pressed)
 	# Apply modern rounded style
 	var UITheme = preload("res://scripts/ui/ui_theme.gd")
@@ -96,27 +109,32 @@ func _add_category_header(text: String) -> void:
 	var label = Label.new()
 	label.text = "--- " + text + " ---"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_color_override("font_color", Color.YELLOW)
-	label.add_theme_font_size_override("font_size", 36)
+	label.add_theme_color_override("font_color", Color(0.4, 0.6, 1.0)) # Modern blue
+	label.add_theme_font_size_override("font_size", 48)
 	container.add_child(label)
 
 func _add_setting_row(registry: BaseConstants, category: String, key: String, data: Dictionary) -> void:
 	# Create a PanelContainer wrapper for each block
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+	style.bg_color = Color(0.25, 0.25, 0.3, 0.9) # Lighter blue-grey for contrast
+	style.border_color = Color(0.35, 0.35, 0.45, 1.0)
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
 	style.corner_radius_top_left = 12
 	style.corner_radius_top_right = 12
 	style.corner_radius_bottom_left = 12
 	style.corner_radius_bottom_right = 12
-	style.content_margin_left = 15
-	style.content_margin_right = 15
-	style.content_margin_top = 10
-	style.content_margin_bottom = 10
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 15
+	style.content_margin_bottom = 15
 	panel.add_theme_stylebox_override("panel", style)
 
 	var main_vbox = VBoxContainer.new()
-	main_vbox.add_theme_constant_override("separation", 10)
+	main_vbox.add_theme_constant_override("separation", 15)
 	panel.add_child(main_vbox)
 
 	# TOP ROW: Name and Value Input
@@ -126,8 +144,8 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	var label = Label.new()
 	label.text = key
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 28)
-	label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	label.add_theme_font_size_override("font_size", 36)
+	label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
 	top_hbox.add_child(label)
 
 	var value = data["value"]
@@ -137,8 +155,8 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	if data.has("description"):
 		var desc_label = Label.new()
 		desc_label.text = data["description"]
-		desc_label.add_theme_font_size_override("font_size", 18)
-		desc_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		desc_label.add_theme_font_size_override("font_size", 24)
+		desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
 		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		main_vbox.add_child(desc_label)
 
@@ -146,8 +164,8 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	if type == "bool" or typeof(value) == TYPE_BOOL:
 		var check = CheckBox.new()
 		check.button_pressed = value
-		check.custom_minimum_size = Vector2(80, 80)
-		check.scale = Vector2(1.5, 1.5)
+		check.custom_minimum_size = Vector2(100, 100)
+		check.scale = Vector2(2.0, 2.0)
 		check.toggled.connect(func(toggled):
 			registry.set_value(category, key, toggled)
 		)
@@ -156,7 +174,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	elif type == "color" or typeof(value) == TYPE_COLOR:
 		var picker = ColorPickerButton.new()
 		picker.color = value
-		picker.custom_minimum_size = Vector2(120, 60)
+		picker.custom_minimum_size = Vector2(150, 80)
 		picker.color_changed.connect(func(col):
 			registry.set_value(category, key, col)
 		)
@@ -168,9 +186,13 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		spinbox.max_value = data.get("max", 1000.0)
 		spinbox.step = data.get("step", 1.0)
 		spinbox.value = value
-		spinbox.custom_minimum_size = Vector2(180, 70)
-		spinbox.get_line_edit().add_theme_font_size_override("font_size", 26)
+		spinbox.custom_minimum_size = Vector2(220, 90)
+		spinbox.get_line_edit().add_theme_font_size_override("font_size", 32)
 		spinbox.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# Hide the up/down buttons
+		var empty_style = StyleBoxEmpty.new()
+		spinbox.add_theme_stylebox_override("up", empty_style)
+		spinbox.add_theme_stylebox_override("down", empty_style)
 		# top_hbox.add_child(spinbox) # REMOVED from top row
 
 		# Slider with a "Scroll Lane" (spacer) and the numerical Value
@@ -179,19 +201,21 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 
 		var slider = HSlider.new()
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		slider.custom_minimum_size.y = 100 # Large touch area
+		slider.custom_minimum_size.y = 150 # Larger touch area
 
 		var slider_style = StyleBoxFlat.new()
-		slider_style.bg_color = Color(0.25, 0.25, 0.25)
-		slider_style.expand_margin_top = 12
-		slider_style.expand_margin_bottom = 12
-		slider_style.corner_radius_top_left = 12
-		slider_style.corner_radius_top_right = 12
-		slider_style.corner_radius_bottom_left = 12
-		slider_style.corner_radius_bottom_right = 12
+		slider_style.bg_color = Color(0.2, 0.2, 0.2)
+		slider_style.expand_margin_top = 20
+		slider_style.expand_margin_bottom = 20
+		slider_style.corner_radius_top_left = 20
+		slider_style.corner_radius_top_right = 20
+		slider_style.corner_radius_bottom_left = 20
+		slider_style.corner_radius_bottom_right = 20
 
 		var slider_active_style = slider_style.duplicate()
-		slider_active_style.bg_color = Color(0.35, 0.55, 0.95) # Modern Blue
+		slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Modern Blue
+		slider_active_style.expand_margin_left = 10
+		slider_active_style.expand_margin_right = 10
 
 		slider.add_theme_stylebox_override("slider", slider_style)
 		slider.add_theme_stylebox_override("grabber_area", slider_active_style)
@@ -204,11 +228,6 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 
 		# Sync
 		slider.value_changed.connect(func(new_val):
-			spinbox.value = new_val
-			registry.set_value(category, key, new_val)
-		)
-		spinbox.value_changed.connect(func(new_val):
-			slider.value = new_val
 			registry.set_value(category, key, new_val)
 		)
 
@@ -220,7 +239,7 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 		slider_hbox.add_child(scroll_lane)
 
 		# Move the numerical value here, after the spacer
-		slider_hbox.add_child(spinbox)
+		# slider_hbox.add_child(spinbox)  # Removed as per user request
 
 		main_vbox.add_child(slider_hbox)
 
