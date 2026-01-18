@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://devsettings123"]
+[gd_scene load_steps=2 format=3 uid="uid://cjrvwbot7dfmg"]
 
-[ext_resource type="Script" path="res://scripts/ui/dev_settings_window.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bl68pdclxkwpe" path="res://scripts/ui/settings_window.gd" id="1_script"]
 
-[node name="DevSettingsWindow" type="CanvasLayer"]
+[node name="SettingsWindow" type="CanvasLayer"]
 process_mode = 3
 layer = 128
 visible = false
@@ -33,7 +33,7 @@ grow_horizontal = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 40
-text = "Developer Settings"
+text = "Settings"
 horizontal_alignment = 1
 
 [node name="CloseButton" type="Button" parent="Panel/Header"]

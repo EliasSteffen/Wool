@@ -1,9 +1,9 @@
 class_name BaseMenu
 extends Node
 
-const DEV_SETTINGS_SCENE = preload("res://scenes/ui/dev_settings_window.tscn")
+const SETTINGS_SCENE = preload("res://scenes/ui/settings_window.tscn")
 
-var _dev_settings_instance: Node = null
+var _settings_instance: Node = null
 var _buttons_to_resize: Array[Control] = []
 
 # UI theme helper
@@ -28,12 +28,12 @@ func _update_button_sizes() -> void:
 		if is_instance_valid(btn):
 			btn.custom_minimum_size.x = width
 
-func _on_dev_settings_pressed() -> void:
-	if not _dev_settings_instance:
-		_dev_settings_instance = DEV_SETTINGS_SCENE.instantiate()
-		get_tree().root.add_child(_dev_settings_instance)
+func _on_settings_pressed() -> void:
+	if not _settings_instance:
+		_settings_instance = SETTINGS_SCENE.instantiate()
+		get_tree().root.add_child(_settings_instance)
 
-	if _dev_settings_instance.has_method("open"):
-		_dev_settings_instance.open()
+	if _settings_instance.has_method("open"):
+		_settings_instance.open()
 	else:
-		_dev_settings_instance.show()
+		_settings_instance.show()

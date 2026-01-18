@@ -40,11 +40,25 @@ static func apply_modern_button_style(button: Button, desired_size: Vector2 = Ve
 	button.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 	button.add_theme_font_size_override("font_size", int(height * 0.35))
 
-	# If icon-only button, make it square and fully round
+# If icon-only button, make it square and fully round and ensure the emoji fills the area
 	if icon_only:
 		var s: float = desired_size.x if desired_size.x > 0 else max(button.custom_minimum_size.x, height)
 		button.custom_minimum_size = Vector2(s, s)
 		var r2: float = s * 0.5
+		# Reduce internal padding so the emoji can occupy most of the area
+		normal.content_margin_left = 4
+		normal.content_margin_right = 4
+		normal.content_margin_top = 4
+		normal.content_margin_bottom = 4
+		hover.content_margin_left = 4
+		hover.content_margin_right = 4
+		hover.content_margin_top = 4
+		hover.content_margin_bottom = 4
+		pressed.content_margin_left = 4
+		pressed.content_margin_right = 4
+		pressed.content_margin_top = 4
+		pressed.content_margin_bottom = 4
+
 		normal.corner_radius_top_left = r2
 		normal.corner_radius_top_right = r2
 		normal.corner_radius_bottom_left = r2
@@ -57,14 +71,16 @@ static func apply_modern_button_style(button: Button, desired_size: Vector2 = Ve
 		pressed.corner_radius_top_right = r2
 		pressed.corner_radius_bottom_left = r2
 		pressed.corner_radius_bottom_right = r2
-		# Re-apply to update
+		# Re-apply styles
 		button.add_theme_stylebox_override("normal", normal)
 		button.add_theme_stylebox_override("hover", hover)
 		button.add_theme_stylebox_override("pressed", pressed)
 
-	# Make touch target comfortably large
-	if button.custom_minimum_size.y < height:
-		button.custom_minimum_size = Vector2(button.custom_minimum_size.x, height)
+		# Make the emoji / icon large so it visually fills the button
+		var icon_font_size: int = int(s * 0.75)
+		button.add_theme_font_size_override("font_size", icon_font_size)
+		# Make touch target comfortably large
+		button.custom_minimum_size = Vector2(s, s)
 
 	# Slightly increase contrast for accessibility when focused
 	button.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.5))
