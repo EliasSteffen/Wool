@@ -15,10 +15,9 @@ script = ExtResource("1_script")
 shape = SubResource("CircleShape2D_detection")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-modulate = Color(1, 1, 1, 1)
-position = Vector2(39.000004, -30)
+position = Vector2(72, -56)
 rotation = 3.3039083
-scale = Vector2(0.10315423, 0.10315423)
+scale = Vector2(0.167, 0.167)
 texture = ExtResource("2_4aftr")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]

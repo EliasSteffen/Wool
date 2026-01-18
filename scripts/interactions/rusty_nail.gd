@@ -20,6 +20,14 @@ func _setup_interaction() -> void:
 	normal_color = InteractionConstants.get_value("Visuals", "rusty_nail_color", InteractionConstants.DEFAULT_RUSTY_NAIL_COLOR)
 	highlight_color = InteractionConstants.get_value("Visuals", "highlight_nail_color", InteractionConstants.DEFAULT_HIGHLIGHT_COLOR)
 
+	# Scale swing_fall_threshold based on distance, like nail distances
+	var base_threshold: float = 3.0
+	var threshold_decrease_interval: float = 512.0
+	var threshold_decrease_percent: float = 0.25
+	var steps: int = int(max(0.0, floor(global_position.x / threshold_decrease_interval)))
+	swing_fall_threshold = base_threshold * pow(1.0 - threshold_decrease_percent, steps)
+	swing_fall_threshold = max(swing_fall_threshold, 1.0)  # Minimum 1 second
+
 	_update_visual()
 
 func _physics_process(delta: float) -> void:
