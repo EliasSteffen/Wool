@@ -2,7 +2,7 @@ extends Node
 
 ## Tweakables - Registry for all configuration singletons
 ##
-## Aggregates all specific constant autoloads for the DevSettingsWindow.
+## Aggregates all specific constant autoloads for the SettingsWindow.
 ## Acts as a facade for backward compatibility if needed, but direct access
 ## to specific constants (e.g. CharacterConstants.get_value) is preferred.
 

@@ -11,6 +11,50 @@ func _ready() -> void:
 	style.bg_color = Color(0.1, 0.1, 0.1, 0.95) # Dark grey, almost opaque
 	$Panel.add_theme_stylebox_override("panel", style)
 
+	# Apply modern rounded style to the close button (icon-like)
+	var UITheme = preload("res://scripts/ui/ui_theme.gd")
+	UITheme.apply_modern_button_style(close_button, Vector2(64, 64), true)
+	# Make close button background transparent (icon-only)
+	var flat_style := StyleBoxFlat.new()
+	flat_style.bg_color = Color(0,0,0,0)
+	flat_style.corner_radius_top_left = 0
+	flat_style.corner_radius_top_right = 0
+	flat_style.corner_radius_bottom_left = 0
+	flat_style.corner_radius_bottom_right = 0
+	close_button.add_theme_stylebox_override("normal", flat_style)
+	close_button.add_theme_stylebox_override("hover", flat_style)
+	# Use asset icon for close (icon-only)
+	close_button.text = ""
+	var close_icon: Texture2D = preload("res://assets/ui/close.svg")
+	var close_icon_rect: TextureRect = close_button.get_node_or_null("IconTex") as TextureRect
+	if not close_icon_rect:
+		close_icon_rect = TextureRect.new()
+		close_icon_rect.name = "IconTex"
+		close_button.add_child(close_icon_rect)
+		close_icon_rect.anchor_left = 0.0
+		close_icon_rect.anchor_top = 0.0
+		close_icon_rect.anchor_right = 1.0
+		close_icon_rect.anchor_bottom = 1.0
+		close_icon_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		close_icon_rect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		close_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	close_icon_rect.texture = close_icon
+
+	# Enhance header visuals (rounded, slight accent)
+	var header = $Panel.get_node_or_null("Header")
+	if header:
+		var header_style = StyleBoxFlat.new()
+		header_style.bg_color = Color(0.06, 0.06, 0.06, 0.95)
+		header_style.corner_radius_top_left = 12
+		header_style.corner_radius_top_right = 12
+		header_style.content_margin_left = 12
+		header_style.content_margin_right = 12
+		header.add_theme_stylebox_override("panel", header_style)
+		for child in header.get_children():
+			if child is Label:
+				child.add_theme_font_size_override("font_size", 28)
+				child.add_theme_color_override("font_color", Color(1, 1, 1))
+
 	_build_ui()
 
 	# Configure ScrollContainer for mobile scrolling
@@ -33,6 +77,9 @@ func _build_ui() -> void:
 	export_btn.custom_minimum_size.y = 100 # Larger mobile touch target
 	export_btn.add_theme_font_size_override("font_size", 32)
 	export_btn.pressed.connect(_on_export_pressed)
+	# Apply modern rounded style
+	var UITheme = preload("res://scripts/ui/ui_theme.gd")
+	UITheme.apply_modern_button_style(export_btn, Vector2(0, 100), false)
 	container.add_child(export_btn)
 
 	# Add separator

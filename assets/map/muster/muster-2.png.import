@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cae4eih4x6voc"
-valid=false
+uid="uid://dd1ci1dej3uqp"
+path="res://.godot/imported/muster-2.png-450daeeaca6176b0c528567b12712aa5.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://assets/icons/icon_ios.png"
+source_file="res://assets/map/muster/muster-2.png"
+dest_files=["res://.godot/imported/muster-2.png-450daeeaca6176b0c528567b12712aa5.ctex"]
 
 [params]
 
