@@ -5,11 +5,19 @@ extends Node2D
 ## Generates infinite background tiles that repeat horizontally
 ## Background spans from y=0 to y=-1755
 
-@export var background_texture: Texture2D = preload("res://assets/map/background.png")
 @export var background_folder: String = "res://assets/map/fetzen"
 @export var pattern_folder: String = "res://assets/map/muster"
 @export var pattern_chance: float = 0.9
 @export var max_patterns_per_tile: int = 25
+
+# Preload textures to ensure they are included in exports
+const BACKGROUND_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/map/fetzen/fetzen-1.jpg")
+]
+const PATTERN_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/map/muster/muster-1.png"),
+	preload("res://assets/map/muster/muster-2.png")
+]
 
 @onready var parallax_layer: ParallaxLayer = get_node_or_null("../ParallaxBackground/ParallaxLayer")
 
@@ -35,34 +43,26 @@ func _ready() -> void:
 	else:
 		_camera_width = get_viewport().get_visible_rect().size.x
 
-	# Load textures from folder (if any) and compute scaled widths
-	_load_background_textures_from_folder()
-	_load_pattern_textures_from_folder()
+	# Use preloaded textures
+	_background_textures = BACKGROUND_TEXTURES.duplicate()
+	_pattern_textures = PATTERN_TEXTURES.duplicate()
 
 	# Randomize RNG for tile selection and pattern placement
 	_rng.randomize()
 
-	if _background_textures.size() > 0:
-		# Determine a consistent tile width: use the maximum scaled width among loaded textures
-		var max_scaled_width: float = 0.0
-		for tex in _background_textures:
-			if tex:
-				var tw: float = tex.get_width()
-				var th: float = tex.get_height()
-				var scaled_w: float = (tw * (_background_height / th)) if th > 0 else tw
-				if scaled_w > max_scaled_width:
-					max_scaled_width = scaled_w
-		_background_width = max_scaled_width
-	else:
-		# Fallback to single background_texture if folder is empty
-		if background_texture:
-			var texture_width = background_texture.get_width()
-			var texture_height = background_texture.get_height()
-			if texture_height > 0:
-				var scale = _background_height / texture_height
-				_background_width = texture_width * scale
-			else:
-				_background_width = texture_width
+	if _background_textures.size() == 0:
+		# error...
+		return
+
+	var max_scaled_width: float = 0.0
+	for tex in _background_textures:
+		if tex:
+			var tw: float = tex.get_width()
+			var th: float = tex.get_height()
+			var scaled_w: float = (tw * (_background_height / th)) if th > 0 else tw
+			if scaled_w > max_scaled_width:
+				max_scaled_width = scaled_w
+	_background_width = max_scaled_width
 
 	# Initial background generation
 	if parallax_layer:
@@ -205,8 +205,6 @@ func _load_background_textures_from_folder() -> void:
 		dir.list_dir_end()
 
 func _choose_random_texture() -> Texture2D:
-	if _background_textures.size() == 0:
-		return background_texture
 	return _background_textures[_rng.randi_range(0, _background_textures.size() - 1)]
 
 func _load_pattern_textures_from_folder() -> void:

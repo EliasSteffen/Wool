@@ -1,15 +1,15 @@
 [gd_scene load_steps=2 format=3 uid="uid://hud1234568aa"]
 
-[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="Script" uid="uid://c8ed53ok2tpnj" path="res://scripts/ui/hud.gd" id="1_hud"]
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
 
 [node name="PauseButton" type="Button" parent="."]
 custom_minimum_size = Vector2(120, 120)
-offset_left = 60.0
-offset_top = 60.0
-offset_right = 180.0
-offset_bottom = 180.0
+offset_left = 75.0
+offset_top = 75.0
+offset_right = 195.0
+offset_bottom = 195.0
 theme_override_font_sizes/font_size = 48
 text = "||"
