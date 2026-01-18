@@ -7,6 +7,7 @@ extends Node2D
 signal start_icons_animation_started
 
 @onready var start_icons: Node2D = $Starticons
+@onready var hud: CanvasLayer = $HUD
 
 var player: BasePlayer = null
 var _has_started: bool = false
@@ -27,6 +28,9 @@ func _ready() -> void:
 	else:
 		# Mark that the game has been started (after first load)
 		GameManager.mark_game_started()
+		# Hide HUD until start icons are gone
+		if hud:
+			hud.visible = false
 
 	# Enable accepting start input on the next idle frame so only input after the scene load counts
 	call_deferred("_enable_start_input")
@@ -136,3 +140,6 @@ func _remove_start_icons() -> void:
 		start_icons.queue_free()
 		start_icons = null
 		_is_animating = false
+		# Show HUD now that start icons are gone
+		if hud:
+			hud.visible = true

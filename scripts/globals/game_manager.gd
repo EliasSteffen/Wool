@@ -15,6 +15,7 @@ enum GameState { MENU, PLAYING, PAUSED }
 var current_state: GameState = GameState.PLAYING
 var current_seed: int = 0
 var is_first_game_start: bool = true  # Track if this is the first time starting the game
+var highscore: int = 0
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
@@ -30,6 +31,9 @@ func _ready() -> void:
 	# Initial seed
 	randomize()
 	current_seed = randi()
+
+	# Load highscore
+	_load_highscore()
 
 	# Add Generic Touch/Click support to "jump" action
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
@@ -94,3 +98,24 @@ func _show_pause_menu() -> void:
 func _hide_pause_menu() -> void:
 	if _pause_menu_instance:
 		_pause_menu_instance.hide()
+
+## Update highscore if new distance is higher
+func update_highscore(new_distance: int) -> void:
+	if new_distance > highscore:
+		highscore = new_distance
+		_save_highscore()
+
+# === PRIVATE METHODS ===
+
+func _load_highscore() -> void:
+	var config = ConfigFile.new()
+	var err = config.load("user://highscore.cfg")
+	if err == OK:
+		highscore = config.get_value("game", "highscore", 0)
+	else:
+		highscore = 0
+
+func _save_highscore() -> void:
+	var config = ConfigFile.new()
+	config.set_value("game", "highscore", highscore)
+	config.save("user://highscore.cfg")

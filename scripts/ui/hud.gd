@@ -1,6 +1,10 @@
 extends CanvasLayer
 
 @onready var pause_button: Button = $PauseButton
+@onready var current_distance_label: Label = $CurrentDistance
+@onready var highscore_label: Label = $Label
+
+var player: BasePlayer = null
 
 func _ready() -> void:
 	if pause_button:
@@ -36,5 +40,29 @@ func _ready() -> void:
 		icon_rect.texture = pause_icon
 		# Ensure icon is visible; sizing and anchors keep it centered
 		icon_rect.modulate = Color(1, 1, 1)
+
+	# Make labels background transparent
+	if current_distance_label:
+		var transparent_style = StyleBoxEmpty.new()
+		current_distance_label.add_theme_stylebox_override("normal", transparent_style)
+
+	if highscore_label:
+		var transparent_style = StyleBoxEmpty.new()
+		highscore_label.add_theme_stylebox_override("normal", transparent_style)
 func _on_pause_pressed() -> void:
 	GameManager.toggle_pause()
+
+func _process(delta: float) -> void:
+	if not player:
+		player = get_tree().get_first_node_in_group("player")
+		if player:
+			# Initialize highscore display
+			highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
+
+	if player and current_distance_label:
+		var distance_meters: int = int(player.global_position.x / 10.0)
+		current_distance_label.text = str(distance_meters) + "m"
+
+		# Update highscore if beaten
+		GameManager.update_highscore(distance_meters)
+		highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"

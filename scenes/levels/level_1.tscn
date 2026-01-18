@@ -68,6 +68,11 @@ position = Vector2(768, -288)
 [node name="Starticons" type="Node2D" parent="."]
 z_index = 10
 
+[node name="Dim" type="ColorRect" parent="Starticons"]
+offset_top = -1176.0
+offset_right = 2536.0
+color = Color(0, 0, 0, 0.75)
+
 [node name="Logo" type="Sprite2D" parent="Starticons"]
 position = Vector2(1266, -585)
 texture = ExtResource("8_dga24")
