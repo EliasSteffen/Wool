@@ -23,6 +23,7 @@ var _game_started: bool = false # Tracks if the game has started
 var _current_shape_animation: String = ""
 var _idle_timer: float = 0.0
 var _last_played_anim: String = ""
+var _extra_gravity: float = 0.0 # Extra gravity when trying to grapple without nails nearby
 
 # Pickaxe Grapple Configuration
 # Assign a Marker2D node here (e.g. child of Pickaxe) to visually define the grapple connection point.
@@ -219,6 +220,10 @@ func _update_rotation(delta: float) -> void:
 
 func _process_physics(delta: float) -> void:
 	super._process_physics(delta)
+
+	# Apply extra gravity when trying to grapple without nails nearby
+	if _extra_gravity > 0.0:
+		velocity.y += _extra_gravity * delta
 
 	# Only reset jumping logic if we are actually on floor AND falling/standing (not moving up/jumping)
 	# This prevents resetting the jump flag immediately in the frame we jump (where is_on_floor is still true)
@@ -430,10 +435,16 @@ func _handle_input() -> void:
 				var best_nail: Interaction = _find_best_grapple_target()
 				if best_nail:
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
+				else:
+					# No nails nearby, but trying to grapple - increase gravity
+					_extra_gravity = gravity * 2.0
+			else:
+				_extra_gravity = 0.0
 		else:
 			# RELEASED
 			if is_grappling:
 				grappling_feature.release()
+			_extra_gravity = 0.0
 
 	# 4. Vertical Input (Swim/Climb) - currently zeroed for one-button simplicity
 	_vertical_direction = 0.0
