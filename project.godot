@@ -14,7 +14,6 @@ config/name="Wool"
 run/main_scene="res://scenes/levels/level_1.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
 boot_splash/image="uid://c6ctd4lv5eere"
-config/icon="uid://c17xho0f8isvk"
 
 [autoload]
 
@@ -48,3 +47,4 @@ jump={
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/quality/msaa_2d=3
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)
