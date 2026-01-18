@@ -11,6 +11,10 @@ func _ready() -> void:
 	style.bg_color = Color(0.1, 0.1, 0.1, 0.95) # Dark grey, almost opaque
 	$Panel.add_theme_stylebox_override("panel", style)
 
+	# Apply modern rounded style to the close button (icon-like)
+	var UITheme = preload("res://scripts/ui/ui_theme.gd")
+	UITheme.apply_modern_button_style(close_button, Vector2(64, 64), true)
+
 	_build_ui()
 
 	# Configure ScrollContainer for mobile scrolling
@@ -33,6 +37,9 @@ func _build_ui() -> void:
 	export_btn.custom_minimum_size.y = 100 # Larger mobile touch target
 	export_btn.add_theme_font_size_override("font_size", 32)
 	export_btn.pressed.connect(_on_export_pressed)
+	# Apply modern rounded style
+	var UITheme = preload("res://scripts/ui/ui_theme.gd")
+	UITheme.apply_modern_button_style(export_btn, Vector2(0, 100), false)
 	container.add_child(export_btn)
 
 	# Add separator

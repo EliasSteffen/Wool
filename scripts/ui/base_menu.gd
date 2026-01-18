@@ -6,13 +6,20 @@ const DEV_SETTINGS_SCENE = preload("res://scenes/ui/dev_settings_window.tscn")
 var _dev_settings_instance: Node = null
 var _buttons_to_resize: Array[Control] = []
 
+# UI theme helper
+var UITheme = preload("res://scripts/ui/ui_theme.gd")
+
 func _ready() -> void:
 	get_tree().root.size_changed.connect(_update_button_sizes)
 	# Defer to ensure all children are ready and registered
 	call_deferred("_update_button_sizes")
 
 func register_buttons(buttons: Array[Control]) -> void:
+	# Apply sizing and modern rounded styles to registered buttons
 	_buttons_to_resize.append_array(buttons)
+	for btn in buttons:
+		if btn and btn is Button:
+			UITheme.apply_modern_button_style(btn)
 	_update_button_sizes()
 
 func _update_button_sizes() -> void:

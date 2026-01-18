@@ -13,6 +13,9 @@ var _has_started: bool = false
 var _is_animating: bool = false
 var _animation_speed: float = 800.0  # Pixels per second upward
 
+# Only accept start input after the scene has finished loading
+var _accept_start_input: bool = false
+
 func _ready() -> void:
 	if not start_icons:
 		push_warning("Level1: Starticons node not found!")
@@ -25,15 +28,16 @@ func _ready() -> void:
 		# Mark that the game has been started (after first load)
 		GameManager.mark_game_started()
 
+	# Enable accepting start input on the next idle frame so only input after the scene load counts
+	call_deferred("_enable_start_input")
+
 func _process(delta: float) -> void:
 	# Try to find player if not found yet
 	if not player:
 		player = get_tree().get_first_node_in_group("player")
 
-	# Check for first input (jump or screen press)
-	if not _has_started and not _is_animating:
-		if Input.is_action_just_pressed("jump"):
-			_start_animation()
+	# Check for first input (handled in _unhandled_input) - see _unhandled_input implementation
+	# Note: We only accept unhandled events after the scene has loaded to avoid UI/pause interactions starting the game.
 
 	# Animate upward if animation is active
 	if _is_animating and start_icons:
@@ -109,6 +113,23 @@ func _get_icons_bounds() -> Dictionary:
 		result["bottom"] = icons_center_y
 
 	return result
+
+func _enable_start_input() -> void:
+	# Called deferred to ensure the scene has finished loading
+	_accept_start_input = true
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Only start on unhandled 'jump' events that occur after the scene is loaded
+	if not _accept_start_input:
+		return
+	if _has_started or _is_animating:
+		return
+	if GameManager.current_state != GameManager.GameState.PLAYING:
+		# Ignore input if the game is paused or not in PLAYING state
+		return
+
+	if event.is_action_pressed("jump") and not event.is_echo():
+		_start_animation()
 
 func _remove_start_icons() -> void:
 	if start_icons:
