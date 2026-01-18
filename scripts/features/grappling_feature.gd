@@ -19,12 +19,15 @@ var tension_strength: float
 var swing_pump_force: float
 var damping: float
 var initial_pull_strength: float
+var max_swing_angle_deg: float = 90.0
 
 # === PRIVATE VARIABLES ===
 var _grapple_target: Vector2 = Vector2.ZERO
 var _target_nail: Interaction = null
 var _has_reached_rope_length: bool = false  # Track if we've reached the rope length once
 var _input_buffer_timer: float = 0.0
+var _animated_rope_length: float = 0.0  # Current animated rope length for smooth transition
+var _rope_animation_speed: float = 800.0  # Speed of rope length animation in pixels per second
 const GRAPPLE_TOLERANCE: float = 20.0 # Extra pixels to allow grappling (compensates for character width)
 
 # === BUILT-IN METHODS ===
@@ -34,18 +37,20 @@ func _ready() -> void:
 	setup_tweakables_generic({
 		"swing_pump_force": "swing_pump_force",
 		"max_boost_force": "max_boost_force",
-		"fixed_rope_length": "fixed_rope_length"
+		"fixed_rope_length": "fixed_rope_length",
+		"max_swing_angle": "max_swing_angle_deg"
 	})
 
 	# Set internal defaults for parameters removed from the UI
 	max_swing_speed_for_boost = 800.0
-	tension_strength = 2000.0
+	tension_strength = 2500.0
 	damping = 0.995
 	initial_pull_strength = 1500.0
 
-	fixed_rope_length = FeatureConstants.get_value("Grappling", "fixed_rope_length")
+func _physics_process(delta: float) -> void:
+	# Animation is now handled in BaseCharacter
+	pass
 
-func _process(delta: float) -> void:
 	# Input Buffering: Retry grapple if button was pressed recently
 	if _input_buffer_timer > 0.0:
 		_input_buffer_timer -= delta
@@ -61,10 +66,11 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	_input_buffer_timer = 0.0 # Reset buffer on success
 	_grapple_target = target_position
 	_target_nail = nail
-	_has_reached_rope_length = true  # Always true to enforce constraint immediately
+	_has_reached_rope_length = false  # Start animation
 
-	# ALWAYS use the fixed rope length (Rigid Rod behavior)
+	# Set rope length immediately to final value
 	rope_length = fixed_rope_length
+	_animated_rope_length = fixed_rope_length
 
 	if nail:
 		nail.set_used(true)

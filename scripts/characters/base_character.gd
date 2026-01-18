@@ -30,6 +30,9 @@ var max_health: int = 1
 var move_speed: float
 var gravity: float = WorldConstants.DEFAULT_GRAVITY
 var _is_grapple_initialized: bool = false
+var _grapple_animation_time: float = 0.0  # Time left for grapple position animation
+var _grapple_target_position: Vector2 = Vector2.ZERO  # Target position for animation
+var _swing_gravity: float = 600.0  # Lower gravity for more natural swinging
 var current_health: int = 1
 var nearby_interactions: Array[Interaction] = []
 var current_terrain: Terrain = null
@@ -76,14 +79,36 @@ func _physics_process(delta: float) -> void:
 	# Custom physics processing (override in child classes)
 	_process_physics(delta)
 
+	# Handle grapple position animation
+	if _grapple_animation_time > 0.0:
+		_grapple_animation_time -= delta
+		if _grapple_animation_time <= 0.0:
+			_grapple_animation_time = 0.0
+			# Mark grapple as reached
+			var grappling = _get_active_grappling()
+			if grappling:
+				grappling._has_reached_rope_length = true
+		else:
+			# Calculate target position on the rope
+			var grappling = _get_active_grappling()
+			if grappling:
+				var offset = get_grapple_offset()
+				var pivot_pos = global_position + offset
+				var to_grapple = _grapple_target_position - pivot_pos
+				var direction = to_grapple.normalized()
+				var target_pos = _grapple_target_position - direction * grappling.rope_length - offset
+				global_position = global_position.lerp(target_pos, 20.0 * delta)  # Faster interpolation
+
 	# Apply swinging constraint
-	_apply_grapple_constraint()
+	_apply_grapple_constraint(delta)
 
 	# Apply movement
 	move_and_slide()
 
-func _on_grapple_started(_target: Vector2) -> void:
+func _on_grapple_started(target: Vector2) -> void:
 	_is_grapple_initialized = false # Reset on start to force impulse on first constraint frame
+	_grapple_animation_time = 0.1  # 0.1 seconds animation time
+	_grapple_target_position = target
 
 func _on_grapple_ended() -> void:
 	_is_grapple_initialized = false
@@ -355,12 +380,23 @@ func _calculate_all_movement_factors(delta: float) -> Vector2:
 
 	return total_factor
 
+## Get the currently active grappling feature
+func _get_active_grappling() -> GrapplingFeature:
+	for feature in _features:
+		if feature is GrapplingFeature and feature.is_active():
+			return feature
+	return null
+
 ## Virtual method to get the local offset for grappling (can be overridden)
 func get_grapple_offset() -> Vector2:
 	return Vector2.ZERO
 
 ## Apply rope constraint when grappling (prevents going beyond rope length)
-func _apply_grapple_constraint() -> void:
+func _apply_grapple_constraint(delta: float) -> void:
+	# Don't apply constraint during animation
+	if _grapple_animation_time > 0.0:
+		return
+
 	# Find active grappling feature
 	var grappling: GrapplingFeature = null
 	for feature in _features:
@@ -389,24 +425,50 @@ func _apply_grapple_constraint() -> void:
 
 	var direction: Vector2 = to_grapple.normalized()
 
-	# Constrain position to exactly rope_length
-	if not is_equal_approx(distance, grappling.rope_length):
-		global_position = grapple_point - direction * grappling.rope_length - offset
+	# Smoothly constrain position towards rope_length
+	if distance > grappling.rope_length:
+		var target_position = grapple_point - direction * grappling.rope_length - offset
+		# Interpolate position smoothly
+		global_position = global_position.lerp(target_position, 10.0 * delta)  # Adjust 10.0 for speed
 
-	# FORCE CONTINUOUS VELOCITY REDIRECTION (Rigid Rod Physics)
-	# Project velocity to be strictly tangent to rope
-	var velocity_radial: float = velocity.dot(direction)
-	var tangential_velocity: Vector2 = velocity - direction * velocity_radial
+	# ANGLE LIMIT & PENDULUM PHYSICS
+	var char_rel: Vector2 = (global_position + offset) - grapple_point
+	if grappling.max_swing_angle_deg <= 0.0:
+		# Lock directly below and remove velocity to prevent swinging
+		global_position = grapple_point + Vector2.DOWN * grappling.rope_length - offset
+		velocity = Vector2.ZERO
+		_is_grapple_initialized = false
+		return
 
-	# INITIAL IMPULSE: Always start CCW (Forward/Right)
-	if not _is_grapple_initialized:
-		# Use rotated direction for initial impulse
-		velocity = direction.rotated(PI / 2.0) * max(velocity.length(), 700.0)
-		_is_grapple_initialized = true
-	else:
-		# FREE SWINGING: Preserve momentum direction (CW or CCW)
-		if tangential_velocity.length_squared() > 10.0:
-			velocity = tangential_velocity.normalized() * velocity.length()
-		else:
-			# If somehow stalled, just keep the projection
-			velocity = tangential_velocity
+	# Compute radial and tangential directions
+	var radial_dir: Vector2 = char_rel.normalized()
+	var tangential_unit: Vector2 = Vector2(-radial_dir.y, radial_dir.x) # perpendicular (CCW)
+	var signed_angle: float = Vector2.DOWN.angle_to(radial_dir) # signed
+	var abs_angle_deg: float = abs(rad_to_deg(signed_angle))
+
+# If beyond allowed angle, reverse tangential velocity (no hard position clamping)
+	if abs_angle_deg > grappling.max_swing_angle_deg:
+		# Reverse tangential velocity if moving outwards
+		var tangential_speed: float = velocity.dot(tangential_unit)
+		if tangential_speed * sign(signed_angle) > 0.0:
+			tangential_speed = -tangential_speed * 0.85 # damped bounce
+		# remove radial component and set new velocity
+		var radial_component: Vector2 = radial_dir * velocity.dot(radial_dir)
+		velocity = radial_component + tangential_unit * tangential_speed
+
+	# Pendulum restoring acceleration (linear tangential): a_t = -gravity * sin(theta)
+	var sin_theta: float = sin(signed_angle)
+	var a_t: float = -_swing_gravity * sin_theta
+	velocity += tangential_unit * (a_t * delta)
+
+	# Project out any radial component introduced by numerical integration to keep rod length
+	var radial_speed: float = velocity.dot(radial_dir)
+	velocity -= radial_dir * radial_speed
+
+	# Slight damping to simulate air resistance and ensure slow at extremes
+	const SWING_DAMPING: float = 0.996
+	velocity *= SWING_DAMPING
+
+	# INITIAL IMPULSE: removed for natural swinging
+	# The pendulum physics will naturally start the swing
+	_is_grapple_initialized = true
