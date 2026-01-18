@@ -72,6 +72,7 @@ z_index = 10
 offset_top = -1176.0
 offset_right = 2536.0
 color = Color(0, 0, 0, 0.75)
+mouse_filter = 2
 
 [node name="Logo" type="Sprite2D" parent="Starticons"]
 position = Vector2(1266, -585)
