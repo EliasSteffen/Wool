@@ -16,7 +16,7 @@ var _last_generated_x: float = 0.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var minimal_nail_distance: float = 256.0
 @export var nail_distance_increase_interval: float = 512.0
-@export var nail_distance_increase_percent: float = 0.05
+@export var nail_distance_increase_percent: float = 0.01
 @export var max_min_nail_distance: float = 512.0
 var _nails: Array[Node2D] = []
 
