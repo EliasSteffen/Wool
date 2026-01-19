@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bq4kld7ehcvr8"
-path="res://.godot/imported/fetzen-1.jpg-c234c6352f5919e39f1433a18b85bb3b.ctex"
+uid="uid://bfshf4qqh3v57"
+path="res://.godot/imported/background.png-0c479fde61e410e7d2a7d9541b458248.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/map/fetzen/fetzen-1.jpg"
-dest_files=["res://.godot/imported/fetzen-1.jpg-c234c6352f5919e39f1433a18b85bb3b.ctex"]
+source_file="res://assets/map/background.png"
+dest_files=["res://.godot/imported/background.png-0c479fde61e410e7d2a7d9541b458248.ctex"]
 
 [params]
 

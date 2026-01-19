@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c6lslmg4acr3u"
-path="res://.godot/imported/Generated Image January 14, 2026 - 7_38PM.png-f10f7351875a48e04b5d813f36febc9e.ctex"
+uid="uid://bxhgg6u7b1yve"
+path="res://.godot/imported/platform.png-596e2e6395cc70643d5bda7a934fa51c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/map/Generated Image January 14, 2026 - 7_38PM.png"
-dest_files=["res://.godot/imported/Generated Image January 14, 2026 - 7_38PM.png-f10f7351875a48e04b5d813f36febc9e.ctex"]
+source_file="res://assets/map/platform.png"
+dest_files=["res://.godot/imported/platform.png-596e2e6395cc70643d5bda7a934fa51c.ctex"]
 
 [params]
 
