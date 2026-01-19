@@ -4,8 +4,8 @@ extends CanvasLayer
 @onready var current_distance_label: Label = $CurrentDistance
 @onready var highscore_label: Label = $Label
 @onready var rusty_nail_timer: Control = $RustyNailTimer
-@onready var rusty_nail_timer_bg: ColorRect = $RustyNailTimer/Background
-@onready var rusty_nail_timer_fill: ColorRect = $RustyNailTimer/Fill
+@onready var rusty_nail_timer_bg: Panel = $RustyNailTimer/Background
+@onready var rusty_nail_timer_fill: Panel = $RustyNailTimer/Fill
 
 var player: BasePlayer = null
 
@@ -29,6 +29,17 @@ func _ready() -> void:
 	flat_style.corner_radius_bottom_right = 0
 	pause_button.add_theme_stylebox_override("normal", flat_style)
 	pause_button.add_theme_stylebox_override("hover", flat_style)
+
+	# Configure RustyNailTimer rounded visuals
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0, 0, 0, 0.5)
+	bg_style.set_corner_radius_all(20) # Half of 40px height
+	rusty_nail_timer_bg.add_theme_stylebox_override("panel", bg_style)
+
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = Color(1, 1, 1, 0.95)
+	fill_style.set_corner_radius_all(20)
+	rusty_nail_timer_fill.add_theme_stylebox_override("panel", fill_style)
 
 	# Clear default text and use a centered TextureRect so the icon fills the button
 	pause_button.text = ""
