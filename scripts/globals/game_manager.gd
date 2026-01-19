@@ -28,6 +28,16 @@ const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 # === PRIVATE VARIABLES ===
 var _pause_menu_instance: Node = null
 
+# Short-lived input ignore window (ms) used to prevent taps on UI from also triggering gameplay actions
+var _ignore_input_until_ms: int = 0
+
+func ignore_input_for(duration: float) -> void:
+	# duration in seconds
+	_ignore_input_until_ms = Time.get_ticks_msec() + int(duration * 1000)
+
+func is_input_ignored() -> bool:
+	return Time.get_ticks_msec() < _ignore_input_until_ms
+
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS

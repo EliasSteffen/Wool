@@ -271,6 +271,9 @@ func _update_camera_and_bounds() -> void:
 # === PRIVATE METHODS ===
 
 func _handle_input() -> void:
+	# Ignore input if GUI recently handled it (prevents tap on UI triggering game actions)
+	if GameManager.is_input_ignored():
+		return
 	# _direction = Input.get_axis("move_left", "move_right")
 	_direction = 0.0
 	# Use ui_up/down as default vertical controls since move_up/down are not defined

@@ -60,7 +60,13 @@ func _ready() -> void:
 	if highscore_label:
 		var transparent_style = StyleBoxEmpty.new()
 		highscore_label.add_theme_stylebox_override("normal", transparent_style)
+
+	# Ensure the pause button triggers on touch (connect pressed signal)
+	if pause_button:
+		pause_button.pressed.connect(_on_pause_pressed)
 func _on_pause_pressed() -> void:
+	# Prevent a simultaneous jump by ignoring input for a short moment
+	GameManager.ignore_input_for(0.15)
 	GameManager.toggle_pause()
 
 func _process(delta: float) -> void:
