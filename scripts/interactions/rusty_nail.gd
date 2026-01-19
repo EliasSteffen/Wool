@@ -36,8 +36,6 @@ func _compute_swing_threshold() -> void:
 	var steps: int = ScaleUtils.steps_from_position(global_position.x, RUSTY_THRESHOLD_DECREASE_INTERVAL)
 	var raw_threshold: float = ScaleUtils.scaled_value(RUSTY_BASE_THRESHOLD, RUSTY_THRESHOLD_DECREASE_PERCENT, steps)
 	swing_fall_threshold = max(raw_threshold, 1.0)
-	var factor := 1.0 + RUSTY_THRESHOLD_DECREASE_PERCENT
-	print("[RustyNail] global_x:", global_position.x, "steps:", steps, "factor:", factor, "raw:", raw_threshold, "clamped:", swing_fall_threshold)
 
 func _physics_process(delta: float) -> void:
 	if _is_being_used and not _is_falling:
