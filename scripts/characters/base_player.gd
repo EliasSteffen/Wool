@@ -273,7 +273,7 @@ func _update_camera_and_bounds() -> void:
 		die()
 
 func _play_death_haptics() -> void:
-	Input.vibrate_handheld(600)
+	Input.vibrate_handheld(1000)
 
 # === PRIVATE METHODS ===
 
