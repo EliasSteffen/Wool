@@ -9,6 +9,7 @@ extends Node2D
 @export var pattern_folder: String = "res://assets/map/muster"
 @export var pattern_chance: float = 0.9
 @export var max_patterns_per_tile: int = 25
+@export var parallax_factor_x: float = 0.5
 
 # Preload textures to ensure they are included in exports
 const BACKGROUND_TEXTURES: Array[Texture2D] = [
@@ -66,6 +67,11 @@ func _ready() -> void:
 
 	# Initial background generation
 	if parallax_layer:
+		# Set parallax motion scale
+		# x moves slower (parallax), y is fixed (1.0) to match gameplay vertical bounds
+		parallax_layer.motion_scale = Vector2(parallax_factor_x, 1.0)
+		
+		# Initial generation assumes camera is near 0, so WorldX ~ LayerX
 		var generation_end: float = 2.0 * _camera_width
 		if _background_textures.size() > 0:
 			_generate_background_until(generation_end)
@@ -87,14 +93,18 @@ func _process(delta: float) -> void:
 		return
 
 	var camera = _player.camera
-	# Get camera position in world coordinates
-	var camera_world_x = camera.global_position.x
-	var camera_left_border = camera_world_x - (_camera_width / 2.0) / camera.zoom.x
-	var camera_right_border = camera_world_x + (_camera_width / 2.0) / camera.zoom.x
+	
+	# Calculate visible bounds in the ParallaxLayer's coordinate space
+	# Since motion_scale.x < 1, the layer moves slower than the camera.
+	var layer_center_x = camera.global_position.x * parallax_factor_x
+	var visible_half_width = (_camera_width / 2.0) / camera.zoom.x
+	
+	var layer_right_border = layer_center_x + visible_half_width
+	var layer_left_border = layer_center_x - visible_half_width
 
 	# Generate ahead (to the right)
-	# Use world coordinates for generation
-	var generation_end: float = camera_right_border + _camera_width
+	var generation_end: float = layer_right_border + _camera_width
+	
 	if _background_textures.size() > 0:
 		_generate_background_until(generation_end)
 	else:
@@ -102,8 +112,8 @@ func _process(delta: float) -> void:
 			_generate_background_in_range(_last_generated_x, _last_generated_x + _background_width)
 			_last_generated_x += _background_width
 
-	# Cleanup tiles left from the camera
-	_cleanup(camera_left_border - _background_width)
+	# Cleanup tiles left from the camera using layer coordinates
+	_cleanup(layer_left_border - _background_width)
 
 func _generate_background_in_range(start_x: float, end_x: float) -> void:
 	if not parallax_layer or _background_width <= 0:
