@@ -7,7 +7,7 @@ extends Node2D
 
 @export var background_folder: String = "res://assets/map/fetzen"
 @export var pattern_folder: String = "res://assets/map/muster"
-@export var pattern_chance: float = 0.4
+@export var pattern_chance: float = 0.25
 @export var max_patterns_per_tile: int = 5
 @export var parallax_factor_x: float = 0.5
 
@@ -19,8 +19,7 @@ const BACKGROUND_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/map/fetzen/2.png")
 ]
 const PATTERN_TEXTURES: Array[Texture2D] = [
-	preload("res://assets/map/muster/muster-1.png"),
-	preload("res://assets/map/muster/muster-2.png")
+
 ]
 
 @onready var parallax_layer: ParallaxLayer = get_node_or_null("../ParallaxBackground/ParallaxLayer")
@@ -179,7 +178,7 @@ func _spawn_background_chunk(x: float) -> float:
 	# 2. Spawn Decorations (Fetzen & Muster) using Grid/Cell approach
 	# This ensures better distribution and less overlapping
 	
-	var cell_size = 500.0
+	var cell_size = 250.0
 	var num_cols = ceil(chunk_width / cell_size)
 	# Playable Height is from PLAYABLE_HEIGHT_TOP (negative, -1755) to PLAYABLE_HEIGHT_BOTTOM (0)
 	# So height is abs(TOP - BOTTOM) which is _background_height
@@ -228,9 +227,9 @@ func _spawn_background_chunk(x: float) -> float:
 				# Decoration Scale - random slightly?
 				var s = 1.0
 				if use_fetzen:
-					s = _rng.randf_range(0.5, 1.5)
+					s = _rng.randf_range(0.2, 0.6)
 				else:
-					s = _rng.randf_range(0.8, 1.2)
+					s = _rng.randf_range(0.4, 0.8)
 				
 				dec_sprite.scale = Vector2(s, s)
 				dec_sprite.rotation = _rng.randf_range(-0.1, 0.1)

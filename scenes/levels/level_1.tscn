@@ -63,7 +63,7 @@ script = ExtResource("10_gen")
 [node name="Nails" type="Node" parent="."]
 
 [node name="Nail" parent="." instance=ExtResource("7_oc4kc")]
-position = Vector2(768, -448)
+position = Vector2(736, -384)
 
 [node name="Starticons" type="Node2D" parent="."]
 z_index = 10
