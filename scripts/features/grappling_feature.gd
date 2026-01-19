@@ -21,6 +21,10 @@ var damping: float
 var initial_pull_strength: float
 var max_swing_angle_deg: float = 90.0
 
+# Edge boost when hitting swing extremes: helps natural back-swinging when too slow
+var edge_boost_multiplier: float = 1.5
+var edge_min_tangential_speed: float = 120.0
+
 # === PRIVATE VARIABLES ===
 var _grapple_target: Vector2 = Vector2.ZERO
 var _target_nail: Interaction = null
@@ -39,7 +43,9 @@ func _ready() -> void:
 		"swing_pump_force": "swing_pump_force",
 		"max_boost_force": "max_boost_force",
 		"fixed_rope_length": "fixed_rope_length",
-		"max_swing_angle": "max_swing_angle_deg"
+		"max_swing_angle": "max_swing_angle_deg",
+		"edge_boost_multiplier": "edge_boost_multiplier",
+		"edge_min_tangential_speed": "edge_min_tangential_speed"
 	})
 
 	# Set internal defaults for parameters removed from the UI

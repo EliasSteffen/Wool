@@ -448,10 +448,17 @@ func _apply_grapple_constraint(delta: float) -> void:
 
 # If beyond allowed angle, reverse tangential velocity (no hard position clamping)
 	if abs_angle_deg > grappling.max_swing_angle_deg:
-		# Reverse tangential velocity if moving outwards
+		# Tangential speed along the rope (positive if moving outwards in the signed-angle sense)
 		var tangential_speed: float = velocity.dot(tangential_unit)
 		if tangential_speed * sign(signed_angle) > 0.0:
-			tangential_speed = -tangential_speed * 0.85 # damped bounce
+			# Damped bounce: reverse outward motion
+			tangential_speed = -tangential_speed * 0.85
+			# Edge-Boost: if the bounce is very slow, encourage a quicker inward swing to look natural
+			var min_speed: float = grappling.edge_min_tangential_speed
+			var boost_mul: float = grappling.edge_boost_multiplier
+			if abs(tangential_speed) < min_speed:
+				# Ensure direction is inward (keep sign of tangential_speed) and set magnitude to at least min_speed * boost_mul
+				tangential_speed = sign(tangential_speed) * (min_speed * boost_mul)
 		# remove radial component and set new velocity
 		var radial_component: Vector2 = radial_dir * velocity.dot(radial_dir)
 		velocity = radial_component + tangential_unit * tangential_speed
