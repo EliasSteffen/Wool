@@ -8,7 +8,6 @@ var spawn_interval_max: float = 5.0
 var spawn_distance_x: float = 2000.0 # Distance ahead of camera
 var spawn_height_min: float = -200.0 # Relative to camera center or fixed? User said "certain height"
 var spawn_height_max: float = -400.0 
-var min_spawn_x: float = 10000.0 # 1000m * 10px/m = 10000px
 
 var _spawn_timer: float = 0.0
 var _player: Node2D = null
@@ -23,12 +22,12 @@ func _process(delta: float) -> void:
 
 	_spawn_timer -= delta
 	if _spawn_timer <= 0:
-		if _player.global_position.x >= min_spawn_x:
+		if GameManager.get_current_distance() >= 1000:
 			_spawn_eagle()
 			_reset_timer()
 		else:
-			# Not far enough yet, keep checking but don't spawn
-			_spawn_timer = 0.1 # Check often
+			# Not far enough yet, wait a bit
+			_spawn_timer = 1.0 # Check every second until requirement met
 
 func _reset_timer() -> void:
 	_spawn_timer = randf_range(spawn_interval_min, spawn_interval_max)

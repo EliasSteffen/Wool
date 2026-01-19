@@ -9,9 +9,6 @@ extends CanvasLayer
 
 var player: BasePlayer = null
 
-# Track starting X so distance reads 0m at game start
-var _start_x: float = 0.0
-var _start_initialized: bool = false
 
 func _ready() -> void:
 	GameManager.rusty_nail_timer_started.connect(_on_rusty_nail_timer_started)
@@ -76,19 +73,13 @@ func _process(delta: float) -> void:
 			# Initialize highscore display
 			highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
 
-	# Initialize start X on first detection or when reset by game state
-	if player:
-		if not _start_initialized:
-			_start_x = player.global_position.x
-			_start_initialized = true
+	if current_distance_label:
+		var distance_meters: int = GameManager.get_current_distance()
+		current_distance_label.text = str(distance_meters) + "m"
 
-		if current_distance_label:
-			var distance_meters: int = int(max(player.global_position.x - _start_x, 0.0) / 10.0)
-			current_distance_label.text = str(distance_meters) + "m"
-
-			# Update highscore if beaten
-			GameManager.update_highscore(distance_meters)
-			highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
+		# Update highscore if beaten
+		GameManager.update_highscore(distance_meters)
+		highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
 
 func _on_rusty_nail_timer_started(duration: float) -> void:
 	rusty_nail_timer.visible = true
@@ -108,9 +99,5 @@ func _on_rusty_nail_timer_stopped() -> void:
 	rusty_nail_timer.visible = false
 
 func _on_game_state_changed(state: int) -> void:
-	# When the game starts playing, reset start position so the displayed distance begins at 0m
-	if state == GameManager.GameState.PLAYING:
-		_start_initialized = false
-		if player:
-			_start_x = player.global_position.x
-			_start_initialized = true
+	# GameManager handles distance reset internally when player resets
+	pass

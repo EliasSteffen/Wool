@@ -132,3 +132,26 @@ func _save_highscore() -> void:
 	var config = ConfigFile.new()
 	config.set_value("game", "highscore", highscore)
 	config.save("user://highscore.cfg")
+
+# === DISTANCE TRACKING ===
+var _start_x: float = 0.0
+var _start_initialized: bool = false
+var _player_ref: Node2D = null
+
+func _process(delta: float) -> void:
+	# Keep a reference to player for distance checking
+	if not _player_ref or not is_instance_valid(_player_ref):
+		_player_ref = get_tree().get_first_node_in_group("player")
+		if _player_ref:
+			_start_initialized = false # Reset start X when player is (re)found
+
+	if _player_ref and not _start_initialized:
+		_start_x = _player_ref.global_position.x
+		_start_initialized = true
+
+func get_current_distance() -> int:
+	if not _player_ref or not is_instance_valid(_player_ref) or not _start_initialized:
+		return 0
+	
+	# Logic: 10 pixels = 1 meter
+	return int(max(_player_ref.global_position.x - _start_x, 0.0) / 10.0)
