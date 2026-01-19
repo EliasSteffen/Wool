@@ -4,8 +4,9 @@ extends Node2D
 @export var rusty_nail_scene: PackedScene = preload("res://scenes/interactions/rusty_nail.tscn")
 
 ## Vertical generation range
-@export var gen_min_y: float = -1600.0
-@export var gen_max_y: float = -150.0
+## Vertical generation range
+@export var gen_min_y: float = GameManager.PLAYABLE_HEIGHT_TOP + 155.0 # Margin from top
+@export var gen_max_y: float = GameManager.PLAYABLE_HEIGHT_BOTTOM - 150.0 # Margin from bottom
 
 const NAILS_PER_SEGMENT: int = 10
 

@@ -26,7 +26,7 @@ var _camera_width: float = 0.0
 var _last_generated_x: float = 0.0
 var _background_tiles: Array[Sprite2D] = []
 var _background_width: float = 0.0  # Width of a single background tile
-var _background_height: float = 1755.0  # Height from y=0 to y=-1755
+var _background_height: float = abs(GameManager.PLAYABLE_HEIGHT_TOP - GameManager.PLAYABLE_HEIGHT_BOTTOM)
 
 # Runtime-loaded pattern textures and pattern nodes
 var _pattern_textures: Array[Texture2D] = []
@@ -155,10 +155,11 @@ func _spawn_background_tile(x: float, texture_in: Texture2D = null) -> float:
 	sprite.texture = texture
 	sprite.z_index = -10
 
-	# Position: x at tile position, y centered at -1755/2 = -877.5
-	# So top is at y=0 and bottom is at y=-1755
-	# Note: Position is relative to ParallaxLayer
-	sprite.position = Vector2(x, -877.5)  # Center Y position
+	# Position: x at tile position, y centered 
+	# Top is GameManager.PLAYABLE_HEIGHT_BOTTOM (0), Bottom is GameManager.PLAYABLE_HEIGHT_TOP (-1755)
+	# Center Y = (0 + -1755) / 2
+	var center_y = (GameManager.PLAYABLE_HEIGHT_BOTTOM + GameManager.PLAYABLE_HEIGHT_TOP) / 2.0
+	sprite.position = Vector2(x, center_y)
 
 	var tile_width: float = 0.0
 	# Scale background textures to fill the background height

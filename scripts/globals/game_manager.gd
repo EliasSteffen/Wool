@@ -25,6 +25,10 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const LEVEL_1_SCENE: String = "res://scenes/levels/level_1.tscn"
 const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 
+const PLAYABLE_HEIGHT_TOP: float = -1755.0
+const PLAYABLE_HEIGHT_BOTTOM: float = 0.0
+const WATER_LEVEL: float = 300.0
+
 # === PRIVATE VARIABLES ===
 var _pause_menu_instance: Node = null
 

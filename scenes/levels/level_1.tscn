@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
 [ext_resource type="Script" uid="uid://b3hisekcg88jf" path="res://scripts/levels/level_1.gd" id="11_level1"]
 [ext_resource type="Script" uid="uid://cdelytkcd0lhe" path="res://scripts/world/background_generator.gd" id="12_bg_gen"]
+[ext_resource type="PackedScene" uid="uid://dm0kdx7t5y4s0" path="res://scenes/characters/enemies/fish.tscn" id="13_fish"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
 size = Vector2(540, 568)
@@ -56,6 +57,7 @@ scale = Vector2(0.15, 0.15)
 position = Vector2(0, 232)
 
 [node name="HUD" parent="." instance=ExtResource("9_hud")]
+
 
 [node name="LevelGenerator" type="Node2D" parent="."]
 script = ExtResource("10_gen")

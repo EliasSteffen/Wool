@@ -25,4 +25,7 @@ func _physics_process(_delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is BaseCharacter:
+		# Fish live in the water (kill zone), so they don't die there
+		if body is Fish:
+			return
 		body.die()
