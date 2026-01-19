@@ -48,7 +48,7 @@ func _physics_process(delta: float) -> void:
 			set_used(false)  # Stop grappling when the nail starts falling
 			GameManager.rusty_nail_timer_stopped.emit()
 			# Haptic feedback when nail falls (Mobile only)
-			Input.vibrate_handheld(200)
+			Input.vibrate_handheld(500)
 			# Optional: Play sound or effect here
 		else:
 			GameManager.rusty_nail_timer_updated.emit(_swing_timer / swing_fall_threshold)
