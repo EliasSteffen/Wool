@@ -41,6 +41,18 @@ func _ready() -> void:
 
 # === PUBLIC METHODS ===
 
+func show_spawn_warning() -> void:
+	# Add warning icon
+	var warning_scene = preload("res://scenes/ui/warn_player.tscn")
+	var warning_instance = warning_scene.instantiate()
+	warning_instance.position = Vector2(0, 0) # Scene has its own offset or we adjust here?
+	# The scene has the exclamation mark at -283, -333. That's huge offset. 
+	# User wants "Links oben vom gegner". 
+	# If I add it at (0,0), the sprite will be at (-283, -333).
+	# This might be too far. But let's respect the scene layout first or reset it?
+	# "verwende die warnplayer szene" - imply using it as is.
+	add_child(warning_instance)
+
 func die() -> void:
 	# Drop features if any
 
@@ -53,12 +65,18 @@ func die() -> void:
 func _process_physics(delta: float) -> void:
 	_process_ai(delta)
 
-	# Check for collision with player to kill
+	# Check for collisions
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
+		
+		# Check for player to kill
 		if collider is BasePlayer:
 			collider.take_damage(collider.max_health)
+			
+		# Check for Left Border to die
+		if collider.name == "Left Border":
+			die()
 
 # === VIRTUAL METHODS (Override in specific enemy types) ===
 

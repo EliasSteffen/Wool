@@ -11,6 +11,7 @@ var spawn_height_max: float = -400.0
 
 var _spawn_timer: float = 0.0
 var _player: Node2D = null
+var _enemies_spawned_count: int = 0
 
 func _ready() -> void:
 	_reset_timer()
@@ -22,7 +23,7 @@ func _process(delta: float) -> void:
 
 	_spawn_timer -= delta
 	if _spawn_timer <= 0:
-		if GameManager.get_current_distance() >= 1000:
+		if GameManager.get_current_distance() >= 0:
 			_spawn_eagle()
 			_reset_timer()
 		else:
@@ -52,3 +53,7 @@ func _spawn_eagle() -> void:
 	# We want to add it to the same container as enemies or just the main level
 	# get_parent() assumes this script is attached to Level
 	get_parent().add_child.call_deferred(eagle)
+	
+	_enemies_spawned_count += 1
+	if _enemies_spawned_count <= 3:
+		eagle.call_deferred("show_spawn_warning")
