@@ -446,6 +446,19 @@ func _apply_grapple_constraint(delta: float) -> void:
 	var signed_angle: float = Vector2.DOWN.angle_to(radial_dir) # signed
 	var abs_angle_deg: float = abs(rad_to_deg(signed_angle))
 
+	# INITIAL BIAS: Subtiler CCW-Startimpuls, falls Feature es wünscht (natürlich skaliert)
+	if not _is_grapple_initialized:
+		if grappling and grappling.prefer_ccw_on_start:
+			var desired_impulse: float = grappling.ccw_start_impulse
+			# Scale down if CCW would move backward (tangential_unit.x negative)
+			var scale: float = 1.0 if tangential_unit.x >= 0.0 else 0.45
+			var current_tangential: float = velocity.dot(tangential_unit)
+			# Only apply if current tangential movement is small to remain natural
+			if abs(current_tangential) < desired_impulse * 0.5:
+				velocity += tangential_unit * (desired_impulse * scale)
+		# Mark initialized so we don't reapply
+		_is_grapple_initialized = true
+
 # If beyond allowed angle, reverse tangential velocity (no hard position clamping)
 	if abs_angle_deg > grappling.max_swing_angle_deg:
 		# Tangential speed along the rope (positive if moving outwards in the signed-angle sense)

@@ -25,6 +25,10 @@ var max_swing_angle_deg: float = 90.0
 var edge_boost_multiplier: float = 1.5
 var edge_min_tangential_speed: float = 120.0
 
+# Prefer CCW start behaviour
+var prefer_ccw_on_start: bool = true
+var ccw_start_impulse: float = 180.0
+
 # === PRIVATE VARIABLES ===
 var _grapple_target: Vector2 = Vector2.ZERO
 var _target_nail: Interaction = null
@@ -45,7 +49,9 @@ func _ready() -> void:
 		"fixed_rope_length": "fixed_rope_length",
 		"max_swing_angle": "max_swing_angle_deg",
 		"edge_boost_multiplier": "edge_boost_multiplier",
-		"edge_min_tangential_speed": "edge_min_tangential_speed"
+		"edge_min_tangential_speed": "edge_min_tangential_speed",
+		"prefer_ccw_on_start": "prefer_ccw_on_start",
+		"ccw_start_impulse": "ccw_start_impulse"
 	})
 
 	# Set internal defaults for parameters removed from the UI
