@@ -7,6 +7,9 @@ extends Node
 
 # === SIGNALS ===
 signal state_changed(new_state: GameState)
+signal rusty_nail_timer_started(duration: float)
+signal rusty_nail_timer_updated(progress: float)
+signal rusty_nail_timer_stopped()
 
 # === ENUMS ===
 enum GameState { MENU, PLAYING, PAUSED }

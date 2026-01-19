@@ -32,13 +32,21 @@ func _setup_interaction() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _is_being_used and not _is_falling:
+		var prev_timer = _swing_timer
 		_swing_timer += delta
+		if prev_timer == 0.0:
+			GameManager.rusty_nail_timer_started.emit(swing_fall_threshold)
 		if _swing_timer >= swing_fall_threshold:
 			_is_falling = true
 			set_used(false)  # Stop grappling when the nail starts falling
+			GameManager.rusty_nail_timer_stopped.emit()
 			# Optional: Play sound or effect here
+		else:
+			GameManager.rusty_nail_timer_updated.emit(_swing_timer / swing_fall_threshold)
 	elif not _is_being_used:
-		_swing_timer = 0.0  # Reset timer if not being used
+		if _swing_timer > 0.0:
+			_swing_timer = 0.0  # Reset timer if not being used
+			GameManager.rusty_nail_timer_stopped.emit()
 
 	if _is_falling:
 		global_position.y += fall_speed * delta
