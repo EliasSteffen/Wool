@@ -14,6 +14,6 @@ func _ready() -> void:
 func _start_pulsing() -> void:
 	var tween = create_tween().set_loops()
 	# Scale up
-	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale * 1.2, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	# Scale down
-	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale * 1.75, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale down (below original size)
+	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale * 0.5, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
