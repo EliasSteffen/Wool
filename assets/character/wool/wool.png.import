@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w7kgfdujh0jy"
-path="res://.godot/imported/nadel.png-a255b01da0b4f10d206aaea80089f27d.ctex"
+uid="uid://dwou74m318rb4"
+path="res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/character/nadel.png"
-dest_files=["res://.godot/imported/nadel.png-a255b01da0b4f10d206aaea80089f27d.ctex"]
+source_file="res://assets/character/wool/wool.png"
+dest_files=["res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.ctex"]
 
 [params]
 

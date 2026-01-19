@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bordbegqbbr6g"
-path="res://.godot/imported/idle.png-0d5c803e012adad06ba56f8d8f729038.ctex"
+uid="uid://w7kgfdujh0jy"
+path="res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/character/idle.png"
-dest_files=["res://.godot/imported/idle.png-0d5c803e012adad06ba56f8d8f729038.ctex"]
+source_file="res://assets/character/wool/nadel.png"
+dest_files=["res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgbijj7ijx54"
-path="res://.godot/imported/swing.png-e6a2b658f2d4e008012bb375768fa0fe.ctex"
+uid="uid://bordbegqbbr6g"
+path="res://.godot/imported/idle.png-8c6f75736692f2bb57757d2150098e76.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/character/swing.png"
-dest_files=["res://.godot/imported/swing.png-e6a2b658f2d4e008012bb375768fa0fe.ctex"]
+source_file="res://assets/character/wool/idle.png"
+dest_files=["res://.godot/imported/idle.png-8c6f75736692f2bb57757d2150098e76.ctex"]
 
 [params]
 

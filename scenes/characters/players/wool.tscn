@@ -2,12 +2,12 @@
 
 [ext_resource type="PackedScene" uid="uid://c6ppvptn4thyd" path="res://scenes/characters/players/base-player.tscn" id="1_base_player"]
 [ext_resource type="Script" uid="uid://cyc3rpi35h3nx" path="res://scripts/characters/wool.gd" id="2_wool"]
-[ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/nadel.png" id="3_bs72m"]
-[ext_resource type="Texture2D" uid="uid://bgbijj7ijx54" path="res://assets/character/swing.png" id="4_1evpv"]
+[ext_resource type="Texture2D" uid="uid://w7kgfdujh0jy" path="res://assets/character/wool/nadel.png" id="3_bs72m"]
+[ext_resource type="Texture2D" uid="uid://bgbijj7ijx54" path="res://assets/character/wool/swing.png" id="4_1evpv"]
 [ext_resource type="Script" uid="uid://cqtfqstpt8tf" path="res://scripts/features/grappling_feature.gd" id="4_grappling"]
-[ext_resource type="Texture2D" uid="uid://c682uuf6dvscc" path="res://assets/character/jump.png" id="8_2rcj1"]
-[ext_resource type="Texture2D" uid="uid://b72jbir0354jh" path="res://assets/character/walk.png" id="9_2rcj1"]
-[ext_resource type="Texture2D" uid="uid://bordbegqbbr6g" path="res://assets/character/idle.png" id="9_whd81"]
+[ext_resource type="Texture2D" uid="uid://c682uuf6dvscc" path="res://assets/character/wool/jump.png" id="8_2rcj1"]
+[ext_resource type="Texture2D" uid="uid://b72jbir0354jh" path="res://assets/character/wool/walk.png" id="9_2rcj1"]
+[ext_resource type="Texture2D" uid="uid://bordbegqbbr6g" path="res://assets/character/wool/idle.png" id="9_whd81"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_codar"]
 size = Vector2(480.00043, 840.0006)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dwou74m318rb4"
-path="res://.godot/imported/wool.png-f57faae709d293d981fd0e3d002dae60.ctex"
+uid="uid://c682uuf6dvscc"
+path="res://.godot/imported/jump.png-d71023bf71c59cb9dd22dc16028dbbc4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/character/wool.png"
-dest_files=["res://.godot/imported/wool.png-f57faae709d293d981fd0e3d002dae60.ctex"]
+source_file="res://assets/character/wool/jump.png"
+dest_files=["res://.godot/imported/jump.png-d71023bf71c59cb9dd22dc16028dbbc4.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

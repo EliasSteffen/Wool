@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c682uuf6dvscc"
-path="res://.godot/imported/jump.png-cb88698f54bfa7d3c06439a4f7a52c50.ctex"
+uid="uid://bgbijj7ijx54"
+path="res://.godot/imported/swing.png-ea821bfce298911ffb64cc6da0158384.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/character/jump.png"
-dest_files=["res://.godot/imported/jump.png-cb88698f54bfa7d3c06439a4f7a52c50.ctex"]
+source_file="res://assets/character/wool/swing.png"
+dest_files=["res://.godot/imported/swing.png-ea821bfce298911ffb64cc6da0158384.ctex"]
 
 [params]
 
