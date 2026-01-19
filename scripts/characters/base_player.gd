@@ -81,6 +81,10 @@ func die() -> void:
 	# Disable control
 	can_control = false
 	velocity = Vector2.ZERO
+	
+	# Haptic feedback on death (Mobile only)
+	_play_death_haptics()
+
 
 	# Slow motion effect
 	Engine.time_scale = 0.5
@@ -267,6 +271,9 @@ func _update_camera_and_bounds() -> void:
 	# If player's X (plus some padding/margin if needed) is less than left_edge
 	if global_position.x < left_edge:
 		die()
+
+func _play_death_haptics() -> void:
+	Input.vibrate_handheld(600)
 
 # === PRIVATE METHODS ===
 
