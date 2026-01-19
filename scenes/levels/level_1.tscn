@@ -53,7 +53,7 @@ position = Vector2(416, -136)
 scale = Vector2(0.15, 0.15)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
-position = Vector2(0, 104)
+position = Vector2(0, 232)
 
 [node name="HUD" parent="." instance=ExtResource("9_hud")]
 
@@ -71,8 +71,8 @@ z_index = 10
 [node name="Dim" type="ColorRect" parent="Starticons"]
 offset_top = -1176.0
 offset_right = 2536.0
-color = Color(0, 0, 0, 0.75)
 mouse_filter = 2
+color = Color(0, 0, 0, 0.75)
 
 [node name="Logo" type="Sprite2D" parent="Starticons"]
 position = Vector2(1266, -585)

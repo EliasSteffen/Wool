@@ -6,11 +6,17 @@ extends Nail
 
 # === EXPORTED VARIABLES ===
 @export var fall_speed: float = 200.0
-@export var swing_fall_threshold: float = 5.0
+@export var swing_fall_threshold: float
 
 # === PRIVATE VARIABLES ===
 var _swing_timer: float = 0.0
 var _is_falling: bool = false
+
+# === CONSTANTS ===
+const RUSTY_BASE_THRESHOLD: float = 5.0
+const RUSTY_THRESHOLD_DECREASE_INTERVAL: float = 256.0
+# Negative percent shortens the threshold per step (e.g. -0.05 = 5% shorter each step)
+const RUSTY_THRESHOLD_DECREASE_PERCENT: float = -0.05
 
 # === OVERRIDDEN METHODS ===
 
@@ -20,15 +26,18 @@ func _setup_interaction() -> void:
 	normal_color = InteractionConstants.get_value("Visuals", "rusty_nail_color", InteractionConstants.DEFAULT_RUSTY_NAIL_COLOR)
 	highlight_color = InteractionConstants.get_value("Visuals", "highlight_nail_color", InteractionConstants.DEFAULT_HIGHLIGHT_COLOR)
 
-	# Scale swing_fall_threshold based on distance, like nail distances
-	var base_threshold: float = 3.0
-	var threshold_decrease_interval: float = 512.0
-	var threshold_decrease_percent: float = 0.25
-	var steps: int = int(max(0.0, floor(global_position.x / threshold_decrease_interval)))
-	swing_fall_threshold = base_threshold * pow(1.0 - threshold_decrease_percent, steps)
-	swing_fall_threshold = max(swing_fall_threshold, 1.0)  # Minimum 1 second
+	# Compute threshold now and again deferred after spawn positions the nail
+	_compute_swing_threshold()
+	call_deferred("_compute_swing_threshold")
 
 	_update_visual()
+
+func _compute_swing_threshold() -> void:
+	var steps: int = ScaleUtils.steps_from_position(global_position.x, RUSTY_THRESHOLD_DECREASE_INTERVAL)
+	var raw_threshold: float = ScaleUtils.scaled_value(RUSTY_BASE_THRESHOLD, RUSTY_THRESHOLD_DECREASE_PERCENT, steps)
+	swing_fall_threshold = max(raw_threshold, 1.0)
+	var factor := 1.0 + RUSTY_THRESHOLD_DECREASE_PERCENT
+	print("[RustyNail] global_x:", global_position.x, "steps:", steps, "factor:", factor, "raw:", raw_threshold, "clamped:", swing_fall_threshold)
 
 func _physics_process(delta: float) -> void:
 	if _is_being_used and not _is_falling:
