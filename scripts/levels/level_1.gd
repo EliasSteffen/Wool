@@ -77,12 +77,12 @@ func _is_out_of_camera_view() -> bool:
 		var camera_top = camera.global_position.y - half_height
 
 		# Check if icons are completely above camera view (with margin)
-		return icons_bottom < camera_top - 200.0  # 200px margin above camera
+		return icons_bottom < camera_top - 500.0  # Increased margin to 500px
 
 	# Fallback: check if icons are far above viewport
 	var viewport_rect = get_viewport().get_visible_rect()
 	var viewport_top = viewport_rect.position.y
-	return icons_bottom < viewport_top - 200.0  # 200px margin
+	return icons_bottom < viewport_top - 500.0  # Increased margin
 
 func _get_icons_bounds() -> Dictionary:
 	var result = {"top": INF, "bottom": -INF}
@@ -151,3 +151,4 @@ func _remove_start_icons() -> void:
 			var spawner = spawner_script.new()
 			spawner.name = "EnemySpawner"
 			add_child(spawner)
+

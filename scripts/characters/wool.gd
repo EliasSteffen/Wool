@@ -449,6 +449,8 @@ func _handle_input() -> void:
 	# 4. Vertical Input (Swim/Climb) - currently zeroed for one-button simplicity
 	_vertical_direction = 0.0
 
+
+
 func _find_best_grapple_target() -> Interaction:
 	var best_target: Interaction = null
 	var best_x: float = -INF
