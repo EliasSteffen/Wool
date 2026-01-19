@@ -1,10 +1,8 @@
-[gd_scene load_steps=23 format=3 uid="uid://vc7o506a25ie"]
+[gd_scene load_steps=21 format=3 uid="uid://vc7o506a25ie"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_base_enemy"]
-[ext_resource type="Script" uid="uid://d2j05ea08c2fv" path="res://scripts/characters/eagle.gd" id="2_script"]
-[ext_resource type="Texture2D" uid="uid://yfr6h1krut5h" path="res://assets/character/eagle/fly.png" id="3_rpkyh"]
-[ext_resource type="Script" uid="uid://dc4wagnw5qxu5" path="res://scripts/features/glide_feature.gd" id="4_rpkyh"]
-[ext_resource type="Texture2D" uid="uid://cedjet70y4nqa" path="res://assets/coin.png" id="5_rpkyh"]
+[ext_resource type="Script" uid="uid://cev4mc8ec42nw" path="res://scripts/characters/eagle.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://dehy0yax711xh" path="res://assets/character/eagle/fly.png" id="3_rpkyh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_350ui"]
 size = Vector2(1307.6876, 560.0002)
@@ -123,14 +121,17 @@ animations = [{
 }]
 
 [node name="Eagle" instance=ExtResource("1_base_enemy")]
-scale = Vector2(0.05, 0.05)
+position = Vector2(-24, 0)
+scale = Vector2(0.5, 0.5)
 script = ExtResource("2_script")
+fly_speed = 300.0
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(42, 1)
 shape = SubResource("RectangleShape2D_350ui")
 
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
+position = Vector2(48, 0)
 sprite_frames = SubResource("SpriteFrames_rpkyh")
 autoplay = "default"
 
@@ -138,8 +139,3 @@ autoplay = "default"
 position = Vector2(46.156265, 1.1473892e-05)
 scale = Vector2(0.9999995, 0.9999995)
 shape = SubResource("RectangleShape2D_350ui")
-
-[node name="GlideFeature" type="Node2D" parent="Features" index="0"]
-script = ExtResource("4_rpkyh")
-drop_icon = ExtResource("5_rpkyh")
-metadata/_custom_type_script = "uid://dc4wagnw5qxu5"

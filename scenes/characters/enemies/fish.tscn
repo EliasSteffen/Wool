@@ -1,19 +1,21 @@
-[gd_scene load_steps=8 format=3 uid="uid://dgl3qoynkddvj"]
+[gd_scene load_steps=7 format=3 uid="uid://dgl3qoynkddvj"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_base_enemy"]
-[ext_resource type="Script" uid="uid://cxhwad2ddre17" path="res://scripts/characters/fish.gd" id="2_script"]
-[ext_resource type="Texture2D" uid="uid://b6f2r00iyajf5" path="res://assets/character/fish.png" id="3_obdji"]
-[ext_resource type="Script" uid="uid://biu4s0f5akfsu" path="res://scripts/features/swim_feature.gd" id="4_obdji"]
-[ext_resource type="Texture2D" uid="uid://cedjet70y4nqa" path="res://assets/coin.png" id="5_e65mj"]
+[ext_resource type="Script" path="res://scripts/characters/fish.gd" id="2_script"]
+[ext_resource type="Texture2D" uid="uid://bjep15om7owmt" path="res://assets/character/fish/fish.png" id="3_cg1ll"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e65mj"]
 size = Vector2(98, 56)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_obdji"]
+atlas = ExtResource("3_cg1ll")
+region = Rect2(0, 0, 2331, 1848)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_e65mj"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_obdji")
+"texture": SubResource("AtlasTexture_obdji")
 }],
 "loop": true,
 "name": &"default",
@@ -30,11 +32,8 @@ shape = SubResource("RectangleShape2D_e65mj")
 [node name="AnimatedSprite2D" parent="Skin" index="0"]
 scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_e65mj")
+autoplay = "default"
 
 [node name="HitboxShape" parent="HitboxArea" index="0"]
 position = Vector2(-1, 0)
 shape = SubResource("RectangleShape2D_e65mj")
-
-[node name="SwimFeature" type="Node2D" parent="Features" index="0"]
-script = ExtResource("4_obdji")
-drop_icon = ExtResource("5_e65mj")

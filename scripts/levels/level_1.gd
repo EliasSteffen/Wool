@@ -140,6 +140,14 @@ func _remove_start_icons() -> void:
 		start_icons.queue_free()
 		start_icons = null
 		_is_animating = false
+		
 		# Show HUD now that start icons are gone
 		if hud:
 			hud.visible = true
+
+		# Add Enemy Spawner
+		var spawner_script = load("res://scripts/levels/enemy_spawner.gd")
+		if spawner_script:
+			var spawner = spawner_script.new()
+			spawner.name = "EnemySpawner"
+			add_child(spawner)

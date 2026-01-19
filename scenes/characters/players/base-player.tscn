@@ -11,3 +11,5 @@ can_control = true
 max_picked_up_features = 1
 
 [node name="Camera2D" type="Camera2D" parent="." index="3"]
+
+[node name="Features" type="Node" parent="." index="4"]
