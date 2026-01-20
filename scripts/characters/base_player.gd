@@ -247,6 +247,13 @@ func _process_physics(delta: float) -> void:
 	if not can_control:
 		return
 
+	# Check for collisions with enemies (e.g. stomp or side hit initiated by player movement)
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+		if collider is BaseEnemy:
+			take_damage(max_health)
+
 	_handle_input()
 	_handle_feature_inputs()
 	# Specific feature inputs are now handled via _handle_feature_inputs calling feature.handle_input()
