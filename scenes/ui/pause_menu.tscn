@@ -56,3 +56,8 @@ text = "Reset Highscore"
 layout_mode = 2
 theme_override_font_sizes/font_size = 200
 text = "Settings"
+
+[node name="CreditsButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 200
+text = "Credits"

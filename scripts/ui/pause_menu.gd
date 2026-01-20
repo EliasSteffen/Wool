@@ -3,6 +3,7 @@ extends BaseMenu
 @onready var resume_button: Button = $Control/CenterContainer/VBoxContainer/ResumeButton
 @onready var reset_button: Button = $Control/CenterContainer/VBoxContainer/ResetHighscoreButton
 @onready var settings_button: Button = $Control/CenterContainer/VBoxContainer/SettingsButton
+@onready var credits_button: Button = $Control/CenterContainer/VBoxContainer/CreditsButton
 
 func _ready() -> void:
 	super._ready()
@@ -45,7 +46,27 @@ func _ready() -> void:
 	settings_button.add_theme_constant_override("icon_size", 64)
 	settings_button.add_theme_font_size_override("font_size", 36)
 
-	register_buttons([resume_button, reset_button, settings_button])
+	register_buttons([resume_button, reset_button, settings_button, credits_button])
+	
+	setup_credits_button()
+
+func setup_credits_button() -> void:
+	credits_button.pressed.connect(_on_credits_pressed)
+	
+	credits_button.custom_minimum_size = Vector2(credits_button.custom_minimum_size.x, 150)
+	var UITheme = preload("res://scripts/ui/ui_theme.gd")
+	UITheme.apply_modern_button_style(credits_button, Vector2(0, 150), false)
+	# Reuse settings icon or similar if no specific icon
+	var icon: Texture2D = preload("res://assets/ui/settings.svg")
+	credits_button.icon = icon
+	credits_button.text = "Credits"
+	credits_button.add_theme_constant_override("icon_size", 64)
+	credits_button.add_theme_font_size_override("font_size", 36)
+
+func _on_credits_pressed() -> void:
+	var credits_scene = preload("res://scenes/ui/credits.tscn").instantiate()
+	add_child(credits_scene)
+
 
 func _on_resume_pressed() -> void:
 	GameManager.toggle_pause()
