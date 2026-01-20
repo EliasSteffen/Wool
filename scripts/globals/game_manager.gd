@@ -57,6 +57,9 @@ func _ready() -> void:
 	# Add Generic Touch/Click support to "jump" action
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
 	# Note: Now also added to project.godot directly for redundancy and export stability.
+	
+	# Start Background Music
+	AudioManager.play_music()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):

@@ -17,6 +17,7 @@ boot_splash/image="uid://c6ctd4lv5eere"
 
 [autoload]
 
+AudioManager="*res://scripts/globals/audio_manager.gd"
 GameManager="*res://scripts/globals/game_manager.gd"
 Tweakables="*res://scripts/globals/tweakables.gd"
 CharacterConstants="*res://scripts/characters/constants.gd"
@@ -25,6 +26,10 @@ InteractionConstants="*res://scripts/interactions/constants.gd"
 TerrainConstants="*res://scripts/terrain/constants.gd"
 WorldConstants="*res://scripts/world/constants.gd"
 
+
+[audio]
+
+buses/default_layout="res://default_bus_layout.tres"
 
 [display]
 
