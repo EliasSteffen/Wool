@@ -62,7 +62,7 @@ func _process(delta: float) -> void:
 		
 		# Check for hold input (Left Mouse or Touch)
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-			current_speed *= 2.0
+			current_speed *= 4.0
 			
 		content.position.y -= current_speed * delta
 		
