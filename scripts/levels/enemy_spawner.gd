@@ -12,19 +12,19 @@ var spawn_distance_x: float = 2000.0 # Distance ahead of camera
 var eagle_spawn_interval_min: float = 2.0
 var eagle_spawn_interval_max: float = 5.0
 var eagle_spawn_height_min: float = -200.0
-var eagle_spawn_height_max: float = -400.0 
+var eagle_spawn_height_max: float = GameManager.PLAYABLE_HEIGHT_TOP 
 var eagle_min_distance: int = 1000
 
 # Fish Config
 var fish_spawn_interval_min: float = 5.0
 var fish_spawn_interval_max: float = 12.0
-var fish_spawn_y: float = 300.0 # Approximate water level
+var fish_spawn_y: float = GameManager.WATER_LEVEL # Approximate water level
 var fish_min_distance: int = 500
 
 var _eagle_timer: float = 0.0
 var _fish_timer: float = 0.0
 var _player: Node2D = null
-var _enemies_spawned_count: int = 0
+var _spawn_counts: Dictionary = {}
 
 func _ready() -> void:
 	_reset_eagle_timer()
@@ -66,12 +66,12 @@ func _spawn_eagle() -> void:
 		return
 		
 	var spawn_x = _player.global_position.x + spawn_distance_x
-	var spawn_y = _player.global_position.y + randf_range(eagle_spawn_height_max, eagle_spawn_height_min)
+	var spawn_y = randf_range(eagle_spawn_height_max, eagle_spawn_height_min)
 	
 	var eagle = eagle_scene.instantiate()
 	eagle.global_position = Vector2(spawn_x, spawn_y)
 	
-	_add_enemy(eagle)
+	_add_enemy(eagle, "Eagle")
 
 func _spawn_fish() -> void:
 	if not _player or not fish_scene:
@@ -84,13 +84,17 @@ func _spawn_fish() -> void:
 	fish.global_position = Vector2(spawn_x, spawn_y)
 	print("DEBUG: Fish spawned at ", fish.global_position)
 	
-	_add_enemy(fish)
+	_add_enemy(fish, "Fish")
 
-func _add_enemy(enemy: Node) -> void:
+func _add_enemy(enemy: Node, type_name: String) -> void:
 	get_parent().add_child.call_deferred(enemy)
 	
-	# Apply warning to the first few enemies regardless of type
-	_enemies_spawned_count += 1
-	if _enemies_spawned_count <= 3:
+	# Initialize count for this type if not exists
+	if not _spawn_counts.has(type_name):
+		_spawn_counts[type_name] = 0
+		
+	# Apply warning to the first few enemies of this specific type
+	_spawn_counts[type_name] += 1
+	if _spawn_counts[type_name] <= 3:
 		if enemy.has_method("show_spawn_warning"):
 			enemy.call_deferred("show_spawn_warning")

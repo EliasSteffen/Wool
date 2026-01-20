@@ -77,7 +77,13 @@ func _ready() -> void:
 	# call_deferred("_setup_debug_ui")
 	call_deferred("_setup_interaction_prompt_label")
 
+var _is_dead: bool = false
+
 func die() -> void:
+	if _is_dead:
+		return
+	_is_dead = true
+	
 	# Disable control
 	can_control = false
 	velocity = Vector2.ZERO
@@ -89,6 +95,10 @@ func die() -> void:
 	# Slow motion effect
 	Engine.time_scale = 0.5
 
+	# Show Game Over Screen deferred to separate from physics step
+	call_deferred("_show_game_over_screen")
+
+func _show_game_over_screen() -> void:
 	# Show Game Over Screen immediately as overlay
 	var game_over_scene = load("res://scenes/ui/game_over.tscn")
 	if game_over_scene:

@@ -82,15 +82,15 @@ func _process(delta: float) -> void:
 		player = get_tree().get_first_node_in_group("player")
 		if player:
 			# Initialize highscore display
-			highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
+			highscore_label.text = str(GameManager.highscore) + "m"
 
 	if current_distance_label:
-		var distance_meters: int = GameManager.get_current_distance()
+		var distance_meters: int = GameManager.max_run_distance
 		current_distance_label.text = str(distance_meters) + "m"
 
 		# Update highscore if beaten
 		GameManager.update_highscore(distance_meters)
-		highscore_label.text = "Highscore: " + str(GameManager.highscore) + "m"
+		highscore_label.text = str(GameManager.highscore) + "m"
 
 func _on_rusty_nail_timer_started(duration: float) -> void:
 	rusty_nail_timer.visible = true
@@ -105,6 +105,11 @@ func _on_rusty_nail_timer_updated(progress: float) -> void:
 	var half := fill_width * 0.5
 	rusty_nail_timer_fill.offset_left = -half
 	rusty_nail_timer_fill.offset_right = half
+	
+	# Update color: White -> Red as it progresses
+	var sb = rusty_nail_timer_fill.get_theme_stylebox("panel") as StyleBoxFlat
+	if sb:
+		sb.bg_color = Color.WHITE.lerp(Color(1, 0, 0, 1), progress)
 
 func _on_rusty_nail_timer_stopped() -> void:
 	rusty_nail_timer.visible = false

@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://d30ynwp46gi7s"]
+[gd_scene load_steps=3 format=3 uid="uid://d30ynwp46gi7s"]
 
 [ext_resource type="Script" uid="uid://kpvat4vghmvj" path="res://scripts/ui/game_over.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_fu4wh"]
 
 [node name="GameOverScreen" type="Control"]
 layout_mode = 3
@@ -20,25 +21,93 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.862745)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_right = 50
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 30
+theme_override_constants/separation = 40
+alignment = 1
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 150
 text = "Game Over"
 horizontal_alignment = 1
 
-[node name="InstructionLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="ScoreDisplay" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="StartLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "0m"
+
+[node name="ProgressBarContainer" type="Control" parent="MarginContainer/VBoxContainer/ScoreDisplay"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LineBase" type="Panel" parent="MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -10.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineFill" type="Panel" parent="MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -10.0
+offset_bottom = 10.0
+grow_vertical = 2
+
+[node name="WoolMarker" type="Control" parent="MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+grow_vertical = 2
+
+[node name="Wool" parent="MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker" instance=ExtResource("2_fu4wh")]
+position = Vector2(-0.9999981, -62.999992)
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 65.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_font_sizes/font_size = 32
+text = "Your Score"
+horizontal_alignment = 1
+
+[node name="EndLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Highscore"
+horizontal_alignment = 2
+
+[node name="InstructionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 32

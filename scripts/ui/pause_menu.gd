@@ -1,11 +1,13 @@
 extends BaseMenu
 
 @onready var resume_button: Button = $Control/CenterContainer/VBoxContainer/ResumeButton
+@onready var reset_button: Button = $Control/CenterContainer/VBoxContainer/ResetHighscoreButton
 @onready var settings_button: Button = $Control/CenterContainer/VBoxContainer/SettingsButton
 
 func _ready() -> void:
 	super._ready()
 	resume_button.pressed.connect(_on_resume_pressed)
+	reset_button.pressed.connect(_on_reset_highscore_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
 
 	# Ensure modern rounded styling on menu buttons (register_buttons will also style)
@@ -20,6 +22,19 @@ func _ready() -> void:
 	# Ensure icon and text scale well for the button height
 	resume_button.add_theme_constant_override("icon_size", 64)
 	resume_button.add_theme_font_size_override("font_size", 36)
+	
+	# Reset Button style
+	reset_button.custom_minimum_size = Vector2(reset_button.custom_minimum_size.x, 150)
+	UITheme.apply_modern_button_style(reset_button, Vector2(0, 150), false)
+	# Reuse settings icon temporarily or use a trash icon if available, or just text
+	var reset_icon: Texture2D = preload("res://assets/ui/settings.svg") # Placeholder/Reuse
+	# Or try to load a specific delete/trash icon if user has one? User didn't specify.
+	# Using "play.svg" or "settings.svg" might be confusing.
+	# Let's see if we can find a clearer icon, otherwise default or reuse.
+	reset_button.icon = reset_icon
+	reset_button.text = "Reset Highscore"
+	reset_button.add_theme_constant_override("icon_size", 64)
+	reset_button.add_theme_font_size_override("font_size", 36)
 
 	# Settings button: use icon + text (matches Resume style)
 	settings_button.custom_minimum_size = Vector2(settings_button.custom_minimum_size.x, 150)
@@ -30,7 +45,13 @@ func _ready() -> void:
 	settings_button.add_theme_constant_override("icon_size", 64)
 	settings_button.add_theme_font_size_override("font_size", 36)
 
-	register_buttons([resume_button, settings_button])
+	register_buttons([resume_button, reset_button, settings_button])
 
 func _on_resume_pressed() -> void:
 	GameManager.toggle_pause()
+
+func _on_reset_highscore_pressed() -> void:
+	GameManager.reset_highscore()
+	# Optional: Give feedback, e.g. change text
+	reset_button.text = "Highscore Reset!"
+	reset_button.disabled = true

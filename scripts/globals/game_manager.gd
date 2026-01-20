@@ -19,6 +19,7 @@ var current_state: GameState = GameState.PLAYING
 var current_seed: int = 0
 var is_first_game_start: bool = true  # Track if this is the first time starting the game
 var highscore: int = 0
+var max_run_distance: int = 0
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
@@ -69,6 +70,12 @@ func _unhandled_input(event: InputEvent) -> void:
 func start_game() -> void:
 	# Always generate a new seed for every session/restart to ensure new level layout
 	current_seed = randi()
+	max_run_distance = 0
+	
+	# Reset tracking state to prevent reading old player position before scene change
+	_player_ref = null
+	_start_initialized = false
+	_start_x = 0.0
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false
@@ -137,6 +144,11 @@ func _save_highscore() -> void:
 	config.set_value("game", "highscore", highscore)
 	config.save("user://highscore.cfg")
 
+## Reset highscore to 0
+func reset_highscore() -> void:
+	highscore = 0
+	_save_highscore()
+
 # === DISTANCE TRACKING ===
 var _start_x: float = 0.0
 var _start_initialized: bool = false
@@ -152,6 +164,11 @@ func _process(delta: float) -> void:
 	if _player_ref and not _start_initialized:
 		_start_x = _player_ref.global_position.x
 		_start_initialized = true
+		
+	# Update max run distance
+	var current_dist = get_current_distance()
+	if current_dist > max_run_distance:
+		max_run_distance = current_dist
 
 func get_current_distance() -> int:
 	if not _player_ref or not is_instance_valid(_player_ref) or not _start_initialized:
