@@ -25,6 +25,7 @@ func _ready() -> void:
 @onready var wool_instance: Node = $MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker/Wool
 @onready var score_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker/ScoreLabel
 @onready var end_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/EndLabel
+var _move_tween: Tween = null
 
 var internal_wool_sprite: AnimatedSprite2D = null
 
@@ -101,27 +102,31 @@ func _setup_score_display(fade_duration: float) -> void:
 		printerr("Game Over Error: Internal Wool Sprite not found on instance!")
 	
 	# Animation
-	var move_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_move_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_move_tween.finished.connect(func(): 
+		_move_tween = null
+		_can_interact = true
+	)
 	
 	# Start moving after start delay
-	move_tween.tween_interval(fade_duration * 0.5)
+	_move_tween.tween_interval(fade_duration * 0.5)
 	
 	# Start Walk Animation callback
-	move_tween.tween_callback(func():
+	_move_tween.tween_callback(func():
 		if internal_wool_sprite:
 			internal_wool_sprite.play("walk")
 	)
 	
 	# Parallel movement, fill, and text counting
-	move_tween.set_parallel(true)
-	move_tween.tween_property(wool_marker, "position:x", target_x, 2.0)
-	move_tween.tween_property(line_fill, "size:x", target_x, 2.0)
+	_move_tween.set_parallel(true)
+	_move_tween.tween_property(wool_marker, "position:x", target_x, 2.0)
+	_move_tween.tween_property(line_fill, "size:x", target_x, 2.0)
 	# Animate the score counting up
-	move_tween.tween_method(_update_score_text, 0, current_score, 2.0)
-	move_tween.set_parallel(false)
+	_move_tween.tween_method(_update_score_text, 0, current_score, 2.0)
+	_move_tween.set_parallel(false)
 	
 	# End callback
-	move_tween.tween_callback(func():
+	_move_tween.tween_callback(func():
 		if internal_wool_sprite:
 			internal_wool_sprite.play("idle")
 	)
@@ -132,14 +137,40 @@ func _update_score_text(value: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not _can_interact:
-		return
-
+	
 	if (event is InputEventKey and event.pressed) or \
 	   (event is InputEventMouseButton and event.pressed) or \
 	   (event is InputEventScreenTouch and event.pressed) or \
 	   (event is InputEventJoypadButton and event.pressed):
-		_restart_game()
+		
+		# If animating, skip animation
+		if _move_tween and _move_tween.is_valid():
+			_move_tween.kill()
+			_move_tween = null
+			
+			# Snap to final values
+			var current_score = GameManager.max_run_distance
+			var highscore = max(GameManager.highscore, current_score)
+			var ratio = 0.0
+			if highscore > 0: ratio = float(current_score) / float(highscore)
+			ratio = clampf(ratio, 0.0, 1.0)
+			
+			if progress_container and progress_container.size.x > 0:
+				var target_x = progress_container.size.x * ratio
+				wool_marker.position.x = target_x
+				line_fill.size.x = target_x
+			
+			_update_score_text(current_score)
+			
+			if internal_wool_sprite:
+				internal_wool_sprite.play("idle")
+				
+			_can_interact = true
+			return # Don't restart yet
+		
+		# If not animating (canceled or finished), check if we can restart
+		if _can_interact:
+			_restart_game()
 
 func _restart_game() -> void:
 	# Prevent double firing

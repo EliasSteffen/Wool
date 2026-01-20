@@ -387,11 +387,32 @@ func _update_facing_direction(is_facing_left: bool) -> void:
 # === MOBILE / ONE-BUTTON GAMEPLAY LOGIC ===
 # Overrides BasePlayer input handling for the requested mobile loop.
 
+var _input_jump_pressed_latched: bool = false
+var _input_jump_held: bool = false
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Note: BasePlayer might not have _unhandled_input, but if it did, we should call super.
+	# Since we don't know for sure here and previous checks didn't show it for BasePlayer specifically,
+	# we omit super to avoid errors, unless we confirmed BasePlayer or GameManager logic needs it.
+	# (GameManager handles global input via its own process, not via Player's unhandled_input)
+	
+	if event.is_action_pressed("jump"):
+		_input_jump_pressed_latched = true
+		_input_jump_held = true
+	elif event.is_action_released("jump"):
+		_input_jump_held = false
+
 func _handle_input() -> void:
 	# 1. Unified Input Action: "jump" (Space / Touch / Click)
 	# We treat any main action as the single input.
-	var input_pressed: bool = Input.is_action_pressed("jump")
-	var input_just_pressed: bool = Input.is_action_just_pressed("jump")
+	# Using latched input from _unhandled_input to respect UI consumption
+	var input_just_pressed: bool = _input_jump_pressed_latched
+	_input_jump_pressed_latched = false # Reset latch
+	
+	var input_pressed: bool = _input_jump_held
+	
+	# Fallback for "Space" key if UI didn't consume it (optional redundancy)
+	# but strictly relying on unhandled_input is cleaner for UI blocking.
 
 	if not _game_started:
 		_direction = 0.0
@@ -399,12 +420,12 @@ func _handle_input() -> void:
 			# Check if start icons still exist - if yes, ignore this input (it's for the animation)
 			var level = get_parent()
 			var start_icons = level.get_node_or_null("Starticons") if level else null
-
+			
 			if start_icons and is_instance_valid(start_icons):
 				# Start icons still exist - this input is for the animation, not for jumping
 				return
-
-			# Start icons are gone or don't exist - start the game
+				
+			# Game start logic
 			_game_started = true
 			_jump()
 			_direction = 1.0
@@ -434,6 +455,8 @@ func _handle_input() -> void:
 			if not is_grappling:
 				var best_nail: Interaction = _find_best_grapple_target()
 				if best_nail:
+					# Reset held latch on grapple start to prevent immediate re-release issues if sync is off? 
+					# No, keep it true as long as held.
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
 				else:
 					# No nails nearby, but trying to grapple - increase gravity

@@ -126,17 +126,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Only start on unhandled 'jump' events that occur after the scene is loaded
 	if not _accept_start_input:
 		return
-	if _has_started or _is_animating:
-		return
+		
 	if GameManager.current_state != GameManager.GameState.PLAYING:
 		# Ignore input if the game is paused or not in PLAYING state
 		return
 
 	if event.is_action_pressed("jump") and not event.is_echo():
-		_start_animation()
+		if _is_animating:
+			# Skip animation
+			_remove_start_icons()
+		elif not _has_started:
+			# Start animation
+			_start_animation()
 
 func _remove_start_icons() -> void:
 	if start_icons:
+		start_icons.visible = false # Hide immediately to prevent freeze frame
 		start_icons.queue_free()
 		start_icons = null
 		_is_animating = false
@@ -146,6 +151,7 @@ func _remove_start_icons() -> void:
 			hud.visible = true
 
 		# Add Enemy Spawner
+		# Preload or Load (Script load is fast, but visible=false handles the visual hitch)
 		var spawner_script = load("res://scripts/levels/enemy_spawner.gd")
 		if spawner_script:
 			var spawner = spawner_script.new()
