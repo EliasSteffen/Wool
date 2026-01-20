@@ -247,29 +247,48 @@ func _load_background_textures_from_folder() -> void:
 		dir.list_dir_end()
 
 func _cleanup_bg(cleanup_x: float) -> void:
-	var tiles_to_remove: Array[Sprite2D] = []
-	for tile in _background_tiles:
+	# Efficient cleanup: arrays are sorted by position.x
+	var remove_count: int = 0
+	
+	for i in range(_background_tiles.size()):
+		var tile = _background_tiles[i]
 		if not is_instance_valid(tile):
-			tiles_to_remove.append(tile)
+			remove_count += 1
 			continue
-		if tile.position.x < cleanup_x:
-			tiles_to_remove.append(tile)
 			
-	for tile in tiles_to_remove:
-		_background_tiles.erase(tile)
-		if is_instance_valid(tile):
+		# Check if the right edge of the tile is past the cleanup line
+		# Tile position is center or top-left? Based on spawn it's center.
+		# width is roughly _background_width
+		# To be safe, we check if position.x is well behind cleanup_x
+		if tile.position.x < cleanup_x:
 			tile.queue_free()
+			remove_count += 1
+		else:
+			break
+			
+	if remove_count > 0:
+		if remove_count >= _background_tiles.size():
+			_background_tiles.clear()
+		else:
+			_background_tiles = _background_tiles.slice(remove_count)
 
 func _cleanup_deco(cleanup_x: float) -> void:
-	var nodes_to_remove: Array[Sprite2D] = []
-	for node in _decoration_nodes:
+	var remove_count: int = 0
+	
+	for i in range(_decoration_nodes.size()):
+		var node = _decoration_nodes[i]
 		if not is_instance_valid(node):
-			nodes_to_remove.append(node)
+			remove_count += 1
 			continue
-		if node.position.x < cleanup_x:
-			nodes_to_remove.append(node)
 			
-	for node in nodes_to_remove:
-		_decoration_nodes.erase(node)
-		if is_instance_valid(node):
+		if node.position.x < cleanup_x:
 			node.queue_free()
+			remove_count += 1
+		else:
+			break
+			
+	if remove_count > 0:
+		if remove_count >= _decoration_nodes.size():
+			_decoration_nodes.clear()
+		else:
+			_decoration_nodes = _decoration_nodes.slice(remove_count)

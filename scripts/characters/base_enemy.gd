@@ -59,6 +59,16 @@ func die() -> void:
 	# Play death animation if available (TODO)
 	queue_free()
 
+func _process(delta: float) -> void:
+	# Cleanup if too far behind player
+	# We use a large buffer to ensure we don't despot eagles that are swooping
+	var player = get_tree().get_first_node_in_group("player")
+	if player and is_instance_valid(player):
+		# If we are more than 3000px behind the player, we are definitely off screen and safe to remove
+		if global_position.x < player.global_position.x - 3000.0:
+			queue_free()
+
+
 
 # === OVERRIDDEN METHODS ===
 

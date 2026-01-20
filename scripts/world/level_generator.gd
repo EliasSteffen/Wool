@@ -98,15 +98,30 @@ func _spawn_nail(pos: Vector2, scene: PackedScene) -> void:
 	_nails.append(nail)
 
 func _cleanup(cleanup_x: float) -> void:
-	var containers = []
-	if nails_container:
-		containers.append(nails_container)
-	if get_child_count() > 0:
-		containers.append(self)
+	# Optimization: Only check nails we track, instead of get_children()
+	# Because _nails is sorted by x position (creation order), we can stop 
+	# once we reach a nail that is still on screen.
+	
+	var nails_to_remove: int = 0
+	
+	for i in range(_nails.size()):
+		var nail = _nails[i]
+		if not is_instance_valid(nail):
+			nails_to_remove += 1
+			continue
+			
+		if nail.global_position.x < cleanup_x:
+			nail.queue_free()
+			nails_to_remove += 1
+		else:
+			# Since nails are added in order of X, if we reach one that is 
+			# within the screen/buffer, all subsequent ones are also safe.
+			break
+	
+	# Create a new array slice if we removed anything
+	if nails_to_remove > 0:
+		if nails_to_remove >= _nails.size():
+			_nails.clear()
+		else:
+			_nails = _nails.slice(nails_to_remove)
 
-	for container in containers:
-		for child in container.get_children():
-			if child is Node2D and child.global_position.x < cleanup_x:
-				if not child.is_queued_for_deletion():
-					_nails.erase(child)
-					child.queue_free()

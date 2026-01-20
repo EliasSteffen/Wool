@@ -95,6 +95,8 @@ func die() -> void:
 	# Slow motion effect
 	Engine.time_scale = 0.5
 
+
+
 	# Show Game Over Screen deferred to separate from physics step
 	call_deferred("_show_game_over_screen")
 
@@ -230,6 +232,10 @@ func _process(delta: float) -> void:
 		current_anim_state = new_state
 		_play_animation_for_state(current_anim_state)
 	# -------------------------------
+
+func _on_grapple_started(target: Vector2) -> void:
+	super._on_grapple_started(target)
+
 
 # === OVERRIDDEN METHODS ===
 

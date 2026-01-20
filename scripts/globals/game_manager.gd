@@ -128,6 +128,9 @@ func update_highscore(new_distance: int) -> void:
 	if new_distance > highscore:
 		highscore = new_distance
 		_save_highscore()
+		
+
+
 
 # === PRIVATE METHODS ===
 
