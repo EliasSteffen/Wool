@@ -25,6 +25,7 @@ func _ready() -> void:
 @onready var wool_instance: Node = $MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker/Wool
 @onready var score_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/ProgressBarContainer/WoolMarker/ScoreLabel
 @onready var end_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/EndLabel
+@onready var new_highscore_label: Label = $MarginContainer/VBoxContainer/NewHighscoreLabel
 var _move_tween: Tween = null
 
 var internal_wool_sprite: AnimatedSprite2D = null
@@ -40,6 +41,11 @@ func _setup_score_display(fade_duration: float) -> void:
 	
 	score_label.text = str(current_score) + "m"
 	end_label.text = str(highscore) + "m"
+	
+	if GameManager.new_highscore_reached_this_run:
+		if new_highscore_label:
+			new_highscore_label.visible = true
+	
 	
 	# Setup Wool Instance
 	if wool_instance:
@@ -97,6 +103,16 @@ func _setup_score_display(fade_duration: float) -> void:
 	
 	if total_width <= 0:
 		printerr("Game Over Error: ProgressBar width is 0!")
+	
+	# Start Highscore Animation now that layout is ready
+	if GameManager.new_highscore_reached_this_run and new_highscore_label:
+		# Ensure pivot is center for scaling
+		new_highscore_label.pivot_offset = new_highscore_label.size / 2.0
+		# Simple pulse animation
+		var pulse_tween = create_tween().set_loops()
+		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.1, 1.1), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
 	
 	if not internal_wool_sprite:
 		printerr("Game Over Error: Internal Wool Sprite not found on instance!")

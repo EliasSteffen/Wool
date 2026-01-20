@@ -20,6 +20,7 @@ var current_seed: int = 0
 var is_first_game_start: bool = true  # Track if this is the first time starting the game
 var highscore: int = 0
 var max_run_distance: int = 0
+var new_highscore_reached_this_run: bool = false
 
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
@@ -71,6 +72,7 @@ func start_game() -> void:
 	# Always generate a new seed for every session/restart to ensure new level layout
 	current_seed = randi()
 	max_run_distance = 0
+	new_highscore_reached_this_run = false
 	
 	# Reset tracking state to prevent reading old player position before scene change
 	_player_ref = null
@@ -126,6 +128,7 @@ func _hide_pause_menu() -> void:
 ## Update highscore if new distance is higher
 func update_highscore(new_distance: int) -> void:
 	if new_distance > highscore:
+		new_highscore_reached_this_run = true
 		highscore = new_distance
 		_save_highscore()
 		
