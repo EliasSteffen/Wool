@@ -35,6 +35,16 @@ func _ready() -> void:
 	if hitbox_area:
 		if not hitbox_area.body_entered.is_connected(_on_hitbox_body_entered):
 			hitbox_area.body_entered.connect(_on_hitbox_body_entered)
+			
+	GameManager.state_changed.connect(_on_game_state_changed)
+
+func _on_game_state_changed(new_state: int) -> void:
+	if new_state == GameManager.GameState.GAME_OVER:
+		_stop_audio()
+
+func _stop_audio() -> void:
+	# Override in specific enemies if they have audio
+	pass
 
 	pass
 

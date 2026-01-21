@@ -15,6 +15,43 @@ func _ready() -> void:
 	_start_x = global_position.x
 	
 	_jump()
+	_setup_sound()
+	_setup_visibility_notifier()
+
+var _sfx_fish: AudioStreamPlayer2D
+
+func _setup_sound() -> void:
+	_sfx_fish = AudioStreamPlayer2D.new()
+	_sfx_fish.stream = load("res://assets/sound/fish.mp3")
+	_sfx_fish.bus = "SFX"
+	_sfx_fish.max_distance = 1500.0
+	add_child(_sfx_fish)
+
+func _setup_visibility_notifier() -> void:
+	var notifier = VisibleOnScreenNotifier2D.new()
+	
+	# Dynamically calculate rect from sprite
+	var rect = Rect2(-50, -50, 100, 100) # Fallback
+
+	if skin and skin.has_node("AnimatedSprite2D"):
+		var sprite = skin.get_node("AnimatedSprite2D") as AnimatedSprite2D
+		if sprite:
+			var frames = sprite.sprite_frames
+			if frames and frames.has_animation(sprite.animation):
+				var texture = frames.get_frame_texture(sprite.animation, 0)
+				if texture:
+					var size = texture.get_size()
+					rect = Rect2(-size / 2.0, size)
+
+	notifier.rect = rect
+	add_child(notifier)
+	
+	notifier.screen_entered.connect(func():
+		if _sfx_fish: _sfx_fish.play()
+	)
+	notifier.screen_exited.connect(func():
+		if _sfx_fish: _sfx_fish.stop()
+	)
 
 func _process_ai(delta: float) -> void:
 	# BaseCharacter applies gravity in _process_physics.
@@ -24,6 +61,9 @@ func _process_ai(delta: float) -> void:
 		# Fish has returned to the water -> Die
 		die()
 
+func _stop_audio() -> void:
+	if _sfx_fish:
+		_sfx_fish.stop()
 func _jump() -> void:
 	# Recalculate or reuse jump velocity
 	# Target significantly above the top of the playable area for a high jump

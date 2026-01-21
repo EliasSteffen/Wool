@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://k54oxe2e6jp8"]
+[gd_scene load_steps=5 format=3 uid="uid://k54oxe2e6jp8"]
 
 [ext_resource type="Script" uid="uid://c6e48xdwtt75f" path="res://scripts/interactions/rusty_nail.gd" id="1_fmlgj"]
-[ext_resource type="Texture2D" uid="uid://bxwanr3xamxtc" path="res://assets/map/rusty_needle.png" id="2_fmlgj"]
+[ext_resource type="Texture2D" uid="uid://bix26ydel8f1s" path="res://assets/map/nails/rusty-back.png" id="2_gkfb2"]
+[ext_resource type="Texture2D" uid="uid://bs1dkjw07tme8" path="res://assets/map/nails/rusty-front.png" id="3_yhas0"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
 radius = 159.39886
@@ -14,10 +15,14 @@ script = ExtResource("1_fmlgj")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_detection")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(72, -54)
-rotation = 3.3039083
-scale = Vector2(0.16737558, 0.1673756)
-texture = ExtResource("2_fmlgj")
+[node name="back" type="Sprite2D" parent="."]
+position = Vector2(14.000001, 46)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("2_gkfb2")
+
+[node name="front" type="Sprite2D" parent="."]
+position = Vector2(14.000001, 42)
+scale = Vector2(0.75, 0.75)
+texture = ExtResource("3_yhas0")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]

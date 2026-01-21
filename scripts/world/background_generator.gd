@@ -96,6 +96,9 @@ func _ready() -> void:
 		_generate_deco_until(bg_gen_end)
 
 func _process(delta: float) -> void:
+	if GameManager.current_state == GameManager.GameState.GAME_OVER:
+		return
+
 	if not _player:
 		_player = get_tree().get_first_node_in_group("player")
 	if not _player or not _player.camera:

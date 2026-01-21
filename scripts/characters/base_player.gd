@@ -90,7 +90,9 @@ func die() -> void:
 	
 	# Haptic feedback on death (Mobile only)
 	_play_death_haptics()
-
+	
+	# Trigger global Game Over state
+	GameManager.game_over()
 
 	# Slow motion effect
 	Engine.time_scale = 0.5

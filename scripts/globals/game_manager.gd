@@ -12,7 +12,32 @@ signal rusty_nail_timer_updated(progress: float)
 signal rusty_nail_timer_stopped()
 
 # === ENUMS ===
-enum GameState { MENU, PLAYING, PAUSED }
+# === ENUMS ===
+enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
+
+# ...
+
+## Trigger Game Over state
+func game_over() -> void:
+	if current_state == GameState.GAME_OVER:
+		return
+	
+	current_state = GameState.GAME_OVER
+	state_changed.emit(current_state)
+	
+	# Stop enemies, generators, and audio logic can listen to this state/signal
+	AudioManager.play_sfx_die()
+	
+	# Note: BasePlayer handles the UI overlay itself currently, 
+	# but we should centralize or at least notify systems here.
+
+## Return to main menu
+func return_to_menu() -> void:
+	current_state = GameState.MENU
+	get_tree().paused = false
+	_hide_pause_menu()
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
+	state_changed.emit(current_state)
 
 # === PUBLIC VARIABLES ===
 var current_state: GameState = GameState.PLAYING
@@ -108,13 +133,7 @@ func toggle_pause() -> void:
 
 	state_changed.emit(current_state)
 
-## Return to main menu
-func return_to_menu() -> void:
-	current_state = GameState.MENU
-	get_tree().paused = false
-	_hide_pause_menu()
-	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
-	state_changed.emit(current_state)
+
 
 # === PRIVATE METHODS ===
 

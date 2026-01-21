@@ -15,6 +15,10 @@ run/main_scene="res://scenes/levels/level_1.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
 boot_splash/image="uid://c6ctd4lv5eere"
 
+[audio]
+
+buses/default_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 AudioManager="*res://scripts/globals/audio_manager.gd"
@@ -25,11 +29,6 @@ FeatureConstants="*res://scripts/features/constants.gd"
 InteractionConstants="*res://scripts/interactions/constants.gd"
 TerrainConstants="*res://scripts/terrain/constants.gd"
 WorldConstants="*res://scripts/world/constants.gd"
-
-
-[audio]
-
-buses/default_layout="res://default_bus_layout.tres"
 
 [display]
 
