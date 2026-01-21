@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://dyc68xp3u5p3y"]
+[gd_scene load_steps=5 format=3 uid="uid://dyc68xp3u5p3y"]
 
 [ext_resource type="Script" uid="uid://bdllnt34naubf" path="res://scripts/interactions/nail.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://t8wrf3cl8prd" path="res://assets/map/nail.png" id="2_4aftr"]
+[ext_resource type="Texture2D" uid="uid://dm8fvllj37kuc" path="res://assets/map/nails/normal-back.png" id="2_3v4ee"]
+[ext_resource type="Texture2D" uid="uid://djuarc1k2gjk5" path="res://assets/map/nails/normal-front.png" id="3_qgxsr"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
 radius = 159.39886
@@ -16,16 +17,14 @@ shape = SubResource("CircleShape2D_detection")
 
 [node name="BackSprite" type="Sprite2D" parent="."]
 z_index = -1
-position = Vector2(72, -56)
-rotation = 3.3039083
-scale = Vector2(0.167, 0.167)
-texture = ExtResource("2_4aftr")
+position = Vector2(3, 14)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_3v4ee")
 
 [node name="FrontSprite" type="Sprite2D" parent="."]
 z_index = 1
-position = Vector2(72, -56)
-rotation = 3.3039083
-scale = Vector2(0.167, 0.167)
-texture = ExtResource("2_4aftr")
+position = Vector2(3, 14)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_qgxsr")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]

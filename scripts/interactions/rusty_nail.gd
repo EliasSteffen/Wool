@@ -67,15 +67,23 @@ func _start_shake() -> void:
 	
 func _on_fall_timeout() -> void:
 	# Break/Fall logic
-	# For now just disable and fall
 	is_active = false
 	_is_falling = true
 	
-	# Physics fall using a simple translation or by enabling physics body?
-	# Let's just animate it falling down
+	# Visual Update: Toggle Sprites
+	var front = get_node_or_null(NODE_FRONT_SPRITE)
+	if front: front.visible = false
+		
+	var back = get_node_or_null(NODE_BACK_SPRITE)
+	if back: back.visible = false
+	
+	var falloff = get_node_or_null("FalloffSprite")
+	if falloff: falloff.visible = true
+	
 	if _shake_tween: _shake_tween.kill()
 	
 	var fall_tween = create_tween()
+	# Fall down
 	fall_tween.tween_property(self, "position:y", position.y + 1000, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	fall_tween.tween_callback(queue_free)
 	
