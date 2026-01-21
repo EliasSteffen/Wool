@@ -62,7 +62,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	# Check if the target nail is falling (for rusty nails)
-	if is_active() and _target_nail is RustyNail and (_target_nail as RustyNail)._is_falling:
+	if is_active() and is_instance_valid(_target_nail) and _target_nail is RustyNail and (_target_nail as RustyNail)._is_falling:
 		_release_without_boost = true
 		release()
 		return
@@ -93,13 +93,15 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 
 	if nail:
 		nail.set_used(true)
+		if nail.has_method("trigger"):
+			nail.trigger()
 
 	activate()
 	grapple_started.emit(target_position)
 
 ## Release the grapple
 func release() -> void:
-	if _target_nail:
+	if is_instance_valid(_target_nail):
 		_target_nail.set_used(false)
 
 	# Apply boost based on swing speed, but not if releasing due to falling nail
@@ -145,16 +147,16 @@ func handle_input(character: BaseCharacter) -> void:
 	# 	release()
 
 func _try_start_grapple(character: BaseCharacter) -> void:
-	var nail: Nail = _find_nearest_nail(character)
+	var nail: BaseNail = _find_nearest_nail(character)
 	if nail:
 		set_target(nail.get_grapple_point(), nail)
 
-func _find_nearest_nail(character: BaseCharacter) -> Nail:
-	var nearest: Nail = null
+func _find_nearest_nail(character: BaseCharacter) -> BaseNail:
+	var nearest: BaseNail = null
 	var nearest_distance: float = INF
 
 	for interaction in character.nearby_interactions:
-		var nail := interaction as Nail
+		var nail := interaction as BaseNail
 		if not nail:
 			continue
 

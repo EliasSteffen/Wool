@@ -79,6 +79,10 @@ func _generate_nails_in_range(start_x: float, end_x: float) -> void:
 			# Check distance to existing nails (from other segments)
 			var ok: bool = true
 			for nail in _nails:
+				# Check for validity first (rusty nails might have fallen)
+				if not is_instance_valid(nail):
+					continue
+				
 				# Reject if too close (use <= to be conservative)
 				if pos.distance_to(nail.global_position) <= current_min_distance:
 					ok = false
@@ -127,4 +131,3 @@ func _cleanup(cleanup_x: float) -> void:
 			_nails.clear()
 		else:
 			_nails = _nails.slice(nails_to_remove)
-

@@ -99,6 +99,9 @@ func _on_rusty_nail_timer_started(duration: float) -> void:
 	rusty_nail_timer_fill.offset_right = rusty_nail_timer.offset_right
 
 func _on_rusty_nail_timer_updated(progress: float) -> void:
+	if not rusty_nail_timer.visible:
+		rusty_nail_timer.visible = true
+	
 	# progress is 0..1 where 1 = timer finished
 	var total_width := rusty_nail_timer.offset_right - rusty_nail_timer.offset_left
 	var fill_width := total_width * (1.0 - progress)

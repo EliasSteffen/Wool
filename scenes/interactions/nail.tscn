@@ -14,7 +14,15 @@ script = ExtResource("1_script")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_detection")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="BackSprite" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(72, -56)
+rotation = 3.3039083
+scale = Vector2(0.167, 0.167)
+texture = ExtResource("2_4aftr")
+
+[node name="FrontSprite" type="Sprite2D" parent="."]
+z_index = 1
 position = Vector2(72, -56)
 rotation = 3.3039083
 scale = Vector2(0.167, 0.167)

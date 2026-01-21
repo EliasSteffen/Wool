@@ -256,10 +256,12 @@ func _update_pickaxe_visual() -> void:
 		return
 
 	var is_grappling: bool = grappling_feature and grappling_feature.is_active()
-	var current_nail: Nail = null
+	var current_nail: BaseNail = null
 
 	if is_grappling and grappling_feature:
-		current_nail = grappling_feature.get_target_nail() as Nail
+		var target = grappling_feature.get_target_nail()
+		if is_instance_valid(target) and target is BaseNail:
+			current_nail = target as BaseNail
 
 	if is_grappling and current_nail:
 		# Show pickaxe as rope stretching from player to nail
@@ -312,7 +314,7 @@ func _update_pickaxe_visual() -> void:
 
 		# Ensure visibility
 		pickaxe.visible = true
-		pickaxe.z_index = 10
+		pickaxe.z_index = 1 # Between Nail Back (0/-1) and Nail Front (2/1)
 	else:
 		# Restore initial state
 		if pickaxe:
@@ -505,7 +507,7 @@ func _find_best_grapple_target() -> Interaction:
 
 	# Use built-in nearby_interactions from BaseCharacter
 	for interaction in nearby_interactions:
-		if interaction is Nail and not interaction.is_being_used():
+		if interaction is BaseNail and not interaction.is_being_used():
 			var x_pos: float = interaction.global_position.x
 			# Choose the nail with the largest X (most forward)
 			if x_pos > best_x:
