@@ -18,6 +18,16 @@ func _ready() -> void:
 	_setup_sound()
 	_setup_visibility_notifier()
 
+func reset() -> void:
+	super.reset()
+	_start_y = global_position.y # Will be set after position update? No, position set before reset call usually? 
+	# Actually spawner sets position AFTER acquiring but BEFORE reset?
+	# In my spawner code: acquire -> set signal -> set position -> reset.
+	# So global_position is correct here.
+	_start_y = global_position.y
+	_start_x = global_position.x
+	_jump()
+
 var _sfx_fish: AudioStreamPlayer2D
 
 func _setup_sound() -> void:
@@ -58,8 +68,8 @@ func _process_ai(delta: float) -> void:
 	# We just need to check if we fell back to water level.
 	
 	if velocity.y > 0 and global_position.y >= _start_y:
-		# Fish has returned to the water -> Die
-		die()
+		# Fish has returned to the water -> Despawn
+		despawn_requested.emit(self)
 
 func _stop_audio() -> void:
 	if _sfx_fish:

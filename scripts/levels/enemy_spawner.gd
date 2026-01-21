@@ -26,7 +26,13 @@ var _fish_timer: float = 0.0
 var _player: Node2D = null
 var _spawn_counts: Dictionary = {}
 
+var _eagle_pool: ObjectPool
+var _fish_pool: ObjectPool
+
 func _ready() -> void:
+	_eagle_pool = ObjectPool.new(eagle_scene, get_parent(), 5)
+	_fish_pool = ObjectPool.new(fish_scene, get_parent(), 5)
+	
 	_reset_eagle_timer()
 	_reset_fish_timer()
 
@@ -62,32 +68,45 @@ func _reset_fish_timer() -> void:
 	_fish_timer = randf_range(fish_spawn_interval_min, fish_spawn_interval_max)
 
 func _spawn_eagle() -> void:
-	if not _player or not eagle_scene:
-		return
+	if not _player: return
 		
 	var spawn_x = _player.global_position.x + spawn_distance_x
 	var spawn_y = randf_range(eagle_spawn_height_max, eagle_spawn_height_min)
 	
-	var eagle = eagle_scene.instantiate()
+	var eagle = _eagle_pool.acquire()
+	if eagle.has_signal("despawn_requested"):
+		if not eagle.despawn_requested.is_connected(_on_enemy_despawn_requested):
+			eagle.despawn_requested.connect(_on_enemy_despawn_requested)
+			
 	eagle.global_position = Vector2(spawn_x, spawn_y)
+	
+	# Reset state?
+	if eagle.has_method("reset"): eagle.reset()
+	# Or manually reset velocity/etc if exposed.
+	# Ideally add reset() to BaseEnemy
 	
 	_add_enemy(eagle, "Eagle")
 
 func _spawn_fish() -> void:
-	if not _player or not fish_scene:
-		return
+	if not _player: return
 	
 	var spawn_x = _player.global_position.x + spawn_distance_x
 	var spawn_y = fish_spawn_y
 	
-	var fish = fish_scene.instantiate()
+	var fish = _fish_pool.acquire()
+	if fish.has_signal("despawn_requested"):
+		if not fish.despawn_requested.is_connected(_on_enemy_despawn_requested):
+			fish.despawn_requested.connect(_on_enemy_despawn_requested)
+			
 	fish.global_position = Vector2(spawn_x, spawn_y)
-	print("DEBUG: Fish spawned at ", fish.global_position)
+	if fish.has_method("reset"): fish.reset()
 	
+	print("DEBUG: Fish spawned at ", fish.global_position)
 	_add_enemy(fish, "Fish")
 
 func _add_enemy(enemy: Node, type_name: String) -> void:
-	get_parent().add_child.call_deferred(enemy)
+	# No longer adding child here as pool handles it, but we might need to call ready?
+	# ObjectPool adds child when creating. When acquiring, it just sets visible.
 	
 	# Initialize count for this type if not exists
 	if not _spawn_counts.has(type_name):
@@ -98,3 +117,10 @@ func _add_enemy(enemy: Node, type_name: String) -> void:
 	if _spawn_counts[type_name] <= 3:
 		if enemy.has_method("show_spawn_warning"):
 			enemy.call_deferred("show_spawn_warning")
+
+func _on_enemy_despawn_requested(enemy: Node) -> void:
+	# Determine which pool it belongs to based on type
+	if enemy is Eagle:
+		_eagle_pool.release(enemy)
+	elif enemy is Fish:
+		_fish_pool.release(enemy)

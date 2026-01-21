@@ -1,8 +1,10 @@
 class_name RustyNail
 extends BaseNail
 
-# Rusty Nail Logic
 @export var fall_delay: float = 3.0
+@export var min_fall_delay: float = 1
+@export var step_size: float = 2000.0 # Distance interval for difficulty increase
+@export var decay_percent: float = -0.1 # Decrease per step (negative)
 
 var _is_triggered: bool = false
 var _is_falling: bool = false
@@ -35,10 +37,30 @@ func trigger() -> void:
 	# Start Shake Effect
 	_start_shake()
 	
-	# Emit signal using GameManager
-	GameManager.rusty_nail_timer_started.emit(fall_delay)
+	# Calculate dynamic delay based on distance using ScaleUtils
+	var current_distance_px = GameManager.get_current_distance() * 10.0 # Convert meters back to pixels? 
+	# Actually GameManager.get_current_distance() returns meters (int). 
+	# ScaleUtils usually works on pixels or units. LevelGenerator uses X position (pixels).
+	# Let's use player global x position if possible, else use distance * 10.
+	# But wait, RustyNail is at a specific position. We should use ITS position!
+	var nail_x = global_position.x
+	# The distance traveled is roughly nail_x (since start is 0).
 	
+	var steps = ScaleUtils.steps_from_position(nail_x, step_size)
+	var scaler = ScaleUtils.scaled_value(fall_delay, decay_percent, steps)
+	var current_delay = max(scaler, min_fall_delay)
+	
+	print("DEBUG: Rusty Nail at %.0f px (Step %d). Delay: %.2f s" % [nail_x, steps, current_delay])
+	
+	# Emit signal using GameManager
+	GameManager.rusty_nail_timer_started.emit(current_delay)
+	
+	_fall_timer.wait_time = current_delay
 	_fall_timer.start()
+	
+	_current_active_delay = current_delay
+
+var _current_active_delay: float = 3.0
 
 var _was_used: bool = false
 
@@ -48,7 +70,7 @@ func _process(delta: float) -> void:
 		
 		if used:
 			var time_left = _fall_timer.time_left
-			var progress = 1.0 - (time_left / fall_delay)
+			var progress = 1.0 - (time_left / _current_active_delay)
 			GameManager.rusty_nail_timer_updated.emit(progress)
 		elif _was_used and not used:
 			# Just released - hide the timer

@@ -32,6 +32,7 @@ var _camera_width: float = 0.0
 
 var _last_bg_x: float = 0.0
 var _last_deco_x: float = 0.0
+var _last_camera_check_x: float = -1000.0
 
 var _background_tiles: Array[Sprite2D] = [] # Base background tiles
 # We track decoration nodes separately if needed, or just keep them in a list for cleanup
@@ -46,6 +47,8 @@ var _pattern_textures: Array[Texture2D] = []
 # Runtime-loaded textures from `background_folder`
 var _background_textures: Array[Texture2D] = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _decoration_pool: ObjectPool
+var _sprite_scene: PackedScene = preload("res://scenes/utils/pooled_sprite.tscn")
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
@@ -90,9 +93,12 @@ func _ready() -> void:
 		
 		# Initial generation
 		var bg_gen_end: float = 2.0 * _camera_width
-		_generate_bg_until(bg_gen_end)
 		
 		# Decor generation (needs its own coordination system)
+		# Initialize pool on the decoration layer
+		_decoration_pool = ObjectPool.new(_sprite_scene, decoration_layer, 50)
+		
+		_generate_bg_until(bg_gen_end)
 		_generate_deco_until(bg_gen_end)
 
 func _process(delta: float) -> void:
@@ -114,12 +120,22 @@ func _process(delta: float) -> void:
 	var camera = _player.camera
 	var visible_half_width = (_camera_width / 2.0) / camera.zoom.x
 	
+	# Optimization: Throttle updates
+	if abs(camera.global_position.x - _last_camera_check_x) < 100.0:
+		return
+	_last_camera_check_x = camera.global_position.x
+	
 	# --- Base Background Generation ---
 	var bg_layer_center_x = camera.global_position.x * parallax_factor_x
 	var bg_layer_right = bg_layer_center_x + visible_half_width
 	var bg_gen_end = bg_layer_right + _camera_width
 	
-	_generate_bg_until(bg_gen_end)
+	# Only generate one chunk per frame if behind
+	if _last_bg_x < bg_gen_end:
+		var chunk_w = _spawn_base_chunk(_last_bg_x)
+		if chunk_w <= 0.0: chunk_w = 1.0
+		_last_bg_x += chunk_w
+	
 	_cleanup_bg(bg_layer_center_x - visible_half_width - _background_width)
 
 	# --- Decoration Generation ---
@@ -127,7 +143,12 @@ func _process(delta: float) -> void:
 	var deco_layer_right = deco_layer_center_x + visible_half_width
 	var deco_gen_end = deco_layer_right + _camera_width
 	
-	_generate_deco_until(deco_gen_end)
+	# Only generate one chunk cell per frame if behind
+	if _last_deco_x < deco_gen_end:
+		var cell_size = 250.0
+		_spawn_deco_chunk(_last_deco_x, cell_size)
+		_last_deco_x += cell_size
+	
 	_cleanup_deco(deco_layer_center_x - visible_half_width - 500.0) # 500 buffer
 
 func _generate_bg_until(end_x: float) -> void:
@@ -191,7 +212,10 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 			
 		var cell_y = start_y + (row * cell_size)
 		
-		var dec_sprite = Sprite2D.new()
+		
+		var dec_sprite = _decoration_pool.acquire() as Sprite2D
+		# Reset properties
+		dec_sprite.offset = Vector2.ZERO
 		var use_fetzen = _rng.randf() > 0.5
 		var tex: Texture2D = null
 		
@@ -285,7 +309,7 @@ func _cleanup_deco(cleanup_x: float) -> void:
 			continue
 			
 		if node.position.x < cleanup_x:
-			node.queue_free()
+			_decoration_pool.release(node)
 			remove_count += 1
 		else:
 			break

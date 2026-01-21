@@ -15,16 +15,27 @@ const NAILS_PER_SEGMENT: int = 10
 var _player: Node2D = null
 var _camera_width: float = 0.0
 var _last_generated_x: float = 0.0
+var _last_camera_check_x: float = -1000.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var minimal_nail_distance: float = 256.0
 @export var step_size: float = 512.0
 @export var nail_distance_increase_percent: float = 0.01
 @export var max_min_nail_distance: float = 512.0
-@export var rusty_nail_probability: float = 0.1
-@export var rusty_nail_probability_increase_percent: float = 0.01
+@export var rusty_nail_probability: float = 0.01
+@export var rusty_nail_probability_increase_percent: float = 0.05
 var _nails: Array[Node2D] = []
+var _normal_nail_pool: ObjectPool
+var _rusty_nail_pool: ObjectPool
 
 func _ready() -> void:
+	# Initialize pools
+	if nails_container:
+		_normal_nail_pool = ObjectPool.new(nail_scene, nails_container, 20)
+		_rusty_nail_pool = ObjectPool.new(rusty_nail_scene, nails_container, 10)
+	else:
+		_normal_nail_pool = ObjectPool.new(nail_scene, self, 20)
+		_rusty_nail_pool = ObjectPool.new(rusty_nail_scene, self, 10)
+
 	# Initialize RNG with session seed from GameManager
 	_rng.seed = GameManager.current_seed
 
@@ -50,10 +61,20 @@ func _process(delta: float) -> void:
 
 	var camera_left_border = _player.camera.global_position.x - (_camera_width / 2.0) / _player.camera.zoom.x
 
-	# Generate ahead
-	while _last_generated_x < camera_left_border + 2.0 * _camera_width:
-		_generate_nails_in_range(_last_generated_x, _last_generated_x + _camera_width)
-		_last_generated_x += _camera_width
+	# Optimization: Only update generation checks if camera moved significantly
+	# This avoids checking arrays every single frame
+	if abs(camera_left_border - _last_camera_check_x) < 100.0:
+		return
+	_last_camera_check_x = camera_left_border
+
+	# Generate ahead in small chunks to distribute load
+	# Instead of filling the entire 2 * camera_width buffer in one go,
+	# we only generate a small slice per frame if needed.
+	if _last_generated_x < camera_left_border + 2.0 * _camera_width:
+		# Use a smaller chunk size (e.g. 512px) to avoid lag spikes
+		var chunk_size = 512.0
+		_generate_nails_in_range(_last_generated_x, _last_generated_x + chunk_size)
+		_last_generated_x += chunk_size
 
 	# Cleanup nails left from the camera
 	_cleanup(camera_left_border - 100.0)
@@ -91,16 +112,20 @@ func _generate_nails_in_range(start_x: float, end_x: float) -> void:
 			if ok:
 				var scene: PackedScene = nail_scene
 				var current_rusty_probability: float = rusty_nail_probability + steps * rusty_nail_probability_increase_percent
-				if _rng.randf() < current_rusty_probability:
-					scene = rusty_nail_scene
-				_spawn_nail(pos, scene)
+				var is_rusty = _rng.randf() < current_rusty_probability
+				
+				_spawn_nail(pos, is_rusty)
 
-func _spawn_nail(pos: Vector2, scene: PackedScene) -> void:
-	var nail = scene.instantiate()
-	if nails_container:
-		nails_container.add_child(nail)
+func _spawn_nail(pos: Vector2, is_rusty: bool) -> void:
+	var nail: Node2D
+	if is_rusty:
+		nail = _rusty_nail_pool.acquire()
+		# Reset rusty nail state if needed
+		if nail.has_method("reset"):
+			nail.reset()
 	else:
-		add_child(nail)
+		nail = _normal_nail_pool.acquire()
+	
 	nail.global_position = pos
 	_nails.append(nail)
 
@@ -118,7 +143,14 @@ func _cleanup(cleanup_x: float) -> void:
 			continue
 			
 		if nail.global_position.x < cleanup_x:
-			nail.queue_free()
+			# Identify type to release to correct pool
+			# This is a bit hacky, normally we'd store type info or have the nail know its pool
+			# But checking script/filename works
+			if nail.scene_file_path == rusty_nail_scene.resource_path:
+				_rusty_nail_pool.release(nail)
+			else:
+				_normal_nail_pool.release(nail)
+				
 			nails_to_remove += 1
 		else:
 			# Since nails are added in order of X, if we reach one that is 

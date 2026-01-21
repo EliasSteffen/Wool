@@ -381,7 +381,7 @@ func _calculate_all_movement_factors(delta: float) -> Vector2:
 	return total_factor
 
 ## Get the currently active grappling feature
-func _get_active_grappling() -> GrapplingFeature:
+func _get_active_grappling() -> Feature:
 	for feature in _features:
 		if feature is GrapplingFeature and feature.is_active():
 			return feature
@@ -398,7 +398,7 @@ func _apply_grapple_constraint(delta: float) -> void:
 		return
 
 	# Find active grappling feature
-	var grappling: GrapplingFeature = null
+	var grappling: Feature = null
 	for feature in _features:
 		if feature is GrapplingFeature and feature.is_active():
 			grappling = feature

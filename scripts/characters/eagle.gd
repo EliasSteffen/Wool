@@ -17,6 +17,12 @@ func _ready() -> void:
 	_setup_visibility_notifier()
 	_setup_sound()
 
+func reset() -> void:
+	super.reset()
+	velocity.x = -fly_speed
+	velocity.y = 0.0
+	_update_direction()
+
 func _setup_visibility_notifier() -> void:
 	var notifier = VisibleOnScreenNotifier2D.new()
 	
@@ -50,7 +56,9 @@ func _setup_visibility_notifier() -> void:
 	# This prevents immediate despawn since we spawn off-screen to the right.
 	notifier.screen_entered.connect(func(): 
 		# Once we enter the screen, we care about exiting it
-		notifier.screen_exited.connect(queue_free)
+		notifier.screen_exited.connect(func():
+			despawn_requested.emit(self)
+		)
 		notifier.screen_exited.connect(func(): if _sfx_eagle: _sfx_eagle.stop())
 		
 		# Play Sound

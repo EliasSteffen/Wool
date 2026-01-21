@@ -47,7 +47,7 @@ var _last_camera_x: float = -INF
 
 # === ONREADY VARIABLES ===
 @onready var camera: Camera2D = $Camera2D if has_node("Camera2D") else null
-@onready var grappling_feature: GrapplingFeature = get_feature_by_type(GrapplingFeature)
+@onready var grappling_feature: Feature = get_feature_by_type(GrapplingFeature)
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -486,7 +486,7 @@ func _update_rotation(delta: float) -> void:
 		return
 
 	# FIND Active Grappling Feature
-	var active_grappling_feature: GrapplingFeature = null
+	var active_grappling_feature: Feature = null
 	for feature in _features:
 		if feature is GrapplingFeature and feature.is_active():
 			active_grappling_feature = feature

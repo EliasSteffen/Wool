@@ -12,6 +12,7 @@ extends BaseCharacter
 # === SIGNALS ===
 signal target_acquired(target: Node2D)
 signal target_lost()
+signal despawn_requested(node: Node)
 
 # === EXPORTED VARIABLES ===
 # Removed exports in favor of Tweakables
@@ -50,6 +51,11 @@ func _stop_audio() -> void:
 
 
 # === PUBLIC METHODS ===
+
+func reset() -> void:
+	velocity = Vector2.ZERO
+	rotation = 0
+	process_mode = Node.PROCESS_MODE_INHERIT
 
 func show_spawn_warning() -> void:
 	# Add warning icon

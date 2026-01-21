@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b72jbir0354jh"
-path="res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.ctex"
+path.s3tc="res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.s3tc.ctex"
+path.etc2="res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/character/wool/walk.png"
-dest_files=["res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.ctex"]
+dest_files=["res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.s3tc.ctex", "res://.godot/imported/walk.png-f1b15322a35ac6db0b02cf57064b94e0.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

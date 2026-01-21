@@ -52,12 +52,23 @@ func play_sfx_die() -> void:
 	if not _sfx_die_stream: return
 	# Use a temporary player for SFX to not interrupt music (if desired, or just use sfx bus)
 	# Since AudioManager is a Node, we can just add a child or use a dedicated SFX player
-	var sfx_player = AudioStreamPlayer.new()
-	sfx_player.stream = _sfx_die_stream
-	sfx_player.bus = "SFX"
-	add_child(sfx_player)
-	sfx_player.finished.connect(sfx_player.queue_free)
-	sfx_player.play()
+	var player = _get_available_sfx_player()
+	player.stream = _sfx_die_stream
+	player.bus = "SFX"
+	player.play()
+
+var _sfx_pool: Array[AudioStreamPlayer] = []
+
+func _get_available_sfx_player() -> AudioStreamPlayer:
+	for p in _sfx_pool:
+		if not p.playing:
+			return p
+	
+	# Create new if none available
+	var new_player = AudioStreamPlayer.new()
+	add_child(new_player)
+	_sfx_pool.append(new_player)
+	return new_player
 
 # Deprecated shorthand, maps to main music
 func play_music() -> void:
