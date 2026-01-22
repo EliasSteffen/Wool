@@ -34,7 +34,7 @@ func _enforce_z_ordering() -> void:
     var front = get_node_or_null(NODE_FRONT_SPRITE)
     if front:
         front.z_index = 2 # Top Layer
-    
+
     # Wool's pickaxe uses Z-Index 1 to sit between them.
 
 func get_grapple_point() -> Vector2:
@@ -64,3 +64,6 @@ func get_detection_radius() -> float:
 # Virtual method for visual updates
 func _update_visual() -> void:
     pass
+
+func get_boost_multiplier() -> float:
+    return 1.0

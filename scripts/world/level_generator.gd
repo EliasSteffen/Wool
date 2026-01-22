@@ -2,6 +2,9 @@ extends Node2D
 
 @export var nail_scene: PackedScene = preload("res://scenes/interactions/nail.tscn")
 @export var rusty_nail_scene: PackedScene = preload("res://scenes/interactions/rusty_nail.tscn")
+@export var boost_nail_scene: PackedScene = preload("res://scenes/interactions/boost_nail.tscn")
+
+enum NailType { NORMAL, RUSTY, BOOST }
 
 ## Vertical generation range
 ## Vertical generation range
@@ -23,18 +26,22 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var max_min_nail_distance: float = 512.0
 @export var rusty_nail_probability: float = 0.01
 @export var rusty_nail_probability_increase_percent: float = 0.05
+@export var boost_nail_probability: float = 0.05
 var _nails: Array[Node2D] = []
 var _normal_nail_pool: ObjectPool
 var _rusty_nail_pool: ObjectPool
+var _boost_nail_pool: ObjectPool
 
 func _ready() -> void:
 	# Initialize pools
 	if nails_container:
 		_normal_nail_pool = ObjectPool.new(nail_scene, nails_container, 20)
 		_rusty_nail_pool = ObjectPool.new(rusty_nail_scene, nails_container, 10)
+		_boost_nail_pool = ObjectPool.new(boost_nail_scene, nails_container, 10)
 	else:
 		_normal_nail_pool = ObjectPool.new(nail_scene, self, 20)
 		_rusty_nail_pool = ObjectPool.new(rusty_nail_scene, self, 10)
+		_boost_nail_pool = ObjectPool.new(boost_nail_scene, self, 10)
 
 	# Initialize RNG with session seed from GameManager
 	_rng.seed = GameManager.current_seed
@@ -103,60 +110,70 @@ func _generate_nails_in_range(start_x: float, end_x: float) -> void:
 				# Check for validity first (rusty nails might have fallen)
 				if not is_instance_valid(nail):
 					continue
-				
+
 				# Reject if too close (use <= to be conservative)
 				if pos.distance_to(nail.global_position) <= current_min_distance:
 					ok = false
 					break
 
 			if ok:
-				var scene: PackedScene = nail_scene
 				var current_rusty_probability: float = rusty_nail_probability + steps * rusty_nail_probability_increase_percent
-				var is_rusty = _rng.randf() < current_rusty_probability
-				
-				_spawn_nail(pos, is_rusty)
 
-func _spawn_nail(pos: Vector2, is_rusty: bool) -> void:
+				var type: NailType = NailType.NORMAL
+
+				if _rng.randf() < current_rusty_probability:
+					type = NailType.RUSTY
+				elif _rng.randf() < boost_nail_probability:
+					type = NailType.BOOST
+
+				_spawn_nail(pos, type)
+
+func _spawn_nail(pos: Vector2, type: NailType) -> void:
 	var nail: Node2D
-	if is_rusty:
-		nail = _rusty_nail_pool.acquire()
-		# Reset rusty nail state if needed
-		if nail.has_method("reset"):
-			nail.reset()
-	else:
-		nail = _normal_nail_pool.acquire()
-	
+
+	match type:
+		NailType.RUSTY:
+			nail = _rusty_nail_pool.acquire()
+			if nail.has_method("reset"):
+				nail.reset()
+		NailType.BOOST:
+			nail = _boost_nail_pool.acquire()
+		_:
+			nail = _normal_nail_pool.acquire()
+
 	nail.global_position = pos
 	_nails.append(nail)
 
 func _cleanup(cleanup_x: float) -> void:
 	# Optimization: Only check nails we track, instead of get_children()
-	# Because _nails is sorted by x position (creation order), we can stop 
+	# Because _nails is sorted by x position (creation order), we can stop
 	# once we reach a nail that is still on screen.
-	
+
 	var nails_to_remove: int = 0
-	
+
 	for i in range(_nails.size()):
 		var nail = _nails[i]
 		if not is_instance_valid(nail):
 			nails_to_remove += 1
 			continue
-			
+
 		if nail.global_position.x < cleanup_x:
 			# Identify type to release to correct pool
 			# This is a bit hacky, normally we'd store type info or have the nail know its pool
 			# But checking script/filename works
 			if nail.scene_file_path == rusty_nail_scene.resource_path:
 				_rusty_nail_pool.release(nail)
+			elif nail.scene_file_path == boost_nail_scene.resource_path:
+				_boost_nail_pool.release(nail)
 			else:
 				_normal_nail_pool.release(nail)
-				
+
 			nails_to_remove += 1
 		else:
-			# Since nails are added in order of X, if we reach one that is 
+			# Since nails are added in order of X, if we reach one that is
 			# within the screen/buffer, all subsequent ones are also safe.
 			break
-	
+
 	# Create a new array slice if we removed anything
 	if nails_to_remove > 0:
 		if nails_to_remove >= _nails.size():

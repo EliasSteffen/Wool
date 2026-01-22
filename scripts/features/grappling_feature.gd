@@ -96,10 +96,10 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 		# Shadow Wool is removed from "player" group so it won't block re-use
 		if get_character() and get_character().is_in_group("player"):
 			nail.set_used(true)
-			
+
 		if nail.has_method("trigger"):
 			nail.trigger()
-	
+
 	activate()
 	grapple_started.emit(target_position)
 
@@ -118,7 +118,11 @@ func release() -> void:
 			var boost_factor: float = clamp(speed / max_swing_speed_for_boost, 0.0, 1.0)
 
 			if speed > 0:
-				var boost_vector: Vector2 = character.velocity.normalized() * max_boost_force * boost_factor
+				var multi: float = 1.0
+				if is_instance_valid(_target_nail) and _target_nail.has_method("get_boost_multiplier"):
+					multi = _target_nail.get_boost_multiplier()
+
+				var boost_vector: Vector2 = character.velocity.normalized() * max_boost_force * boost_factor * multi
 				character.velocity += boost_vector
 
 	# Reset the flag

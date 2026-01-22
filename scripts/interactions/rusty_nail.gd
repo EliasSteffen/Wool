@@ -2,7 +2,7 @@ class_name RustyNail
 extends BaseNail
 
 @export var fall_delay: float = 3.0
-@export var min_fall_delay: float = 1
+@export var min_fall_delay: float = 1.5
 @export var step_size: float = 2000.0 # Distance interval for difficulty increase
 @export var decay_percent: float = -0.1 # Decrease per step (negative)
 
@@ -33,31 +33,31 @@ func _setup_timer() -> void:
 func trigger() -> void:
 	if _is_triggered: return
 	_is_triggered = true
-	
+
 	# Start Shake Effect
 	_start_shake()
-	
+
 	# Calculate dynamic delay based on distance using ScaleUtils
-	var current_distance_px = GameManager.get_current_distance() * 10.0 # Convert meters back to pixels? 
-	# Actually GameManager.get_current_distance() returns meters (int). 
+	var current_distance_px = GameManager.get_current_distance() * 10.0 # Convert meters back to pixels?
+	# Actually GameManager.get_current_distance() returns meters (int).
 	# ScaleUtils usually works on pixels or units. LevelGenerator uses X position (pixels).
 	# Let's use player global x position if possible, else use distance * 10.
 	# But wait, RustyNail is at a specific position. We should use ITS position!
 	var nail_x = global_position.x
 	# The distance traveled is roughly nail_x (since start is 0).
-	
+
 	var steps = ScaleUtils.steps_from_position(nail_x, step_size)
 	var scaler = ScaleUtils.scaled_value(fall_delay, decay_percent, steps)
 	var current_delay = max(scaler, min_fall_delay)
-	
+
 	print("DEBUG: Rusty Nail at %.0f px (Step %d). Delay: %.2f s" % [nail_x, steps, current_delay])
-	
+
 	# Emit signal using GameManager
 	GameManager.rusty_nail_timer_started.emit(current_delay)
-	
+
 	_fall_timer.wait_time = current_delay
 	_fall_timer.start()
-	
+
 	_current_active_delay = current_delay
 
 var _current_active_delay: float = 3.0
@@ -67,7 +67,7 @@ var _was_used: bool = false
 func _process(delta: float) -> void:
 	if _is_triggered and not _is_falling:
 		var used = is_being_used()
-		
+
 		if used:
 			var time_left = _fall_timer.time_left
 			var progress = 1.0 - (time_left / _current_active_delay)
@@ -75,7 +75,7 @@ func _process(delta: float) -> void:
 		elif _was_used and not used:
 			# Just released - hide the timer
 			GameManager.rusty_nail_timer_stopped.emit()
-			
+
 		_was_used = used
 
 func _start_shake() -> void:
@@ -86,29 +86,29 @@ func _start_shake() -> void:
 	_shake_tween.tween_property(self, "position", position + Vector2(5,0), 0.05)
 	_shake_tween.tween_property(self, "position", position - Vector2(5,0), 0.05)
 	_shake_tween.tween_property(self, "position", position, 0.05)
-	
+
 func _on_fall_timeout() -> void:
 	# Break/Fall logic
 	is_active = false
 	_is_falling = true
-	
+
 	# Visual Update: Toggle Sprites
 	var front = get_node_or_null(NODE_FRONT_SPRITE)
 	if front: front.visible = false
-		
+
 	var back = get_node_or_null(NODE_BACK_SPRITE)
 	if back: back.visible = false
-	
+
 	var falloff = get_node_or_null("FalloffSprite")
 	if falloff: falloff.visible = true
-	
+
 	if _shake_tween: _shake_tween.kill()
-	
+
 	var fall_tween = create_tween()
 	# Fall down
 	fall_tween.tween_property(self, "position:y", position.y + 1000, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	fall_tween.tween_callback(queue_free)
-	
+
 	GameManager.rusty_nail_timer_stopped.emit()
 
 	# Break any active grapple (Player logic handles distance check, but we force release?)
@@ -118,17 +118,17 @@ func _update_visual() -> void:
 	var color = highlight_color if is_active else normal_color
 	# Only tint if desired, usually rusty nail has specific texture
 	# But highlighting is important
-	
+
 	var back = get_node_or_null(NODE_BACK_SPRITE) # e.g. "back" node name mapped to constant?
 	# RustyNail scene has "back" and "front" nodes (lowercase)
 	# We should rename them in the scene to match BaseNail "BackSprite", "FrontSprite"
 	# OR handle both names here.
-	
+
 	# Let's strictly rename scene nodes.
 	if back: back.modulate = color
 	var front = get_node_or_null(NODE_FRONT_SPRITE)
 	if front: front.modulate = color
-	
+
 	# Legacy Fallback
 	var legacy_back = get_node_or_null("back")
 	if legacy_back: legacy_back.modulate = color
