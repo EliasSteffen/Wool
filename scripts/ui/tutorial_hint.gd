@@ -157,21 +157,23 @@ func _run_unified_loop() -> void:
 	)
 	
 	# --- PHASE 6: RESTART ---
-	_loop_tween.tween_interval(1.5)
+	_loop_tween.tween_interval(2.5)
 	_loop_tween.tween_callback(func(): _run_unified_loop())
 
 func _reset_shadow_wool() -> void:
 	if not _shadow_wool: return
 	
+	# Update start position to match current player position perfectly
+	if _player_ref and is_instance_valid(_player_ref):
+		_start_pos = _player_ref.global_position
+		# Also match velocity to ensure seamless overlap if moving slightly
+		_shadow_wool.velocity = _player_ref.velocity
+	else:
+		_shadow_wool.velocity = Vector2.ZERO
+	
 	_shadow_wool.visible = false
 	_shadow_wool.global_position = _start_pos
 	_shadow_wool.rotation = 0
-	
-	# Match player velocity to prevent drift
-	if _player_ref and is_instance_valid(_player_ref):
-		_shadow_wool.velocity = _player_ref.velocity
-	else:
-		_shadow_wool.velocity = Vector2.ZERO 
 	
 	# Reset grapple state
 	if _shadow_wool.grappling_feature:

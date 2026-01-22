@@ -24,14 +24,14 @@ func _ready() -> void:
 	# We keep Layer 2 so Nails can detect us.
 	# We Mask Layer 1 so we stand on ground.
 	collision_mask = 1
-	
+
 	# Initial State
 	velocity = Vector2.ZERO
 	_game_started = true # Force game start mode so it runs physics logic
-	
-	# Disable sound effects to avoid spam?
-	# Or keep them for realism? "physics should be also the same" implies sound too?
-	# Keep sounds.
+
+func _setup_sounds() -> void:
+	# Do not create SFX players for Shadow Wool to keep it silent
+	pass
 
 func _unhandled_input(event: InputEvent) -> void:
 	pass # Ignore real input
@@ -43,6 +43,51 @@ func _get_jump_just_pressed() -> bool:
 
 func _get_jump_held() -> bool:
 	return _sim_jump_held
+
+func _handle_input() -> void:
+	# Override Wool's auto-run logic.
+	# We want ShadowWool to stay in place horizontally (unless it has momentum from player),
+	# but perform the vertical actions (Jump/Grapple).
+	
+	_direction = 0.0 # Prevent auto-run
+	
+	var input_just_pressed: bool = _get_jump_just_pressed()
+	var input_pressed: bool = _get_jump_held()
+
+	# 1. Ground Logic: Jump Only
+	if is_on_floor():
+		if input_just_pressed:
+			_jump()
+			# Simulate running jump momentum
+			velocity.x = move_speed
+
+	# 2. Air Logic: Grapple & Forward Movement
+	else:
+		# Move forward while in air
+		_direction = 1.0
+		
+		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
+
+		if input_pressed:
+			# HOLDING
+			if not is_grappling:
+				var best_nail: Interaction = _find_best_grapple_target()
+				if best_nail:
+					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
+					if sfx_hook: sfx_hook.play()
+				else:
+					_extra_gravity = gravity * 2.0
+			else:
+				_extra_gravity = 0.0
+		else:
+			# RELEASED
+			if is_grappling:
+				grappling_feature.release()
+				if sfx_boost: sfx_boost.play()
+
+			_extra_gravity = 0.0
+	
+	_vertical_direction = 0.0
 
 # === CONTROLS ===
 func sim_press_jump() -> void:
