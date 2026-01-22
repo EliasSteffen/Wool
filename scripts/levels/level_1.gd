@@ -15,6 +15,11 @@ var _is_animating: bool = false
 var _animation_speed: float = 800.0  # Pixels per second upward
 
 # Only accept start input after the scene has finished loading
+var _tutorial_hint_instance: Control = null
+var _tutorial_timer: float = 0.0
+var _waiting_for_input_after_icons: bool = false
+const TUTORIAL_HINT_SCENE = preload("res://scenes/ui/tutorial_hint.tscn")
+
 var _accept_start_input: bool = false
 
 func _ready() -> void:
@@ -39,6 +44,12 @@ func _process(delta: float) -> void:
 	# Try to find player if not found yet
 	if not player:
 		player = get_tree().get_first_node_in_group("player")
+
+	# Tutorial Hint Timer Logic
+	if _waiting_for_input_after_icons and not _tutorial_hint_instance:
+		_tutorial_timer += delta
+		if _tutorial_timer >= 2.0:
+			_show_tutorial_hint()
 
 	# Check for first input (handled in _unhandled_input) - see _unhandled_input implementation
 	# Note: We only accept unhandled events after the scene has loaded to avoid UI/pause interactions starting the game.
@@ -122,6 +133,15 @@ func _enable_start_input() -> void:
 	# Called deferred to ensure the scene has finished loading
 	_accept_start_input = true
 
+func _show_tutorial_hint() -> void:
+	if not TUTORIAL_HINT_SCENE: return
+	
+	_tutorial_hint_instance = TUTORIAL_HINT_SCENE.instantiate()
+	if hud:
+		hud.add_child(_tutorial_hint_instance)
+	else:
+		add_child(_tutorial_hint_instance)
+
 func _unhandled_input(event: InputEvent) -> void:
 	# Only start on unhandled 'jump' events that occur after the scene is loaded
 	if not _accept_start_input:
@@ -132,6 +152,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("jump") and not event.is_echo():
+		# Check tutorial dismissal
+		if _waiting_for_input_after_icons:
+			_waiting_for_input_after_icons = false
+			if _tutorial_hint_instance:
+				_tutorial_hint_instance.queue_free()
+				_tutorial_hint_instance = null
+
 		if _is_animating:
 			# Skip animation
 			_remove_start_icons()
@@ -149,6 +176,10 @@ func _remove_start_icons() -> void:
 		# Show HUD now that start icons are gone
 		if hud:
 			hud.visible = true
+			
+		# Start waiting for player input (Tutorial logic)
+		_waiting_for_input_after_icons = true
+		_tutorial_timer = 0.0
 
 		# Add Enemy Spawner
 		# Preload or Load (Script load is fast, but visible=false handles the visual hitch)
