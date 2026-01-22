@@ -24,12 +24,6 @@ func game_over() -> void:
 	
 	current_state = GameState.GAME_OVER
 	state_changed.emit(current_state)
-	
-	# Stop enemies, generators, and audio logic can listen to this state/signal
-	AudioManager.play_sfx_die()
-	
-	# Note: BasePlayer handles the UI overlay itself currently, 
-	# but we should centralize or at least notify systems here.
 
 ## Return to main menu
 func return_to_menu() -> void:

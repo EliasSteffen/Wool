@@ -28,4 +28,12 @@ func _on_body_entered(body: Node2D) -> void:
 		# Fish live in the water (kill zone), so they don't die there
 		if body is Fish:
 			return
+
+		# Don't play death sound if already dead (e.g. killed by enemy collision just before)
+		if body.has_method("is_dead") and body.is_dead():
+			return
+		if body.current_health <= 0:
+			return
+
+		AudioManager.play_sfx_die_to_void()
 		body.die()

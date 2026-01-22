@@ -79,10 +79,14 @@ func _ready() -> void:
 
 var _is_dead: bool = false
 
+func is_dead() -> bool:
+	return _is_dead
+
 func die() -> void:
 	if _is_dead:
 		return
 	_is_dead = true
+	current_health = 0 # Ensure health logic is consistent
 	
 	# Disable control
 	can_control = false
@@ -259,7 +263,8 @@ func _process_physics(delta: float) -> void:
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
-		if collider is BaseEnemy:
+		if collider is BaseEnemy and not _is_dead:
+			AudioManager.play_sfx_die_to_enemy()
 			take_damage(max_health)
 
 	_handle_input()
@@ -294,7 +299,9 @@ func _update_camera_and_bounds() -> void:
 	var left_edge = camera.global_position.x - half_width
 
 	# If player's X (plus some padding/margin if needed) is less than left_edge
-	if global_position.x < left_edge:
+	# And player is technically alive (to avoid double sounds if they die and camera stops/moves)
+	if not _is_dead and global_position.x < left_edge:
+		AudioManager.play_sfx_die_to_void()
 		die()
 
 func _play_death_haptics() -> void:

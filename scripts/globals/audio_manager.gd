@@ -3,7 +3,8 @@ extends Node
 var _music_player: AudioStreamPlayer
 var _main_music_stream: AudioStream
 var _credits_music_stream: AudioStream
-var _sfx_die_stream: AudioStream
+var _sfx_die_to_void_stream: AudioStream
+var _sfx_die_to_enemy_stream: AudioStream
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -22,9 +23,13 @@ func _ready() -> void:
 	if not _credits_music_stream:
 		printerr("AudioManager: Failed to load credits-music.mp3")
 
-	_sfx_die_stream = load("res://assets/sound/die.mp3")
-	if not _sfx_die_stream:
-		printerr("AudioManager: Failed to load die.mp3")
+	_sfx_die_to_void_stream = load("res://assets/sound/die-to-void.mp3")
+	if not _sfx_die_to_void_stream:
+		printerr("AudioManager: Failed to load die-to-void.mp3")
+
+	_sfx_die_to_enemy_stream = load("res://assets/sound/die-to-enemy.mp3")
+	if not _sfx_die_to_enemy_stream:
+		printerr("AudioManager: Failed to load die-to-enemy.mp3")
 
 func play_main_music() -> void:
 	if not _main_music_stream: return
@@ -48,12 +53,18 @@ func play_credits_music() -> void:
 	elif not _music_player.playing:
 		_music_player.play()
 
-func play_sfx_die() -> void:
-	if not _sfx_die_stream: return
-	# Use a temporary player for SFX to not interrupt music (if desired, or just use sfx bus)
-	# Since AudioManager is a Node, we can just add a child or use a dedicated SFX player
+
+func play_sfx_die_to_void() -> void:
+	if not _sfx_die_to_void_stream: return
 	var player = _get_available_sfx_player()
-	player.stream = _sfx_die_stream
+	player.stream = _sfx_die_to_void_stream
+	player.bus = "SFX"
+	player.play()
+
+func play_sfx_die_to_enemy() -> void:
+	if not _sfx_die_to_enemy_stream: return
+	var player = _get_available_sfx_player()
+	player.stream = _sfx_die_to_enemy_stream
 	player.bus = "SFX"
 	player.play()
 
