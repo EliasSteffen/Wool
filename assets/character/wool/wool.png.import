@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dwou74m318rb4"
-path="res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.ctex"
+path.s3tc="res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.s3tc.ctex"
+path.etc2="res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/character/wool/wool.png"
-dest_files=["res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.ctex"]
+dest_files=["res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.s3tc.ctex", "res://.godot/imported/wool.png-6284d426f34da8e8f0fde0898a7e1a44.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
