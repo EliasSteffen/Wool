@@ -423,11 +423,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _handle_input() -> void:
 	# 1. Unified Input Action: "jump" (Space / Touch / Click)
 	# We treat any main action as the single input.
-	# Using latched input from _unhandled_input to respect UI consumption
-	var input_just_pressed: bool = _input_jump_pressed_latched
-	_input_jump_pressed_latched = false # Reset latch
-	
-	var input_pressed: bool = _input_jump_held
+	# Using virtual methods to allow ShadowWool to override
+	var input_just_pressed: bool = _get_jump_just_pressed()
+	var input_pressed: bool = _get_jump_held()
 	
 	# Fallback for "Space" key if UI didn't consume it (optional redundancy)
 	# but strictly relying on unhandled_input is cleaner for UI blocking.
@@ -498,6 +496,16 @@ func _handle_input() -> void:
 
 	# 4. Vertical Input (Swim/Climb) - currently zeroed for one-button simplicity
 	_vertical_direction = 0.0
+
+# === VIRTUAL INPUT METHODS ===
+func _get_jump_just_pressed() -> bool:
+	var pressed = _input_jump_pressed_latched
+	_input_jump_pressed_latched = false
+	# Redundancy check only if we really want strict hybrid input
+	return pressed
+
+func _get_jump_held() -> bool:
+	return _input_jump_held
 
 
 

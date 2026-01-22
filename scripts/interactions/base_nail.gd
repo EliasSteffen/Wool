@@ -18,6 +18,7 @@ const NODE_GRAPPLE_POINT = "GrapplePoint"
 func _ready() -> void:
     super._ready()
     _enforce_z_ordering()
+    add_to_group("nails")
 
 func _setup_interaction() -> void:
     interaction_name = "BaseNail"

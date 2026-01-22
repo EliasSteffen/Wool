@@ -137,10 +137,19 @@ func _show_tutorial_hint() -> void:
 	if not TUTORIAL_HINT_SCENE: return
 	
 	_tutorial_hint_instance = TUTORIAL_HINT_SCENE.instantiate()
+	
+	# Pass context to tutorial hint
+	if player:
+		var start_pos = player.global_position
+		if _tutorial_hint_instance.has_method("setup"):
+			_tutorial_hint_instance.setup(start_pos, player)
+	
 	if hud:
 		hud.add_child(_tutorial_hint_instance)
 	else:
 		add_child(_tutorial_hint_instance)
+
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Only start on unhandled 'jump' events that occur after the scene is loaded
