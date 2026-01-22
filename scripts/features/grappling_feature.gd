@@ -92,17 +92,23 @@ func set_target(target_position: Vector2, nail: Interaction = null) -> void:
 	_animated_rope_length = fixed_rope_length
 
 	if nail:
-		nail.set_used(true)
+		# Only mark as used if the character is a real player
+		# Shadow Wool is removed from "player" group so it won't block re-use
+		if get_character() and get_character().is_in_group("player"):
+			nail.set_used(true)
+			
 		if nail.has_method("trigger"):
 			nail.trigger()
-
+	
 	activate()
 	grapple_started.emit(target_position)
 
 ## Release the grapple
 func release() -> void:
 	if is_instance_valid(_target_nail):
-		_target_nail.set_used(false)
+		# Only unmark if we are a real player (matching set_target logic)
+		if get_character() and get_character().is_in_group("player"):
+			_target_nail.set_used(false)
 
 	# Apply boost based on swing speed, but not if releasing due to falling nail
 	if not _release_without_boost:
