@@ -86,7 +86,13 @@ func _run_unified_loop() -> void:
 
 	# 1. Reset State
 	_reset_shadow_wool()
-	var screen_pos = _world_to_screen(_start_pos)
+	
+	# Fixed position: Center of bottom right quarter
+	# X = 3/4 Width
+	# Y = 3/4 Height (assuming 1/4 from bottom)
+	var vp_size = get_viewport_rect().size
+	var screen_pos = Vector2(vp_size.x * 0.75, vp_size.y * 0.75)
+	
 	_reset_visuals(screen_pos)
 	
 	# 2. Start Timeline
@@ -211,7 +217,9 @@ func _trigger_ripple() -> void:
 	_ripple_tween.parallel().tween_property(circle, "modulate:a", 0.0, 0.3).set_delay(0.1)
 
 func _reset_circle_state() -> void:
-	var screen_pos = _world_to_screen(_start_pos)
+	var vp_size = get_viewport_rect().size
+	var screen_pos = Vector2(vp_size.x * 0.75, vp_size.y * 0.75)
+	
 	circle.scale = Vector2.ONE * 0.25
 	circle.modulate.a = 0.0
 	# Recenter assuming scale 0.25
