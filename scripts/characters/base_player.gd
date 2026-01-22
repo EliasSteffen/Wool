@@ -53,7 +53,9 @@ var _last_camera_x: float = -INF
 func _ready() -> void:
 	super._ready()
 
-	add_to_group("player")
+	# Only add the real player to the group to avoid GameManager tracking tutorial ghosts
+	if _should_track_as_player():
+		add_to_group("player")
 
 	# Set floor snap length to ensure we stick to slopes
 	floor_snap_length = 32.0
@@ -87,14 +89,14 @@ func die() -> void:
 		return
 	_is_dead = true
 	current_health = 0 # Ensure health logic is consistent
-	
+
 	# Disable control
 	can_control = false
 	velocity = Vector2.ZERO
-	
+
 	# Haptic feedback on death (Mobile only)
 	_play_death_haptics()
-	
+
 	# Trigger global Game Over state
 	GameManager.game_over()
 
@@ -210,6 +212,9 @@ func _play_animation_for_state(state: PlayerState) -> void:
 func _update_skin_appearance() -> void:
 	# Virtual method to be overridden by subclasses
 	pass
+
+func _should_track_as_player() -> bool:
+	return true
 
 func _on_feature_enabled_changed(enabled: bool) -> void:
 	_update_skin_appearance()

@@ -1,3 +1,4 @@
+class_name ShadowWool
 extends Wool
 
 var _sim_jump_pressed: bool = false
@@ -7,16 +8,16 @@ func _ready() -> void:
 	# Do NOT call super._ready() immediately if we want to modify things before?
 	# Actually super._ready() does setup. We want that.
 	super._ready()
-	
+
 	# Remove from 'player' group to avoid interference
 	if is_in_group("player"):
 		remove_from_group("player")
-	
+
 	# Disable Camera
 	if camera:
 		camera.enabled = false
 		camera.queue_free()
-		
+
 	# Collision Layer Adjustment
 	# We want to collide with World (Layer 1) and Nails (Interaction?)
 	# But NOT Enemies (Layer ?)
@@ -48,9 +49,9 @@ func _handle_input() -> void:
 	# Override Wool's auto-run logic.
 	# We want ShadowWool to stay in place horizontally (unless it has momentum from player),
 	# but perform the vertical actions (Jump/Grapple).
-	
+
 	_direction = 0.0 # Prevent auto-run
-	
+
 	var input_just_pressed: bool = _get_jump_just_pressed()
 	var input_pressed: bool = _get_jump_held()
 
@@ -65,7 +66,7 @@ func _handle_input() -> void:
 	else:
 		# Move forward while in air
 		_direction = 1.0
-		
+
 		var is_grappling: bool = grappling_feature and grappling_feature.is_active()
 
 		if input_pressed:
@@ -86,7 +87,7 @@ func _handle_input() -> void:
 				if sfx_boost: sfx_boost.play()
 
 			_extra_gravity = 0.0
-	
+
 	_vertical_direction = 0.0
 
 # === CONTROLS ===
@@ -102,3 +103,6 @@ func die() -> void:
 	# Just vanish or reset?
 	# Tutorial controller handles reset loop.
 	pass
+
+func _should_track_as_player() -> bool:
+	return false
