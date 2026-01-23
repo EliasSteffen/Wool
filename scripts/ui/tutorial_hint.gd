@@ -92,7 +92,7 @@ func _run_unified_loop() -> void:
 	# X = 3/4 Width
 	# Y = 3/4 Height (assuming 1/4 from bottom)
 	var vp_size = get_viewport_rect().size
-	_touch_pos = Vector2(vp_size.x * 2/3, vp_size.y * 0.5)
+	_touch_pos = Vector2(vp_size.x * 1/2, vp_size.y * 1/2)
 
 	_reset_visuals(_touch_pos)
 

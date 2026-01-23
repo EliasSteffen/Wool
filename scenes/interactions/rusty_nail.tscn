@@ -18,14 +18,10 @@ shape = SubResource("CircleShape2D_detection")
 
 [node name="BackSprite" type="Sprite2D" parent="."]
 z_index = -1
-position = Vector2(4, 14)
-scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_gkfb2")
 
 [node name="FrontSprite" type="Sprite2D" parent="."]
 z_index = 1
-position = Vector2(4, 12)
-scale = Vector2(0.25, 0.25)
 texture = ExtResource("3_yhas0")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]

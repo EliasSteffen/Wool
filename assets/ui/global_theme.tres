@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://d3xsdcms6qxxe"]
+
+[ext_resource type="FontFile" uid="uid://p4e5pw2h615r" path="res://assets/font/MomoSignature-Regular.ttf" id="1_oi513"]
+
+[resource]
+default_font = ExtResource("1_oi513")
+default_font_size = 32

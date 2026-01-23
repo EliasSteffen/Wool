@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=5 format=3 uid="uid://376vm1l4n6fi"]
 
-[ext_resource type="Script" path="res://scripts/interactions/boost_nail.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://u2mjcank1xux" path="res://scripts/interactions/boost_nail.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://fjjhne10o8ly" path="res://assets/map/nails/boost-back.png" id="2_back"]
 [ext_resource type="Texture2D" uid="uid://datvyletdl06l" path="res://assets/map/nails/boost-front.png" id="3_front"]
 
@@ -17,14 +17,10 @@ shape = SubResource("CircleShape2D_detection")
 
 [node name="BackSprite" type="Sprite2D" parent="."]
 z_index = -1
-position = Vector2(3, 14)
-scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_back")
 
 [node name="FrontSprite" type="Sprite2D" parent="."]
 z_index = 1
-position = Vector2(3, 14)
-scale = Vector2(0.25, 0.25)
 texture = ExtResource("3_front")
 
 [node name="GrapplePoint" type="Marker2D" parent="."]

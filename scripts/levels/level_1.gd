@@ -48,7 +48,7 @@ func _process(delta: float) -> void:
 	# Tutorial Hint Timer Logic
 	if _waiting_for_input_after_icons and not _tutorial_hint_instance:
 		_tutorial_timer += delta
-		if _tutorial_timer >= 2.0:
+		if _tutorial_timer >= 1.5:
 			_show_tutorial_hint()
 
 	# Check for first input (handled in _unhandled_input) - see _unhandled_input implementation
@@ -135,15 +135,15 @@ func _enable_start_input() -> void:
 
 func _show_tutorial_hint() -> void:
 	if not TUTORIAL_HINT_SCENE: return
-	
+
 	_tutorial_hint_instance = TUTORIAL_HINT_SCENE.instantiate()
-	
+
 	# Pass context to tutorial hint
 	if player:
 		var start_pos = player.global_position
 		if _tutorial_hint_instance.has_method("setup"):
 			_tutorial_hint_instance.setup(start_pos, player)
-	
+
 	if hud:
 		hud.add_child(_tutorial_hint_instance)
 	else:
@@ -155,7 +155,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Only start on unhandled 'jump' events that occur after the scene is loaded
 	if not _accept_start_input:
 		return
-		
+
 	if GameManager.current_state != GameManager.GameState.PLAYING:
 		# Ignore input if the game is paused or not in PLAYING state
 		return
@@ -181,11 +181,11 @@ func _remove_start_icons() -> void:
 		start_icons.queue_free()
 		start_icons = null
 		_is_animating = false
-		
+
 		# Show HUD now that start icons are gone
 		if hud:
 			hud.visible = true
-			
+
 		# Start waiting for player input (Tutorial logic)
 		_waiting_for_input_after_icons = true
 		_tutorial_timer = 0.0
