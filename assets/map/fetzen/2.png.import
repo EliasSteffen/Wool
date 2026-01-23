@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ds33ur80whbul"
-path.s3tc="res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.s3tc.ctex"
-path.etc2="res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.etc2.ctex"
+uid="uid://cxu1cyr70pa7q"
+path="res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/map/fetzen/2.png"
-dest_files=["res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.s3tc.ctex", "res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.etc2.ctex"]
+dest_files=["res://.godot/imported/2.png-a757b7b626ce66fa4b3151216b4a16bb.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

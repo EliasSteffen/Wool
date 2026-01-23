@@ -1,7 +1,7 @@
 class_name BoostNail
 extends BaseNail
 
-@export var boost_multiplier: float = 4.0
+@export var boost_multiplier: float = 2.5
 
 func _setup_interaction() -> void:
 	interaction_name = "BoostNail"

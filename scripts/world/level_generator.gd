@@ -25,8 +25,8 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 @export var nail_distance_increase_percent: float = 0.01
 @export var max_min_nail_distance: float = 512.0
 @export var rusty_nail_probability: float = 0.01
-@export var rusty_nail_probability_increase_percent: float = 0.05
-@export var boost_nail_probability: float = 0.05
+@export var rusty_nail_probability_increase_percent: float = 0.01
+@export var boost_nail_probability: float = 0.1
 var _nails: Array[Node2D] = []
 var _normal_nail_pool: ObjectPool
 var _rusty_nail_pool: ObjectPool
