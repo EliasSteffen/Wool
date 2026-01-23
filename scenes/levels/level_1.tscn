@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
 [ext_resource type="Texture2D" uid="uid://bxhgg6u7b1yve" path="res://assets/map/platform.png" id="3_dga24"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
-[ext_resource type="Texture2D" uid="uid://c2127h3vkj61w" path="res://assets/ui/logo.png" id="8_dga24"]
+[ext_resource type="Texture2D" uid="uid://t6qqb0gaucwp" path="res://assets/ui/logo.png" id="8_dga24"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://hud1234568aa" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
@@ -53,7 +53,7 @@ position = Vector2(1266, -584)
 texture = ExtResource("8_dga24")
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(400, -240)
+position = Vector2(248, -240.00002)
 scale = Vector2(0.15, 0.15)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
@@ -67,4 +67,7 @@ script = ExtResource("10_gen")
 [node name="Nails" type="Node" parent="."]
 
 [node name="Nail" parent="." instance=ExtResource("7_oc4kc")]
+position = Vector2(584, -656)
+
+[node name="Nail2" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(736, -384)

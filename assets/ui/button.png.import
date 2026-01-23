@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d4l276sb1tv45"
-path.s3tc="res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.s3tc.ctex"
-path.etc2="res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.etc2.ctex"
+uid="uid://d1krmngeqewh7"
+path="res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/ui/button.png"
-dest_files=["res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.s3tc.ctex", "res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.etc2.ctex"]
+dest_files=["res://.godot/imported/button.png-473760ec7449fb30c95f607492aecb17.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

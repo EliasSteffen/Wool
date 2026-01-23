@@ -16,51 +16,32 @@ func _ready() -> void:
 	# Apply normal modern style to resume and ensure it sizes like other UI buttons
 	resume_button.custom_minimum_size = Vector2(resume_button.custom_minimum_size.x, 150)
 	UITheme.apply_modern_button_style(resume_button, Vector2(0, 150), false)
-	# Use Button's built-in icon + text features for consistent sizing
-	var play_icon: Texture2D = preload("res://assets/ui/play.svg")
-	resume_button.icon = play_icon
 	resume_button.text = "Resume"
-	# Ensure icon and text scale well for the button height
-	resume_button.add_theme_constant_override("icon_size", 64)
 	resume_button.add_theme_font_size_override("font_size", 36)
-	
+
 	# Reset Button style
 	reset_button.custom_minimum_size = Vector2(reset_button.custom_minimum_size.x, 150)
 	UITheme.apply_modern_button_style(reset_button, Vector2(0, 150), false)
-	# Reuse settings icon temporarily or use a trash icon if available, or just text
-	var reset_icon: Texture2D = preload("res://assets/ui/settings.svg") # Placeholder/Reuse
-	# Or try to load a specific delete/trash icon if user has one? User didn't specify.
-	# Using "play.svg" or "settings.svg" might be confusing.
-	# Let's see if we can find a clearer icon, otherwise default or reuse.
-	reset_button.icon = reset_icon
 	reset_button.text = "Reset Highscore"
-	reset_button.add_theme_constant_override("icon_size", 64)
 	reset_button.add_theme_font_size_override("font_size", 36)
 
 	# Settings button: use icon + text (matches Resume style)
 	settings_button.custom_minimum_size = Vector2(settings_button.custom_minimum_size.x, 150)
 	UITheme.apply_modern_button_style(settings_button, Vector2(0, 150), false)
-	var icon: Texture2D = preload("res://assets/ui/settings.svg")
-	settings_button.icon = icon
 	settings_button.text = "Settings"
-	settings_button.add_theme_constant_override("icon_size", 64)
 	settings_button.add_theme_font_size_override("font_size", 36)
 
 	register_buttons([resume_button, reset_button, settings_button, credits_button])
-	
+
 	setup_credits_button()
 
 func setup_credits_button() -> void:
 	credits_button.pressed.connect(_on_credits_pressed)
-	
+
 	credits_button.custom_minimum_size = Vector2(credits_button.custom_minimum_size.x, 150)
 	var UITheme = preload("res://scripts/ui/ui_theme.gd")
 	UITheme.apply_modern_button_style(credits_button, Vector2(0, 150), false)
-	# Reuse settings icon or similar if no specific icon
-	var icon: Texture2D = preload("res://assets/ui/settings.svg")
-	credits_button.icon = icon
 	credits_button.text = "Credits"
-	credits_button.add_theme_constant_override("icon_size", 64)
 	credits_button.add_theme_font_size_override("font_size", 36)
 
 func _on_credits_pressed() -> void:

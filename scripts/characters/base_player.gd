@@ -24,6 +24,7 @@ var acceleration: float
 var friction: float
 var jump_velocity: float
 var camera_zoom: float
+var fall_gravity_multiplier: float = 1.0
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
@@ -134,6 +135,7 @@ func _setup_tweakables() -> void:
 	acceleration = CharacterConstants.get_value("Player", "acceleration")
 	friction = CharacterConstants.get_value("Player", "friction")
 	jump_velocity = CharacterConstants.get_value("Player", "jump_velocity")
+	fall_gravity_multiplier = CharacterConstants.get_value("Player", "fall_gravity_multiplier")
 	camera_zoom = CharacterConstants.get_value("Player", "camera_zoom")
 
 	if camera:
@@ -151,6 +153,7 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 			"acceleration": acceleration = float(value)
 			"friction": friction = float(value)
 			"jump_velocity": jump_velocity = float(value)
+			"fall_gravity_multiplier": fall_gravity_multiplier = float(value)
 			"camera_zoom":
 				camera_zoom = float(value)
 				if camera:
@@ -246,6 +249,18 @@ func _process(delta: float) -> void:
 
 func _on_grapple_started(target: Vector2) -> void:
 	super._on_grapple_started(target)
+
+func _calculate_gravity(delta: float) -> float:
+	var g = super._calculate_gravity(delta)
+
+	# Apply multiplier if falling AND not grappling
+	# (Grappling ignores this to keep swing physics natural)
+	var is_grappling = grappling_feature and grappling_feature.is_active()
+	if velocity.y > 0 and not is_grappling:
+		return g * fall_gravity_multiplier
+
+	return g
+
 
 
 # === OVERRIDDEN METHODS ===

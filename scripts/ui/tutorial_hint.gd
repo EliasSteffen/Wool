@@ -132,12 +132,10 @@ func _run_unified_loop() -> void:
 	)
 
 	# --- PHASE 2: INTERVAL (0.4s - 0.6s) ---
-	# Hand Lifts (0.2s)
-	_loop_tween.tween_callback(func(): _animate_lift(0.2))
-	_loop_tween.tween_interval(0.2)
+	_loop_tween.tween_callback(func(): _animate_lift(0.5))
+	_loop_tween.tween_interval(0.5)
 
 	# --- PHASE 3: JUMP 2 PREP (0.6s - 0.7s) ---
-	# Hand Presses Again (0.1s)
 	_loop_tween.tween_callback(func(): _animate_press(0.1))
 	_loop_tween.tween_interval(0.1)
 
@@ -164,7 +162,7 @@ func _run_unified_loop() -> void:
 	)
 
 	# --- PHASE 6: RESTART ---
-	_loop_tween.tween_interval(2.5)
+	_loop_tween.tween_interval(3)
 	_loop_tween.tween_callback(func(): _run_unified_loop())
 
 func _reset_shadow_wool() -> void:
