@@ -7,7 +7,6 @@
 script = ExtResource("1_script")
 
 [node name="ExclamationMark" type="Sprite2D" parent="."]
-position = Vector2(-473, -469)
-rotation = -0.58070517
-scale = Vector2(0.47315374, 0.47315374)
+rotation = -0.5235988
+scale = Vector2(0.2, 0.2)
 texture = ExtResource("1_dmwk8")

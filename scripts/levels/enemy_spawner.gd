@@ -114,9 +114,9 @@ func _add_enemy(enemy: Node, type_name: String) -> void:
 
 	# Apply warning to the first few enemies of this specific type
 	_spawn_counts[type_name] += 1
-	if _spawn_counts[type_name] <= 3:
-		if enemy.has_method("show_spawn_warning"):
-			enemy.call_deferred("show_spawn_warning")
+
+	if enemy.has_method("show_spawn_warning"):
+		enemy.call_deferred("show_spawn_warning")
 
 func _on_enemy_despawn_requested(enemy: Node) -> void:
 	# Determine which pool it belongs to based on type

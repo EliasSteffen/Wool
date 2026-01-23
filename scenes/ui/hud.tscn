@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://c8ed53ok2tpnj" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Texture2D" uid="uid://dp2k86loldjoo" path="res://assets/ui/pointer.png" id="2_hqnrr"]
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" groups=["hud"]]
 script = ExtResource("1_hud")
 
 [node name="PauseButton" type="Button" parent="."]

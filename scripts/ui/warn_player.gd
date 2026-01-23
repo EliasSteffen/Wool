@@ -3,17 +3,62 @@ extends Node2D
 
 @onready var exclamation_mark: Sprite2D = $ExclamationMark
 
+var target: Node2D = null
+var margin: float = 50.0
+
 func _ready() -> void:
 	if exclamation_mark:
 		_start_pulsing()
-	
-	# Auto-destroy after 2 seconds
-	await get_tree().create_timer(2.0).timeout
-	queue_free()
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(target):
+		queue_free()
+		return
+
+	_update_position()
+
+func _update_position() -> void:
+	var viewport = get_viewport()
+	if not viewport:
+		return
+
+	var camera = viewport.get_camera_2d()
+	if not camera:
+		return
+
+	var screen_rect = viewport.get_visible_rect()
+	# Get target's position in screen coordinates relative to the viewport (CanvasLayer)
+	# Since this node will be in a CanvasLayer (HUD), (0,0) is top-left of screen.
+	# But target is in world space.
+
+	var canvas_transform = target.get_canvas_transform()
+	var screen_pos = canvas_transform * target.global_position
+
+	# Check if target is inside the screen OR on the left side
+	# User wants "Only show the exclamationmarks on the right edge"
+	# So if it's visible (inside) OR passed (left), we remove it.
+
+	if screen_pos.x <= screen_rect.end.x:
+		queue_free()
+		return
+
+	# Clamp position to screen edges
+	# X is always Right Edge
+	var clamped_x = screen_rect.end.x - margin
+	var clamped_y = clamp(screen_pos.y, screen_rect.position.y + margin, screen_rect.end.y - margin)
+
+	position = Vector2(clamped_x, clamped_y)
+
+	# Optional: Rotate to point towards the target off-screen center?
+	# Or just keep it upright. The user didn't ask for rotation but "Show ... where the enemy is".
+	# Placing it at the edge is "showing where".
+	# I will keep it upright for now as it Is an exclamation mark.
+	# If I were to rotate it, I'd need to rotate the parent or sprite.
+	# Let's keep it simple: Position on edge.
 
 func _start_pulsing() -> void:
 	var tween = create_tween().set_loops()
 	# Scale up
-	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale * 1.75, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	# Scale down (below original size)
-	tween.tween_property(exclamation_mark, "scale", exclamation_mark.scale * 0.5, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(exclamation_mark, "scale", Vector2(0.2, 0.2), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale down
+	tween.tween_property(exclamation_mark, "scale", Vector2(0.15, 0.15), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
