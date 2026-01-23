@@ -24,6 +24,7 @@ var _current_shape_animation: String = ""
 var _idle_timer: float = 0.0
 var _last_played_anim: String = ""
 var _extra_gravity: float = 0.0 # Extra gravity when trying to grapple without nails nearby
+var _ignore_hold_gravity: bool = false # Ignore hold input for fast-fall until first release
 
 # Pickaxe Grapple Configuration
 # Assign a Marker2D node here (e.g. child of Pickaxe) to visually define the grapple connection point.
@@ -413,12 +414,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Since we don't know for sure here and previous checks didn't show it for BasePlayer specifically,
 	# we omit super to avoid errors, unless we confirmed BasePlayer or GameManager logic needs it.
 	# (GameManager handles global input via its own process, not via Player's unhandled_input)
-	
+
 	if event.is_action_pressed("jump"):
 		_input_jump_pressed_latched = true
 		_input_jump_held = true
 	elif event.is_action_released("jump"):
 		_input_jump_held = false
+		_ignore_hold_gravity = false
 
 func _handle_input() -> void:
 	# 1. Unified Input Action: "jump" (Space / Touch / Click)
@@ -426,7 +428,7 @@ func _handle_input() -> void:
 	# Using virtual methods to allow ShadowWool to override
 	var input_just_pressed: bool = _get_jump_just_pressed()
 	var input_pressed: bool = _get_jump_held()
-	
+
 	# Fallback for "Space" key if UI didn't consume it (optional redundancy)
 	# but strictly relying on unhandled_input is cleaner for UI blocking.
 
@@ -436,17 +438,18 @@ func _handle_input() -> void:
 			# Check if start icons still exist - if yes, ignore this input (it's for the animation)
 			var level = get_parent()
 			var start_icons = level.get_node_or_null("Starticons") if level else null
-			
+
 			if start_icons and is_instance_valid(start_icons):
 				# Start icons still exist - this input is for the animation, not for jumping
 				return
-				
+
 			# Game start logic
 			_game_started = true
-			
+
 			# Ensure music overrides on first interaction (iOS fix)
 			AudioManager.play_main_music()
-			
+
+			_ignore_hold_gravity = true
 			_jump()
 			_direction = 1.0
 			velocity.x = move_speed # Instant burst to right
@@ -475,14 +478,18 @@ func _handle_input() -> void:
 			if not is_grappling:
 				var best_nail: Interaction = _find_best_grapple_target()
 				if best_nail:
-					# Reset held latch on grapple start to prevent immediate re-release issues if sync is off? 
+					# Reset held latch on grapple start to prevent immediate re-release issues if sync is off?
 					# No, keep it true as long as held.
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
 					# Play Hook Sound
 					if sfx_hook: sfx_hook.play()
 				else:
 					# No nails nearby, but trying to grapple - increase gravity
-					_extra_gravity = gravity * 2.0
+					# Only apply if we are not ignoring the hold (initial start hold)
+					if not _ignore_hold_gravity:
+						_extra_gravity = gravity * 2.0
+					else:
+						_extra_gravity = 0.0
 			else:
 				_extra_gravity = 0.0
 		else:

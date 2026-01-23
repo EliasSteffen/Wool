@@ -14,7 +14,7 @@ func _ready() -> void:
 	super._ready()
 	_start_y = global_position.y
 	_start_x = global_position.x
-	
+
 	_jump()
 	_setup_visibility_notifier()
 
@@ -26,7 +26,7 @@ func reset() -> void:
 
 func _setup_visibility_notifier() -> void:
 	var notifier = VisibleOnScreenNotifier2D.new()
-	
+
 	# Dynamically calculate rect from sprite
 	var rect = Rect2(-50, -50, 100, 100) # Fallback
 
@@ -42,22 +42,22 @@ func _setup_visibility_notifier() -> void:
 
 	notifier.rect = rect
 	add_child(notifier)
-	
+
 	# Audio handling moved to BaseEnemy
-	
+
 func _process_ai(delta: float) -> void:
 	# BaseCharacter applies gravity in _process_physics.
 	# We just need to check if we fell back to water level.
-	
+
 	if velocity.y > 0 and global_position.y >= _start_y:
 		# Fish has returned to the water -> Despawn
 		despawn_requested.emit(self)
 func _jump() -> void:
 	# Recalculate or reuse jump velocity
 	# Target significantly above the top of the playable area for a high jump
-	var target_y = GameManager.PLAYABLE_HEIGHT_TOP - 400.0
+	var target_y = GameManager.PLAYABLE_HEIGHT_TOP - 1000.0
 	var height_diff = _start_y - target_y
-	
+
 	if height_diff > 0:
 		var jump_velocity = sqrt(2.0 * gravity * height_diff)
 		velocity.y = -jump_velocity
