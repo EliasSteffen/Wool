@@ -64,19 +64,38 @@ var _current_active_delay: float = 3.0
 
 var _was_used: bool = false
 
+# Falling Variables
+var _fall_speed: float = 300.0
+var _wobble_freq: float = 5.0
+var _wobble_mag: float = 20.0
+var _fall_time: float = 0.0
+var _fall_start_x: float = 0.0
+
 func _process(delta: float) -> void:
 	if _is_triggered and not _is_falling:
 		var used = is_being_used()
-
 		if used:
 			var time_left = _fall_timer.time_left
 			var progress = 1.0 - (time_left / _current_active_delay)
 			GameManager.rusty_nail_timer_updated.emit(progress)
 		elif _was_used and not used:
-			# Just released - hide the timer
 			GameManager.rusty_nail_timer_stopped.emit()
-
 		_was_used = used
+
+	# Falling Logic
+	if _is_falling:
+		_fall_time += delta
+
+		# Vertical Movement
+		position.y += _fall_speed * delta
+
+		# Horizontal Sine Wave
+		var offset_x = sin(_fall_time * _wobble_freq) * _wobble_mag
+		position.x = _fall_start_x + offset_x
+
+		# Cleanup if too far down
+		if _fall_time > 3.0:
+			queue_free()
 
 func _start_shake() -> void:
 	if _shake_tween: _shake_tween.kill()
@@ -91,6 +110,7 @@ func _on_fall_timeout() -> void:
 	# Break/Fall logic
 	is_active = false
 	_is_falling = true
+	_fall_start_x = position.x # Store initial X for sine wave center
 
 	# Visual Update: Toggle Sprites
 	var front = get_node_or_null(NODE_FRONT_SPRITE)
@@ -99,20 +119,21 @@ func _on_fall_timeout() -> void:
 	var back = get_node_or_null(NODE_BACK_SPRITE)
 	if back: back.visible = false
 
+	# Try legacy nodes if standard ones fail, just in case
+	if not front:
+		var lf = get_node_or_null("front")
+		if lf: lf.visible = false
+	if not back:
+		var lb = get_node_or_null("back")
+		if lb: lb.visible = false
+
 	var falloff = get_node_or_null("FalloffSprite")
 	if falloff: falloff.visible = true
 
 	if _shake_tween: _shake_tween.kill()
 
-	var fall_tween = create_tween()
-	# Fall down
-	fall_tween.tween_property(self, "position:y", position.y + 1000, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	fall_tween.tween_callback(queue_free)
-
 	GameManager.rusty_nail_timer_stopped.emit()
 
-	# Break any active grapple (Player logic handles distance check, but we force release?)
-	# The player checks if target is valid usually.
 
 func _update_visual() -> void:
 	var color = highlight_color if is_active else normal_color

@@ -33,20 +33,23 @@ var internal_wool_sprite: AnimatedSprite2D = null
 func _setup_score_display(fade_duration: float) -> void:
 	if not score_display:
 		return
-	
+
 	_setup_styles()
-		
+
 	var current_score = GameManager.max_run_distance
 	var highscore = max(GameManager.highscore, current_score) # Ensure highscore is at least current score
-	
+
 	score_label.text = str(current_score) + "m"
 	end_label.text = str(highscore) + "m"
-	
+
 	if GameManager.new_highscore_reached_this_run:
 		if new_highscore_label:
 			new_highscore_label.visible = true
-	
-	
+		# Hide the moving score label as requested, since end_label shows the same value
+		if score_label:
+			score_label.visible = false
+
+
 	# Setup Wool Instance
 	if wool_instance:
 		# Disable physics and game logic for this UI instance
@@ -58,52 +61,52 @@ func _setup_score_display(fade_duration: float) -> void:
 		# Neuter the instance (Prevent interaction with world)
 		if wool_instance.is_in_group("player"):
 			wool_instance.remove_from_group("player")
-		
+
 		# Disable Collisions
 		if wool_instance is CollisionObject2D:
 			wool_instance.collision_layer = 0
 			wool_instance.collision_mask = 0
-			
+
 		# Remove Camera (Prevent stealing focus)
 		var cam = wool_instance.get_node_or_null("Camera2D")
 		if cam:
 			cam.queue_free()
-		
+
 		# Find the internal AnimatedSprite2D to animate it
 		var skin = wool_instance.get_node_or_null("Skin")
 		if skin:
 			internal_wool_sprite = skin.get_node_or_null("AnimatedSprite2D")
-			
+
 		if internal_wool_sprite:
 			internal_wool_sprite.play("idle")
-	
+
 	# Calculate ratio (0.0 to 1.0)
 	var ratio = 0.0
 	if highscore > 0:
 		ratio = float(current_score) / float(highscore)
-	
+
 	# Clamp ratio just in case
 	ratio = clampf(ratio, 0.0, 1.0)
-	
+
 	# Initial State
 	wool_marker.position.x = 0
 	line_fill.size.x = 0
-	
+
 	# Wait for layout to determine width
 	# We loop a few times to ensure layout has propagated
 	var retries = 0
 	while progress_container.size.x <= 0 and retries < 10:
 		await get_tree().process_frame
 		retries += 1
-	
+
 	var total_width = progress_container.size.x
 	var target_x = total_width * ratio
-	
+
 	print("Game Over Debug: Score=", current_score, " MaxWidth=", total_width, " TargetX=", target_x, " Ratio=", ratio)
-	
+
 	if total_width <= 0:
 		printerr("Game Over Error: ProgressBar width is 0!")
-	
+
 	# Start Highscore Animation now that layout is ready
 	if GameManager.new_highscore_reached_this_run and new_highscore_label:
 		# Ensure pivot is center for scaling
@@ -113,26 +116,26 @@ func _setup_score_display(fade_duration: float) -> void:
 		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.1, 1.1), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
-	
+
 	if not internal_wool_sprite:
 		printerr("Game Over Error: Internal Wool Sprite not found on instance!")
-	
+
 	# Animation
 	_move_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_move_tween.finished.connect(func(): 
+	_move_tween.finished.connect(func():
 		_move_tween = null
 		_can_interact = true
 	)
-	
+
 	# Start moving after start delay
 	_move_tween.tween_interval(fade_duration * 0.5)
-	
+
 	# Start Walk Animation callback
 	_move_tween.tween_callback(func():
 		if internal_wool_sprite:
 			internal_wool_sprite.play("walk")
 	)
-	
+
 	# Parallel movement, fill, and text counting
 	_move_tween.set_parallel(true)
 	_move_tween.tween_property(wool_marker, "position:x", target_x, 2.0)
@@ -140,7 +143,7 @@ func _setup_score_display(fade_duration: float) -> void:
 	# Animate the score counting up
 	_move_tween.tween_method(_update_score_text, 0, current_score, 2.0)
 	_move_tween.set_parallel(false)
-	
+
 	# End callback
 	_move_tween.tween_callback(func():
 		if internal_wool_sprite:
@@ -153,37 +156,37 @@ func _update_score_text(value: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	
+
 	if (event is InputEventKey and event.pressed) or \
 	   (event is InputEventMouseButton and event.pressed) or \
 	   (event is InputEventScreenTouch and event.pressed) or \
 	   (event is InputEventJoypadButton and event.pressed):
-		
+
 		# If animating, skip animation
 		if _move_tween and _move_tween.is_valid():
 			_move_tween.kill()
 			_move_tween = null
-			
+
 			# Snap to final values
 			var current_score = GameManager.max_run_distance
 			var highscore = max(GameManager.highscore, current_score)
 			var ratio = 0.0
 			if highscore > 0: ratio = float(current_score) / float(highscore)
 			ratio = clampf(ratio, 0.0, 1.0)
-			
+
 			if progress_container and progress_container.size.x > 0:
 				var target_x = progress_container.size.x * ratio
 				wool_marker.position.x = target_x
 				line_fill.size.x = target_x
-			
+
 			_update_score_text(current_score)
-			
+
 			if internal_wool_sprite:
 				internal_wool_sprite.play("idle")
-				
+
 			_can_interact = true
 			return # Don't restart yet
-		
+
 		# If not animating (canceled or finished), check if we can restart
 		if _can_interact:
 			_restart_game()
@@ -206,14 +209,14 @@ func _restart_game() -> void:
 func _setup_styles() -> void:
 	# Configure Rounded Corners (10px radius for 20px height)
 	var radius = 10
-	
+
 	# Line Base (Background)
 	if line_base:
 		var style_base = StyleBoxFlat.new()
 		style_base.bg_color = Color(1, 1, 1, 0.3)
 		style_base.set_corner_radius_all(radius)
 		line_base.add_theme_stylebox_override("panel", style_base)
-		
+
 	# Line Fill (Foreground)
 	if line_fill:
 		var style_fill = StyleBoxFlat.new()

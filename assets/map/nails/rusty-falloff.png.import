@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ca82g0ihw07wn"
-path.s3tc="res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.s3tc.ctex"
-path.etc2="res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.etc2.ctex"
+uid="uid://cxj0sa7qw2dt"
+path="res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/map/nails/rusty-falloff.png"
-dest_files=["res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.s3tc.ctex", "res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.etc2.ctex"]
+dest_files=["res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6acaec112.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -6,6 +6,7 @@ extends CanvasLayer
 @onready var rusty_nail_timer: Control = $RustyNailTimer
 @onready var rusty_nail_timer_bg: Panel = $RustyNailTimer/Background
 @onready var rusty_nail_timer_fill: Panel = $RustyNailTimer/Fill
+@onready var off_screen_indicator: TextureRect = $OffScreenIndicator
 
 var player: BasePlayer = null
 
@@ -84,6 +85,9 @@ func _process(delta: float) -> void:
 			# Initialize highscore display
 			highscore_label.text = str(GameManager.highscore) + "m"
 
+	if player:
+		_update_off_screen_indicator()
+
 	if current_distance_label:
 		var distance_meters: int = GameManager.max_run_distance
 		current_distance_label.text = str(distance_meters) + "m"
@@ -101,14 +105,14 @@ func _on_rusty_nail_timer_started(duration: float) -> void:
 func _on_rusty_nail_timer_updated(progress: float) -> void:
 	if not rusty_nail_timer.visible:
 		rusty_nail_timer.visible = true
-	
+
 	# progress is 0..1 where 1 = timer finished
 	var total_width := rusty_nail_timer.offset_right - rusty_nail_timer.offset_left
 	var fill_width := total_width * (1.0 - progress)
 	var half := fill_width * 0.5
 	rusty_nail_timer_fill.offset_left = -half
 	rusty_nail_timer_fill.offset_right = half
-	
+
 	# Update color: White -> Red as it progresses
 	var sb = rusty_nail_timer_fill.get_theme_stylebox("panel") as StyleBoxFlat
 	if sb:
@@ -120,3 +124,34 @@ func _on_rusty_nail_timer_stopped() -> void:
 func _on_game_state_changed(state: int) -> void:
 	# GameManager handles distance reset internally when player resets
 	pass
+
+func _update_off_screen_indicator() -> void:
+	if not off_screen_indicator:
+		return
+
+	# Get player screen position
+	var screen_pos = player.get_global_transform_with_canvas().origin
+	var viewport_rect = get_viewport().get_visible_rect()
+
+	# Margin to keep the arrow fully on screen (approx half icon size)
+	# Margin to keep the arrow fully on screen
+	var margin = 50.0
+
+	# Only show if player is ABOVE the screen (y < 0)
+	if screen_pos.y >= 0:
+		# Player is visible OR below screen
+		off_screen_indicator.visible = false
+	else:
+		# Player is off-screen (ABOVE)
+		off_screen_indicator.visible = true
+
+		# Clamp X position to screen edges with margin, FIX Y to top margin
+		var clamped_x = clamp(screen_pos.x, viewport_rect.position.x + margin, viewport_rect.end.x - margin)
+		var clamped_y = viewport_rect.position.y + margin
+
+		off_screen_indicator.position = Vector2(clamped_x, clamped_y) - off_screen_indicator.pivot_offset
+
+		# Rotate to point at player
+		# Adjusted to + PI / 2.0 based on request "rotated by 180" relative to last fix (-PI/2).
+		var to_player = screen_pos - Vector2(clamped_x, clamped_y)
+		off_screen_indicator.rotation = to_player.angle() - PI / 2.0 + PI
