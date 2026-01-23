@@ -17,8 +17,13 @@ texture_margin_bottom = 100.0
 [resource]
 default_font = ExtResource("1_oi513")
 default_font_size = 32
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_focus_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
 Button/styles/disabled = SubResource("StyleBoxTexture_btn")
 Button/styles/focus = SubResource("StyleBoxTexture_btn")
 Button/styles/hover = SubResource("StyleBoxTexture_btn")
 Button/styles/normal = SubResource("StyleBoxTexture_btn")
 Button/styles/pressed = SubResource("StyleBoxTexture_btn")
+Label/colors/font_color = Color(0, 0, 0, 1)
