@@ -1,7 +1,16 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://d3xsdcms6qxxe"]
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://d3xsdcms6qxxe"]
 
 [ext_resource type="FontFile" uid="uid://p4e5pw2h615r" path="res://assets/font/MomoSignature-Regular.ttf" id="1_oi513"]
+[ext_resource type="Texture2D" uid="uid://d1krmngeqewh7" path="res://assets/ui/button.png" id="2_btn_bg"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn"]
+texture = ExtResource("2_btn_bg")
 
 [resource]
 default_font = ExtResource("1_oi513")
 default_font_size = 32
+Button/styles/disabled = SubResource("StyleBoxTexture_btn")
+Button/styles/focus = SubResource("StyleBoxTexture_btn")
+Button/styles/hover = SubResource("StyleBoxTexture_btn")
+Button/styles/normal = SubResource("StyleBoxTexture_btn")
+Button/styles/pressed = SubResource("StyleBoxTexture_btn")

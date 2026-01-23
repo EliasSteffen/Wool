@@ -1,7 +1,7 @@
 [gd_scene load_steps=12 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
-[ext_resource type="Texture2D" uid="uid://bxhgg6u7b1yve" path="res://assets/map/platform.png" id="3_dga24"]
+[ext_resource type="Texture2D" uid="uid://cpts61gy6cmd7" path="res://assets/map/platform.png" id="3_dga24"]
 [ext_resource type="PackedScene" uid="uid://dyc68xp3u5p3y" path="res://scenes/interactions/nail.tscn" id="7_oc4kc"]
 [ext_resource type="Texture2D" uid="uid://t6qqb0gaucwp" path="res://assets/ui/logo.png" id="8_dga24"]
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://cdelytkcd0lhe" path="res://scripts/world/background_generator.gd" id="12_bg_gen"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
-size = Vector2(752, 376)
+size = Vector2(632, 224)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_excbq"]
 size = Vector2(240, 7184)
@@ -32,12 +32,11 @@ script = ExtResource("12_bg_gen")
 
 [node name="platform" type="Sprite2D" parent="Platforms/StartPlatform"]
 z_index = -1
-position = Vector2(167.99998, 16)
-scale = Vector2(0.5, 0.5)
+position = Vector2(1152, -504)
 texture = ExtResource("3_dga24")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform"]
-position = Vector2(144, 36)
+position = Vector2(204, -56)
 shape = SubResource("RectangleShape2D_oc4kc")
 
 [node name="Left Border" type="StaticBody2D" parent="Platforms"]
@@ -53,7 +52,7 @@ position = Vector2(1266, -584)
 texture = ExtResource("8_dga24")
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(248, -240.00002)
+position = Vector2(216.00002, -240.00002)
 scale = Vector2(0.15, 0.15)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
