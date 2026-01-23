@@ -157,9 +157,10 @@ func _run_unified_loop() -> void:
 
 		# Visual Release
 		_animate_lift(0.2)
-		var t = create_tween()
-		t.tween_property(hand, "modulate:a", 0.0, 0.2)
 	)
+	_loop_tween.parallel().tween_property(hand, "modulate:a", 0.0, 0.5)
+	if _shadow_wool:
+		_loop_tween.parallel().tween_property(_shadow_wool, "modulate:a", 0.0, 0.5).set_delay(1.0)
 
 	# --- PHASE 6: RESTART ---
 	_loop_tween.tween_interval(3)
@@ -179,6 +180,7 @@ func _reset_shadow_wool() -> void:
 	_shadow_wool.visible = false
 	_shadow_wool.global_position = _start_pos
 	_shadow_wool.rotation = 0
+	_shadow_wool.modulate.a = 0.5
 
 	# Reset grapple state
 	if _shadow_wool.grappling_feature:
