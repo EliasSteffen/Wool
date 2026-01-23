@@ -54,7 +54,7 @@ func _create_shadow_wool() -> void:
 
 	_shadow_wool = WOOL_SCENE.instantiate()
 	_shadow_wool.modulate = Color(1, 1, 1, 0.5)
-	_shadow_wool.z_index = 10
+	_shadow_wool.z_index = 0
 
 	# Attach Shadow Script logic
 	_shadow_wool.set_script(load("res://scripts/characters/shadow_wool.gd"))
