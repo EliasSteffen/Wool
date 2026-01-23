@@ -70,6 +70,7 @@ var _wobble_freq: float = 5.0
 var _wobble_mag: float = 20.0
 var _fall_time: float = 0.0
 var _fall_start_x: float = 0.0
+var _rotation_mag: float = 0.5 # Max tilt in radians
 
 func _process(delta: float) -> void:
 	if _is_triggered and not _is_falling:
@@ -92,6 +93,11 @@ func _process(delta: float) -> void:
 		# Horizontal Sine Wave
 		var offset_x = sin(_fall_time * _wobble_freq) * _wobble_mag
 		position.x = _fall_start_x + offset_x
+
+		# Rotation tilting back and forth
+		# Using cos because it represents the horizontal velocity (derivative of sin)
+		# so the tilt is maximum at the center of the swing.
+		rotation = cos(_fall_time * _wobble_freq) * _rotation_mag
 
 		# Cleanup if too far down
 		if _fall_time > 3.0:
