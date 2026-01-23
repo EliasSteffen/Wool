@@ -50,10 +50,6 @@ custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
 text = "Resume"
 
-[node name="ResetHighscoreButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(800, 150)
-layout_mode = 2
-text = "Reset Highscore"
 
 [node name="SettingsButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(800, 150)

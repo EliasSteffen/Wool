@@ -38,6 +38,7 @@ alignment = 1
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 150
 text = "Game Over"
 horizontal_alignment = 1
@@ -57,6 +58,7 @@ theme_override_constants/separation = 20
 
 [node name="StartLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 40
 text = "0m"
 
@@ -104,20 +106,21 @@ offset_top = 43.0
 offset_right = 100.0
 offset_bottom = 88.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0, 0.8, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 32
 text = "Your Score"
 horizontal_alignment = 1
 
 [node name="EndLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 40
 text = "Highscore"
 horizontal_alignment = 2
 
 [node name="InstructionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 40
 text = "Drücke auf den Bildschirm,
 um das Level neu zu starten"

@@ -21,7 +21,7 @@ enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
 func game_over() -> void:
 	if current_state == GameState.GAME_OVER:
 		return
-	
+
 	current_state = GameState.GAME_OVER
 	state_changed.emit(current_state)
 
@@ -66,17 +66,18 @@ func is_input_ignored() -> bool:
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Load highscore
+	_load_highscore()
+
 	# Initial seed
 	randomize()
 	current_seed = randi()
 
-	# Load highscore
-	_load_highscore()
 
 	# Add Generic Touch/Click support to "jump" action
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
 	# Note: Now also added to project.godot directly for redundancy and export stability.
-	
+
 	# Start Background Music
 	AudioManager.play_music()
 
@@ -95,7 +96,7 @@ func start_game() -> void:
 	current_seed = randi()
 	max_run_distance = 0
 	new_highscore_reached_this_run = false
-	
+
 	# Reset tracking state to prevent reading old player position before scene change
 	_player_ref = null
 	_start_initialized = false
@@ -131,15 +132,6 @@ func toggle_pause() -> void:
 
 # === PRIVATE METHODS ===
 
-func _show_pause_menu() -> void:
-	if not _pause_menu_instance:
-		_pause_menu_instance = PAUSE_MENU_SCENE.instantiate()
-		get_tree().root.add_child(_pause_menu_instance)
-	_pause_menu_instance.show()
-
-func _hide_pause_menu() -> void:
-	if _pause_menu_instance:
-		_pause_menu_instance.hide()
 
 ## Update highscore if new distance is higher
 func update_highscore(new_distance: int) -> void:
@@ -147,11 +139,6 @@ func update_highscore(new_distance: int) -> void:
 		new_highscore_reached_this_run = true
 		highscore = new_distance
 		_save_highscore()
-		
-
-
-
-# === PRIVATE METHODS ===
 
 func _load_highscore() -> void:
 	var config = ConfigFile.new()
@@ -171,6 +158,16 @@ func reset_highscore() -> void:
 	highscore = 0
 	_save_highscore()
 
+func _show_pause_menu() -> void:
+	if not _pause_menu_instance:
+		_pause_menu_instance = PAUSE_MENU_SCENE.instantiate()
+		get_tree().root.add_child(_pause_menu_instance)
+	_pause_menu_instance.show()
+func _hide_pause_menu() -> void:
+	if _pause_menu_instance:
+		_pause_menu_instance.hide()
+
+
 # === DISTANCE TRACKING ===
 var _start_x: float = 0.0
 var _start_initialized: bool = false
@@ -186,7 +183,7 @@ func _process(delta: float) -> void:
 	if _player_ref and not _start_initialized:
 		_start_x = _player_ref.global_position.x
 		_start_initialized = true
-		
+
 	# Update max run distance
 	var current_dist = get_current_distance()
 	if current_dist > max_run_distance:
@@ -195,6 +192,6 @@ func _process(delta: float) -> void:
 func get_current_distance() -> int:
 	if not _player_ref or not is_instance_valid(_player_ref) or not _start_initialized:
 		return 0
-	
+
 	# Logic: 10 pixels = 1 meter
 	return int(max(_player_ref.global_position.x - _start_x, 0.0) / 10.0)

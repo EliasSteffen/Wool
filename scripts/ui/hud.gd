@@ -2,7 +2,6 @@ extends CanvasLayer
 
 @onready var pause_button: Button = $PauseButton
 @onready var current_distance_label: Label = $CurrentDistance
-@onready var highscore_label: Label = $Label
 @onready var rusty_nail_timer: Control = $RustyNailTimer
 @onready var rusty_nail_timer_bg: Panel = $RustyNailTimer/Background
 @onready var rusty_nail_timer_fill: Panel = $RustyNailTimer/Fill
@@ -66,9 +65,6 @@ func _ready() -> void:
 		var transparent_style = StyleBoxEmpty.new()
 		current_distance_label.add_theme_stylebox_override("normal", transparent_style)
 
-	if highscore_label:
-		var transparent_style = StyleBoxEmpty.new()
-		highscore_label.add_theme_stylebox_override("normal", transparent_style)
 
 	# Ensure the pause button triggers on touch (connect pressed signal)
 	if pause_button:
@@ -81,9 +77,6 @@ func _on_pause_pressed() -> void:
 func _process(delta: float) -> void:
 	if not player:
 		player = get_tree().get_first_node_in_group("player")
-		if player:
-			# Initialize highscore display
-			highscore_label.text = str(GameManager.highscore) + "m"
 
 	if player:
 		_update_off_screen_indicator()
@@ -92,9 +85,6 @@ func _process(delta: float) -> void:
 		var distance_meters: int = GameManager.max_run_distance
 		current_distance_label.text = str(distance_meters) + "m"
 
-		# Update highscore if beaten
-		GameManager.update_highscore(distance_meters)
-		highscore_label.text = str(GameManager.highscore) + "m"
 
 func _on_rusty_nail_timer_started(duration: float) -> void:
 	rusty_nail_timer.visible = true
