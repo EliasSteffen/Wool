@@ -74,6 +74,17 @@ func _on_pause_pressed() -> void:
 	GameManager.ignore_input_for(0.15)
 	GameManager.toggle_pause()
 
+
+func _input(event: InputEvent) -> void:
+	# Explicitly handle touch for the pause button to support multi-touch
+	# (e.g. holding grapple (finger 1) and hitting pause (finger 2))
+	if event is InputEventScreenTouch and event.pressed:
+		if pause_button and pause_button.is_visible_in_tree():
+			if pause_button.get_global_rect().has_point(event.position):
+				_on_pause_pressed()
+				get_viewport().set_input_as_handled()
+
+
 func _process(delta: float) -> void:
 	if not player:
 		player = get_tree().get_first_node_in_group("player")

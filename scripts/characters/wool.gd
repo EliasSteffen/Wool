@@ -408,13 +408,27 @@ func _update_facing_direction(is_facing_left: bool) -> void:
 
 var _input_jump_pressed_latched: bool = false
 var _input_jump_held: bool = false
+var _active_touch_indices: Dictionary = {}
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Note: BasePlayer might not have _unhandled_input, but if it did, we should call super.
-	# Since we don't know for sure here and previous checks didn't show it for BasePlayer specifically,
-	# we omit super to avoid errors, unless we confirmed BasePlayer or GameManager logic needs it.
-	# (GameManager handles global input via its own process, not via Player's unhandled_input)
+	# Handle Multi-Touch specific logic
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_active_touch_indices[event.index] = true
+			_input_jump_pressed_latched = true # Also trigger jump
+		else:
+			_active_touch_indices.erase(event.index)
 
+			# If NO touches are left, we consider the "jump/grapple" released
+			if _active_touch_indices.is_empty():
+				_ignore_hold_gravity = false
+
+		# We generally DON'T consume the event here (set_input_as_handled)
+		# because we want other systems (like UI) to potentially see it if they are on top.
+		# However, _unhandled_input is only called if UI didn't consume it.
+		return
+
+	# Fallback for Mouse/Keyboard (or if touch emulation is on but we want redundancy)
 	if event.is_action_pressed("jump"):
 		_input_jump_pressed_latched = true
 		_input_jump_held = true
@@ -427,7 +441,9 @@ func _handle_input() -> void:
 	# We treat any main action as the single input.
 	# Using virtual methods to allow ShadowWool to override
 	var input_just_pressed: bool = _get_jump_just_pressed()
-	var input_pressed: bool = _get_jump_held()
+
+	# Pressed is true if standard action is held OR if we have active touches
+	var input_pressed: bool = _get_jump_held() or not _active_touch_indices.is_empty()
 
 	# Fallback for "Space" key if UI didn't consume it (optional redundancy)
 	# but strictly relying on unhandled_input is cleaner for UI blocking.
