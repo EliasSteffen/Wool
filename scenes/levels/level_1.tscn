@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dys6tb5xur5kw"]
+[gd_scene load_steps=15 format=3 uid="uid://dys6tb5xur5kw"]
 
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_wool"]
 [ext_resource type="Texture2D" uid="uid://cpts61gy6cmd7" path="res://assets/map/platform.png" id="3_dga24"]
@@ -7,8 +7,11 @@
 [ext_resource type="PackedScene" uid="uid://cyd7fkfntvjrp" path="res://scenes/terrain/kill_zone.tscn" id="8_s8va5"]
 [ext_resource type="PackedScene" uid="uid://hud1234568aa" path="res://scenes/ui/hud.tscn" id="9_hud"]
 [ext_resource type="Script" uid="uid://bda7hptn4quii" path="res://scripts/world/level_generator.gd" id="10_gen"]
+[ext_resource type="Texture2D" uid="uid://c7cu5fm7dgrhd" path="res://assets/map/pin-blue.png" id="10_iav0o"]
+[ext_resource type="Texture2D" uid="uid://bnlwwrqooq2b" path="res://assets/map/pin-red.png" id="11_dnkej"]
 [ext_resource type="Script" uid="uid://b3hisekcg88jf" path="res://scripts/levels/level_1.gd" id="11_level1"]
 [ext_resource type="Script" uid="uid://cdelytkcd0lhe" path="res://scripts/world/background_generator.gd" id="12_bg_gen"]
+[ext_resource type="Texture2D" uid="uid://bglxrr10de6ud" path="res://assets/map/pin-yellow.png" id="12_mm8aj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oc4kc"]
 size = Vector2(632, 224)
@@ -70,3 +73,23 @@ position = Vector2(584, -656)
 
 [node name="Nail2" parent="." instance=ExtResource("7_oc4kc")]
 position = Vector2(736, -384)
+
+[node name="pins" type="Node2D" parent="."]
+
+[node name="blue" type="Sprite2D" parent="pins"]
+position = Vector2(536.00006, -128)
+rotation = -2.7080307
+scale = Vector2(0.5694561, 0.5694561)
+texture = ExtResource("10_iav0o")
+
+[node name="red" type="Sprite2D" parent="pins"]
+position = Vector2(55.999996, -208.00002)
+rotation = 2.896886
+scale = Vector2(0.6418233, 0.6418233)
+texture = ExtResource("11_dnkej")
+
+[node name="yellow" type="Sprite2D" parent="pins"]
+position = Vector2(92, -46.999992)
+rotation = -2.585028
+scale = Vector2(0.9072475, 0.9072475)
+texture = ExtResource("12_mm8aj")

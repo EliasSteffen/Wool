@@ -13,7 +13,7 @@ var eagle_spawn_interval_min: float = 2.0
 var eagle_spawn_interval_max: float = 5.0
 var eagle_spawn_height_min: float = -200.0
 var eagle_spawn_height_max: float = GameManager.PLAYABLE_HEIGHT_TOP
-var eagle_min_distance: int = 0
+var eagle_min_distance: int = 1000
 
 # Fish Config
 var fish_spawn_interval_min: float = 5.0

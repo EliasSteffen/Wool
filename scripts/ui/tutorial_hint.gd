@@ -148,7 +148,7 @@ func _run_unified_loop() -> void:
 	)
 
 	# Hold for 0.7s
-	_loop_tween.tween_interval(0.7)
+	_loop_tween.tween_interval(0.6)
 
 	# --- PHASE 5: RELEASE (1.4s) ---
 	_loop_tween.tween_callback(func():

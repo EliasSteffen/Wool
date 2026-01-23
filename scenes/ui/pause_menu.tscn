@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://pausemenu123"]
+[gd_scene load_steps=3 format=3 uid="uid://pausemenu123"]
 
 [ext_resource type="Script" uid="uid://cmvg86ssr800a" path="res://scripts/ui/pause_menu.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="2_theme"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -14,6 +15,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 
 [node name="ColorRect" type="ColorRect" parent="Control"]
 layout_mode = 1
@@ -43,21 +45,21 @@ text = "Pause"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_font_sizes/font_size = 200
 text = "Resume"
 
 [node name="ResetHighscoreButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_font_sizes/font_size = 200
 text = "Reset Highscore"
 
 [node name="SettingsButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_font_sizes/font_size = 200
 text = "Settings"
 
 [node name="CreditsButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_font_sizes/font_size = 200
 text = "Credits"

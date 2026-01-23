@@ -26,8 +26,11 @@ animations = [{
 size = Vector2(2011.75, 1173.5)
 
 [node name="Fish" instance=ExtResource("1_base_enemy")]
-scale = Vector2(0.25, 0.25)
+scale = Vector2(0.1, 0.1)
 script = ExtResource("2_script")
+horizontal_speed = -900.0
+start_volume_percent = 10.0
+audio_stream = null
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(40, 79.5)

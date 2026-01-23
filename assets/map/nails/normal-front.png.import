@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djuarc1k2gjk5"
-path.s3tc="res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.s3tc.ctex"
-path.etc2="res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.etc2.ctex"
+uid="uid://b6tqop7f1xqj1"
+path="res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/map/nails/normal-front.png"
-dest_files=["res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.s3tc.ctex", "res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.etc2.ctex"]
+dest_files=["res://.godot/imported/normal-front.png-8d215c4bce17d0239cde2e8e501a0ec5.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
