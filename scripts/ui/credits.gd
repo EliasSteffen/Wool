@@ -10,11 +10,11 @@ func _ready() -> void:
     # Apply button style
 	if has_node("CloseButton"):
 		var btn = get_node("CloseButton")
-		
+
 		# Apply modern rounded style (base size)
 		var UITheme = preload("res://scripts/ui/ui_theme.gd")
 		UITheme.apply_modern_button_style(btn, Vector2(100, 100), true)
-		
+
 		# Make close button background transparent (icon-only style from settings)
 		var flat_style := StyleBoxFlat.new()
 		flat_style.bg_color = Color(0,0,0,0)
@@ -26,8 +26,8 @@ func _ready() -> void:
 		btn.add_theme_stylebox_override("hover", flat_style)
 
 		# Use asset icon via TextureRect child for full control
-		btn.text = "" 
-		var close_icon: Texture2D = preload("res://assets/ui/close.svg")
+		btn.text = ""
+		var close_icon: Texture2D = preload("res://assets/ui/close-button.png")
 		# Check if child exists (re-run safety)
 		var close_icon_rect: TextureRect = btn.get_node_or_null("IconTex") as TextureRect
 		if not close_icon_rect:
@@ -49,7 +49,7 @@ func _ready() -> void:
 		var viewport_height = get_viewport_rect().size.y
 		content.position.y = viewport_height
 		_initial_y = content.position.y
-		
+
 	# Switch music
 	AudioManager.play_credits_music()
 
@@ -59,13 +59,13 @@ func _exit_tree() -> void:
 func _process(delta: float) -> void:
 	if content:
 		var current_speed = scroll_speed
-		
+
 		# Check for hold input (Left Mouse or Touch)
 		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			current_speed *= 4.0
-			
+
 		content.position.y -= current_speed * delta
-		
+
 		# Reset if it goes too far up (off screen top)
 		# Content height + position.y < 0 means the bottom of content is above top of screen
 		if content.position.y + content.size.y < 0:

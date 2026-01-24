@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cmvg86ssr800a" path="res://scripts/ui/pause_menu.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://closebtn123" path="res://assets/ui/close-button.png" id="3_close"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -46,9 +47,11 @@ text = "Pause"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(800, 150)
+custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-text = "Resume"
+size_flags_horizontal = 4
+icon = ExtResource("3_close")
+flat = true
 
 
 [node name="SettingsButton" type="Button" parent="Control/CenterContainer/VBoxContainer"]

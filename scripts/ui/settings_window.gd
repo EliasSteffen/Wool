@@ -34,7 +34,7 @@ func _ready() -> void:
 	close_button.add_theme_stylebox_override("hover", flat_style)
 	# Use asset icon for close (icon-only)
 	close_button.text = ""
-	var close_icon: Texture2D = preload("res://assets/ui/close.svg")
+	var close_icon: Texture2D = preload("res://assets/ui/close-button.png")
 	var close_icon_rect: TextureRect = close_button.get_node_or_null("IconTex") as TextureRect
 	if not close_icon_rect:
 		close_icon_rect = TextureRect.new()

@@ -43,7 +43,7 @@ func _ready() -> void:
 
 	# Clear default text and use a centered TextureRect so the icon fills the button
 	pause_button.text = ""
-	var pause_icon: Texture2D = preload("res://assets/ui/pause.svg")
+	var pause_icon: Texture2D = preload("res://assets/ui/pause-button.png")
 	var icon_rect: TextureRect = pause_button.get_node_or_null("IconTex") as TextureRect
 	if not icon_rect:
 		icon_rect = TextureRect.new()

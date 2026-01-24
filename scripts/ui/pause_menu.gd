@@ -10,7 +10,7 @@ func _ready() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 
 	# Buttons will use the textured theme from assets/ui/pause_theme.tres
-	resume_button.text = "Resume"
+
 	settings_button.text = "Settings"
 
 	register_buttons([resume_button, settings_button, credits_button], false, false)
