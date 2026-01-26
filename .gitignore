@@ -5,7 +5,7 @@ android/build/build/
 android/build/.gradle/
 
 # Build artifacts
-build/
+/build/
 ios/
 
 # Export artifacts
