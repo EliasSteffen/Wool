@@ -35,11 +35,11 @@ script = ExtResource("12_bg_gen")
 
 [node name="platform" type="Sprite2D" parent="Platforms/StartPlatform"]
 z_index = -1
-position = Vector2(1152, -504)
+position = Vector2(1266, -583)
 texture = ExtResource("3_dga24")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/StartPlatform"]
-position = Vector2(204, -56)
+position = Vector2(318, -135)
 shape = SubResource("RectangleShape2D_oc4kc")
 
 [node name="Left Border" type="StaticBody2D" parent="Platforms"]
@@ -56,7 +56,7 @@ position = Vector2(1266, -584)
 texture = ExtResource("8_dga24")
 
 [node name="Wool" parent="." instance=ExtResource("2_wool")]
-position = Vector2(216.00002, -240.00002)
+position = Vector2(330, -319)
 scale = Vector2(0.15, 0.15)
 
 [node name="KillZone" parent="." instance=ExtResource("8_s8va5")]
@@ -70,27 +70,27 @@ script = ExtResource("10_gen")
 [node name="Nails" type="Node" parent="."]
 
 [node name="Nail" parent="." instance=ExtResource("7_oc4kc")]
-position = Vector2(584, -656)
+position = Vector2(698, -735)
 
 [node name="Nail2" parent="." instance=ExtResource("7_oc4kc")]
-position = Vector2(736, -384)
+position = Vector2(850, -463)
 
 [node name="pins" type="Node2D" parent="."]
 
 [node name="blue" type="Sprite2D" parent="pins"]
-position = Vector2(536.00006, -128)
+position = Vector2(650.00006, -207)
 rotation = -2.7080307
 scale = Vector2(0.5694561, 0.5694561)
 texture = ExtResource("10_iav0o")
 
 [node name="red" type="Sprite2D" parent="pins"]
-position = Vector2(55.999996, -208.00002)
+position = Vector2(170, -287)
 rotation = 2.896886
 scale = Vector2(0.6418233, 0.6418233)
 texture = ExtResource("11_dnkej")
 
 [node name="yellow" type="Sprite2D" parent="pins"]
-position = Vector2(92, -46.999992)
+position = Vector2(206, -126)
 rotation = -2.585028
 scale = Vector2(0.9072475, 0.9072475)
 texture = ExtResource("12_mm8aj")

@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/pointer.png-133392f260ecc87b51a28d66b4343076.
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

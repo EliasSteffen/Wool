@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/pin-blue.png-8f326ee1935fe9d5065b7517d1a1962d
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

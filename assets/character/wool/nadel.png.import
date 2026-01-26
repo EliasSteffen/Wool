@@ -3,21 +3,19 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://w7kgfdujh0jy"
-path.s3tc="res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.s3tc.ctex"
-path.etc2="res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.etc2.ctex"
+path="res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://assets/character/wool/nadel.png"
-dest_files=["res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.s3tc.ctex", "res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.etc2.ctex"]
+dest_files=["res://.godot/imported/nadel.png-65fc025286a71c0b86233e7566f9bb2e.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/rusty-falloff.png-3fa6ce837adeeeafc5c9fcf6aca
 
 [params]
 
-compress/mode=0
+compress/mode=1
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
