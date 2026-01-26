@@ -888,7 +888,20 @@ position = Vector2(-7.748603e-06, 3.0517564e-05)
 scale = Vector2(0.9999989, 0.9999989)
 shape = SubResource("RectangleShape2D_codar")
 
-[node name="Pickaxe" type="Sprite2D" parent="." index="1"]
+[node name="ShadowPickaxe" type="Sprite2D" parent="." index="1"]
+visible = false
+modulate = Color(0, 0, 0, 0.5)
+z_index = -1
+texture = ExtResource("3_bs72m")
+
+[node name="ShadowSkin" type="AnimatedSprite2D" parent="." index="2"]
+visible = false
+modulate = Color(0, 0, 0, 0.5)
+z_index = -1
+sprite_frames = SubResource("SpriteFrames_codar")
+animation = &"idle"
+
+[node name="Pickaxe" type="Sprite2D" parent="." index="3"]
 position = Vector2(89.99999, -159.99997)
 rotation = 0.5235988
 scale = Vector2(1.0356652, 1.0356652)

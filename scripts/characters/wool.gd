@@ -26,6 +26,11 @@ var _last_played_anim: String = ""
 var _extra_gravity: float = 0.0 # Extra gravity when trying to grapple without nails nearby
 var _ignore_hold_gravity: bool = false # Ignore hold input for fast-fall until first release
 
+# Shadows
+@onready var shadow_pickaxe: Sprite2D = $ShadowPickaxe
+@onready var shadow_skin: AnimatedSprite2D = $ShadowSkin
+const SHADOW_OFFSET: Vector2 = Vector2(100, 100)
+
 # Pickaxe Grapple Configuration
 # Assign a Marker2D node here (e.g. child of Pickaxe) to visually define the grapple connection point.
 @export var grapple_marker: Marker2D
@@ -70,6 +75,7 @@ func _process(delta: float) -> void:
 		_idle_timer = 0.0
 
 	_update_pickaxe_visual()
+	_update_shadows()
 
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
 
@@ -561,3 +567,39 @@ func _handle_grapple_swing_pump(delta: float) -> void:
 
 	# Store the auto-direction so super() can use it
 	super._handle_grapple_swing_pump(delta)
+
+func _update_shadows() -> void:
+	# Synchronize Skin Shadow
+	if skin and shadow_skin:
+		shadow_skin.visible = skin.visible
+		# Skin is a Node2D container, effectively the pivot.
+		shadow_skin.position = skin.position + SHADOW_OFFSET
+		shadow_skin.rotation = skin.rotation
+		shadow_skin.scale = skin.scale
+
+		# Sync Animation
+		if skin.animated_sprite:
+			var anim_sprite = skin.animated_sprite
+			if anim_sprite.sprite_frames:
+				shadow_skin.sprite_frames = anim_sprite.sprite_frames
+
+			shadow_skin.animation = anim_sprite.animation
+			shadow_skin.frame = anim_sprite.frame
+			shadow_skin.flip_h = anim_sprite.flip_h
+			shadow_skin.flip_v = anim_sprite.flip_v
+
+	# Synchronize Pickaxe Shadow
+	if pickaxe and shadow_pickaxe:
+		shadow_pickaxe.visible = pickaxe.visible
+		shadow_pickaxe.position = pickaxe.position + SHADOW_OFFSET
+		# Rotation/Scale/Offset/Centered from pickaxe
+		shadow_pickaxe.rotation = pickaxe.rotation
+		shadow_pickaxe.scale = pickaxe.scale
+		shadow_pickaxe.offset = pickaxe.offset
+		shadow_pickaxe.centered = pickaxe.centered
+
+		if pickaxe.texture:
+			shadow_pickaxe.texture = pickaxe.texture
+
+		# Keep Z-Index fixed at -1
+		shadow_pickaxe.z_index = -1
