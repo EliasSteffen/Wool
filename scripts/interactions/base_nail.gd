@@ -38,7 +38,7 @@ func _enforce_z_ordering() -> void:
 
 	var shadow = get_node_or_null(NODE_SHADOW_SPRITE)
 	if shadow:
-		shadow.z_index = -1 # Background Shadow Layer
+		shadow.z_index = -2 # Background Shadow Layer (Behind Pickaxe Shadow -1)
 
 	# Wool's pickaxe uses Z-Index 1 to sit between them.
 
