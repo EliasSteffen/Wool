@@ -208,15 +208,17 @@ func _update_rotation(delta: float) -> void:
 		target_rotation = floor_normal.angle() + PI / 2.0
 		_last_valid_floor_normal = floor_normal
 	else:
-		# VISUAL FLICKER FIX:
-		# Use last known floor normal to maintain rotation during momentary flickers
-		target_rotation = _last_valid_floor_normal.angle() + PI / 2.0
-
-		# If we are really in the air for longer, slowly rotate back to 0
-		# But for quick flickers, this keeps it stable.
-		var target_air_rotation = 0.0
-		# Interpolate target towards 0 based on air time (heuristic) would be ideal,
-		# but simply reusing last normal prevents the hard snap to 0.
+		# In Air logic
+		if velocity.y > 100.0:
+			# FLIGHT / FALLING: Rotate slightly CW
+			target_rotation = deg_to_rad(15.0)
+		elif velocity.y < -50.0:
+			# JUMPING: Rotate to 0 (Upright)
+			target_rotation = 0.0
+		else:
+			# APEX / FLICKER FIX:
+			# Use last known floor normal to maintain rotation during momentary flickers (e.g. running down slopes)
+			target_rotation = _last_valid_floor_normal.angle() + PI / 2.0
 
 	# Apply rotation with smoothing to the VISUAL ROTATION variable
 	var rotate_speed = 15.0 if is_on_floor() else 5.0
@@ -389,7 +391,9 @@ func _update_pickaxe_visual() -> void:
 		# 3. Apply Visual Rotation (Slope) to Pickaxe
 		# Pickaxe is child of Wool (unrotated), so we must manually add the visual rotation
 		# to match the skin.
-		pickaxe.rotation += _current_visual_rotation
+		# ONLY applied when visually grounded (slopes). In air, we want Wool to rotate but NOT the pickaxe.
+		if is_visually_grounded:
+			pickaxe.rotation += _current_visual_rotation
 
 		# Sync Position offset with skin (floating fix)
 		if skin:
