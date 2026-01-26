@@ -1,6 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
-/android/
+# Android
+android/build/build/
+android/build/.gradle/
 
 # Build artifacts
 build/
