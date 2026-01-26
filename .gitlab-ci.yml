@@ -2,16 +2,45 @@ stages:
   - export
   - deploy
 
-export-web:
+variables:
+  EXPORT_NAME: wooly
+
+.export:
   stage: export
   image: barichello/godot-ci:4.5.1
+
   script:
-    - mkdir -p build/web
-    - godot --headless --verbose --export-release "Web" build/web/index.html
+    - mkdir -p $(dirname ${EXPORT_PATH})
+    - godot --headless --verbose --export-${EXPORT_TYPE} "${PRESET_NAME}" ${EXPORT_PATH}
   artifacts:
+    name: ${EXPORT_NAME}-${PLATFORM}
     paths:
-      - build/web
-    expire_in: 1 day
+      - build/${PLATFORM}
+    expire_in: 1 week
+
+export-web:
+  extends: .export
+  variables:
+    PLATFORM: web
+    PRESET_NAME: Web
+    EXPORT_PATH: build/web/index.html
+    EXPORT_TYPE: release
+
+export-android:
+  extends: .export
+  variables:
+    PLATFORM: android
+    PRESET_NAME: Android
+    EXPORT_PATH: build/android/${EXPORT_NAME}.apk
+    EXPORT_TYPE: debug
+
+export-windows:
+  extends: .export
+  variables:
+    PLATFORM: windows
+    PRESET_NAME: "Windows Desktop"
+    EXPORT_PATH: build/windows/${EXPORT_NAME}.exe
+    EXPORT_TYPE: release
 
 pages:
   stage: deploy

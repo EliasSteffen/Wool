@@ -13,7 +13,6 @@ config_version=5
 config/name="Wool"
 run/main_scene="res://scenes/levels/level_1.tscn"
 config/features=PackedStringArray("4.5", "Mobile")
-boot_splash/image="uid://c6ctd4lv5eere"
 
 [audio]
 
@@ -37,7 +36,6 @@ window/size/viewport_height=1170
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
-
 
 [gui]
 
