@@ -30,6 +30,11 @@ const FETZEN_TEXTURES: Array[Texture2D] = [
 const PATTERN_TEXTURES: Array[Texture2D] = [
 
 ]
+const PIN_TEXTURES: Array[Texture2D] = [
+	preload("res://assets/map/pin-blue.png"),
+	preload("res://assets/map/pin-red.png"),
+	preload("res://assets/map/pin-yellow.png"),
+]
 
 @onready var parallax_layer: ParallaxLayer = get_node_or_null("../ParallaxBackground/ParallaxLayer")
 var decoration_layer: ParallaxLayer = null
@@ -51,6 +56,7 @@ var _background_height: float = abs(GameManager.PLAYABLE_HEIGHT_TOP - GameManage
 # Runtime-loaded pattern textures and pattern nodes
 var _pattern_textures: Array[Texture2D] = []
 var _fetzen_textures: Array[Texture2D] = []
+var _pin_textures: Array[Texture2D] = []
 
 # Runtime-loaded textures from `background_folder`
 var _background_textures: Array[Texture2D] = []
@@ -68,6 +74,7 @@ func _ready() -> void:
 	# Use preloaded textures
 	_background_textures = BACKGROUND_TEXTURES.duplicate()
 	_fetzen_textures = FETZEN_TEXTURES.duplicate()
+	_pin_textures = PIN_TEXTURES.duplicate()
 	# remove background.png from random textures if added there by mistake
 
 	_pattern_textures = PATTERN_TEXTURES.duplicate()
@@ -224,6 +231,11 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 		var dec_sprite = _decoration_pool.acquire() as Sprite2D
 		# Reset properties
 		dec_sprite.offset = Vector2.ZERO
+
+		# CLEANUP CHILDREN (e.g. Pins from previous use)
+		for child in dec_sprite.get_children():
+			child.queue_free()
+
 		var use_fetzen = _rng.randf() > 0.5
 		var tex: Texture2D = null
 
@@ -249,11 +261,63 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 			var s = 1.0
 			if use_fetzen:
 				s = _rng.randf_range(0.1, 0.3)
+
+				# ADD PIN
+				if _pin_textures.size() > 0:
+					var pin_sprite = Sprite2D.new()
+					pin_sprite.texture = _pin_textures[_rng.randi() % _pin_textures.size()]
+
+					# Pin properties
+					# Pin properties
+					# Position in top 1/4 of the fetzen
+					var tex_size = tex.get_size()
+
+					var half_w = tex_size.x / 2.0
+					var half_h = tex_size.y / 2.0
+
+					var pin_x = _rng.randf_range(-half_w * 0.8, half_w * 0.8)
+					var pin_y = _rng.randf_range(-half_h + 10, -half_h + (tex_size.y * 0.25))
+
+					var final_pin_pos = Vector2(pin_x, pin_y)
+
+					# 1. SHADOW SPRITE (Behind Pin)
+					var shadow_sprite = Sprite2D.new()
+					shadow_sprite.texture = pin_sprite.texture
+					# Offset needs to be larger since we are scaling up
+					shadow_sprite.position = final_pin_pos + Vector2(15, 15)
+					shadow_sprite.rotation = deg_to_rad(-135) # Same rotation as pin
+					shadow_sprite.scale = Vector2(3, 3)
+					shadow_sprite.modulate = Color(0, 0, 0, 0.5) # Shadow color
+					shadow_sprite.z_index = 2 # On top of paper, behind pin
+					dec_sprite.add_child(shadow_sprite)
+
+					# 2. PIN SPRITE
+					pin_sprite.position = final_pin_pos
+
+					# Rotation: 135 deg CCW = -135 deg
+					pin_sprite.rotation = deg_to_rad(-135)
+
+					# Add slight variance if desired, or stick to strict angle?
+					# User said "rotate them 135 CCW", implies fixed or base.
+					# Let's add tiny variance for natural look: +/- 5 deg
+					pin_sprite.rotation += _rng.randf_range(deg_to_rad(-5), deg_to_rad(5))
+
+					pin_sprite.scale = Vector2(3, 3)
+					pin_sprite.z_index = 5 # Force on top relative to parent
+
+					dec_sprite.add_child(pin_sprite)
+
 			else:
 				s = _rng.randf_range(0.4, 0.8)
 
 			dec_sprite.scale = Vector2(s, s)
-			dec_sprite.rotation = _rng.randf_range(-0.1, 0.1)
+
+			# Rotation
+			if use_fetzen:
+				# Increased "Fetzen" rotation
+				dec_sprite.rotation = _rng.randf_range(-0.35, 0.35)
+			else:
+				dec_sprite.rotation = _rng.randf_range(-0.1, 0.1)
 
 			decoration_layer.add_child(dec_sprite)
 			_decoration_nodes.append(dec_sprite)
