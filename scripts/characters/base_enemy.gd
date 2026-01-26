@@ -29,8 +29,7 @@ var _current_target: Node2D = null
 
 var _sfx_player: AudioStreamPlayer2D
 var _spawn_position: Vector2
-
-
+var _shadow_sprite: AnimatedSprite2D
 
 # === ENUMS ===
 
@@ -42,6 +41,21 @@ func _ready() -> void:
 	_setup_audio()
 	# Ensure enemies render above Nails (Z=0 and Z=2)
 	z_index = 10
+
+	# Create Shadow
+	_shadow_sprite = AnimatedSprite2D.new()
+	_shadow_sprite.name = "ShadowSprite"
+	_shadow_sprite.modulate = Color(0, 0, 0, 0.5)
+	_shadow_sprite.z_index = -12 # Relative to enemy (Enemy is 10, so -12 makes it -2 global? No, Z-index is relative if Top Level is not set?
+	# Wait, Node2D Z-index is absolute relative to canvas layers if Y-sort is off?
+	# Godot 4: Z-index is relative to parent if "Z as Relative" is true (default).
+	# Enemy Z=10. We want Shadow Z=-2 (Global).
+	# So Relative Z should be -12. (10 - 12 = -2).
+	_shadow_sprite.z_index = -12
+	add_child(_shadow_sprite)
+	# Move to back of children list to be safe, though Z-index handles drawing
+	move_child(_shadow_sprite, 0)
+
 	super._ready()
 
 
@@ -97,6 +111,34 @@ func _process(delta: float) -> void:
 		# If we are more than 3000px behind the player, we are definitely off screen and safe to remove
 		if global_position.x < player.global_position.x - 3000.0:
 			queue_free()
+
+	# Update Shadow
+	if _shadow_sprite and skin:
+		# Find the main animated sprite/sprite inside skin
+		# Skin is BodySkin class usually, which has `animated_sprite`
+		var main_sprite = null
+		if "animated_sprite" in skin:
+			main_sprite = skin.animated_sprite
+
+		if main_sprite:
+			_shadow_sprite.sprite_frames = main_sprite.sprite_frames
+			_shadow_sprite.animation = main_sprite.animation
+			_shadow_sprite.frame = main_sprite.frame
+			_shadow_sprite.speed_scale = main_sprite.speed_scale
+			_shadow_sprite.flip_h = main_sprite.flip_h
+			_shadow_sprite.flip_v = main_sprite.flip_v
+			_shadow_sprite.scale = skin.scale
+			_shadow_sprite.rotation = skin.rotation
+			_shadow_sprite.offset = main_sprite.offset
+			_shadow_sprite.centered = main_sprite.centered
+
+			# Position Offset
+			# If Enemy is scaled 0.1, we need 100 px offset to get 10px visual
+			# Assuming enemies are generally scaled similarly to Wool (0.1)
+			# Better: Check scale?
+			# BaseCharacter doesn't strictly enforce scale. But Fish.tscn has scale 0.1.
+			# Let's use constant offset vector (100, 100) as per Wool
+			_shadow_sprite.position = skin.position + Vector2(100, 100)
 
 	_update_audio_volume()
 
