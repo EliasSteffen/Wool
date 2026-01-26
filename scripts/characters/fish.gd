@@ -52,6 +52,10 @@ func _process_ai(delta: float) -> void:
 	if velocity.y > 0 and global_position.y >= _start_y:
 		# Fish has returned to the water -> Despawn
 		despawn_requested.emit(self)
+
+	# Rotate based on velocity to face movement direction
+	rotation = velocity.angle() + PI
+
 func _jump() -> void:
 	# Recalculate or reuse jump velocity
 	# Target significantly above the top of the playable area for a high jump
