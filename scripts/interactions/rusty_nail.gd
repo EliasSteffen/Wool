@@ -133,6 +133,9 @@ func _on_fall_timeout() -> void:
 		var lb = get_node_or_null("back")
 		if lb: lb.visible = false
 
+	var shadow = get_node_or_null(NODE_SHADOW_SPRITE)
+	if shadow: shadow.visible = false
+
 	var falloff = get_node_or_null("FalloffSprite")
 	if falloff: falloff.visible = true
 

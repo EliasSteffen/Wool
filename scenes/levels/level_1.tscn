@@ -51,6 +51,7 @@ position = Vector2(192, -2400)
 shape = SubResource("RectangleShape2D_excbq")
 
 [node name="logo" type="Sprite2D" parent="."]
+z_index = -5
 position = Vector2(1266, -584)
 texture = ExtResource("8_dga24")
 
