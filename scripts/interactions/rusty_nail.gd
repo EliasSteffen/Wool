@@ -63,6 +63,7 @@ func trigger() -> void:
 var _current_active_delay: float = 3.0
 
 var _was_used: bool = false
+var _falloff_shadow: Sprite2D
 
 # Falling Variables
 var _fall_speed: float = 300.0
@@ -137,7 +138,22 @@ func _on_fall_timeout() -> void:
 	if shadow: shadow.visible = false
 
 	var falloff = get_node_or_null("FalloffSprite")
-	if falloff: falloff.visible = true
+	if falloff:
+		falloff.visible = true
+
+		# Create/Setup Shadow for Falloff
+		if not _falloff_shadow:
+			_falloff_shadow = Sprite2D.new()
+			_falloff_shadow.texture = falloff.texture
+			_falloff_shadow.modulate = Color(0, 0, 0, 0.8)
+			_falloff_shadow.z_index = -2
+			_falloff_shadow.position = falloff.position + Vector2(10, 10)
+			_falloff_shadow.scale = falloff.scale # Sync Scale if any
+			add_child(_falloff_shadow)
+			# Move behind everything
+			move_child(_falloff_shadow, 0)
+
+		_falloff_shadow.visible = true
 
 	if _shake_tween: _shake_tween.kill()
 

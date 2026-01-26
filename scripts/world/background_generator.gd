@@ -7,7 +7,7 @@ extends Node2D
 
 @export var background_folder: String = "res://assets/map/fetzen"
 @export var pattern_folder: String = "res://assets/map/muster"
-@export var pattern_chance: float = 0.25
+@export var pattern_chance: float = 0.50
 @export var max_patterns_per_tile: int = 5
 @export var parallax_factor_x: float = 1.0
 @export var decoration_parallax_factor_x: float = 1.0
@@ -262,50 +262,21 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 			if use_fetzen:
 				s = _rng.randf_range(0.1, 0.3)
 
-				# ADD PIN
-				if _pin_textures.size() > 0:
-					var pin_sprite = Sprite2D.new()
-					pin_sprite.texture = _pin_textures[_rng.randi() % _pin_textures.size()]
+				# FETZEN SHADOW (Way smaller than others)
+				# 5px visual offset
+				var fetzen_shadow = Sprite2D.new()
+				fetzen_shadow.texture = tex
+				fetzen_shadow.modulate = Color(0, 0, 0, 0.5)
+				fetzen_shadow.z_index = -1 # Behind fetzen
 
-					# Pin properties
-					# Pin properties
-					# Position in top 1/4 of the fetzen
-					var tex_size = tex.get_size()
+				# Position relative to fetzen (scaled)
+				# Only apply offset, no position since it's child (0,0)
+				fetzen_shadow.position = Vector2(5, 5) / s
+				fetzen_shadow.scale = Vector2(1.0, 1.0) # Inherit scale
 
-					var half_w = tex_size.x / 2.0
-					var half_h = tex_size.y / 2.0
+				dec_sprite.add_child(fetzen_shadow)
 
-					var pin_x = _rng.randf_range(-half_w * 0.8, half_w * 0.8)
-					var pin_y = _rng.randf_range(-half_h + 10, -half_h + (tex_size.y * 0.25))
 
-					var final_pin_pos = Vector2(pin_x, pin_y)
-
-					# 1. SHADOW SPRITE (Behind Pin)
-					var shadow_sprite = Sprite2D.new()
-					shadow_sprite.texture = pin_sprite.texture
-					# Offset needs to be larger since we are scaling up
-					shadow_sprite.position = final_pin_pos + Vector2(15, 15)
-					shadow_sprite.rotation = deg_to_rad(-135) # Same rotation as pin
-					shadow_sprite.scale = Vector2(3, 3)
-					shadow_sprite.modulate = Color(0, 0, 0, 0.5) # Shadow color
-					shadow_sprite.z_index = 2 # On top of paper, behind pin
-					dec_sprite.add_child(shadow_sprite)
-
-					# 2. PIN SPRITE
-					pin_sprite.position = final_pin_pos
-
-					# Rotation: 135 deg CCW = -135 deg
-					pin_sprite.rotation = deg_to_rad(-135)
-
-					# Add slight variance if desired, or stick to strict angle?
-					# User said "rotate them 135 CCW", implies fixed or base.
-					# Let's add tiny variance for natural look: +/- 5 deg
-					pin_sprite.rotation += _rng.randf_range(deg_to_rad(-5), deg_to_rad(5))
-
-					pin_sprite.scale = Vector2(3, 3)
-					pin_sprite.z_index = 5 # Force on top relative to parent
-
-					dec_sprite.add_child(pin_sprite)
 
 			else:
 				s = _rng.randf_range(0.4, 0.8)

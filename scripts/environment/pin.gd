@@ -16,10 +16,13 @@ func _ready() -> void:
 	# These pins are scale ~0.6 to 0.9.
 	# 15 / 3.0 = 5 offset per scale unit?
 	# Let's try a fixed local offset of (10, 10) / scale?
-	# Or simpler: Fixed visual offset (5, 5).
-	# Since shadow is child, position (10, 10) will be scaled by parent scale.
-	# If parent scale is 0.6, (10, 10) becomes (6, 6) global. Close enough.
-	shadow.position = Vector2(10, 10)
+	# Or simpler: Fixed visual offset (3, 3) for contact realism.
+	# Since shadow is child, position (3, 3) will be scaled by parent scale.
+	# But manual pins have varied scale. If we want constant visual offset:
+	# position = Vector2(3, 3) / scale
+	# Since this script is ON the pin (self), 'scale' is self.scale.
+
+	shadow.position = Vector2(3, 3) / scale
 
 	shadow.modulate = Color(0, 0, 0, 0.5)
 	shadow.z_index = -1 # Relative to Pin (Z=2) -> Z=1.
