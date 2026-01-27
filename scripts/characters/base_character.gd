@@ -460,21 +460,19 @@ func _apply_grapple_constraint(delta: float) -> void:
 		_is_grapple_initialized = true
 
 # If beyond allowed angle, reverse tangential velocity (no hard position clamping)
+	# Limit Enforced: Prevent 360 degree spins.
 	if abs_angle_deg > grappling.max_swing_angle_deg:
-		# Tangential speed along the rope (positive if moving outwards in the signed-angle sense)
+		# Tangential speed along the rope
 		var tangential_speed: float = velocity.dot(tangential_unit)
+
+		# If moving OUTWARDS (away from center center), kill velocity to stop exactly at limit
 		if tangential_speed * sign(signed_angle) > 0.0:
-			# Damped bounce: reverse outward motion
-			tangential_speed = -tangential_speed * 0.85
-			# Edge-Boost: if the bounce is very slow, encourage a quicker inward swing to look natural
-			var min_speed: float = grappling.edge_min_tangential_speed
-			var boost_mul: float = grappling.edge_boost_multiplier
-			if abs(tangential_speed) < min_speed:
-				# Ensure direction is inward (keep sign of tangential_speed) and set magnitude to at least min_speed * boost_mul
-				tangential_speed = sign(tangential_speed) * (min_speed * boost_mul)
-		# remove radial component and set new velocity
+			tangential_speed = 0.0
+
+		# Apply restricted velocity
 		var radial_component: Vector2 = radial_dir * velocity.dot(radial_dir)
 		velocity = radial_component + tangential_unit * tangential_speed
+
 
 	# Pendulum restoring acceleration (linear tangential): a_t = -gravity * sin(theta)
 	var sin_theta: float = sin(signed_angle)
@@ -485,9 +483,29 @@ func _apply_grapple_constraint(delta: float) -> void:
 	var radial_speed: float = velocity.dot(radial_dir)
 	velocity -= radial_dir * radial_speed
 
-	# Slight damping to simulate air resistance and ensure slow at extremes
-	const SWING_DAMPING: float = 0.996
-	velocity *= SWING_DAMPING
+	# Progressive Braking: Manually reduce speed as we approach the limit to ensure "realistic" slowing down.
+	# User requirement: "Slowest at edges, fastest at bottom".
+	var limit_angle: float = grappling.max_swing_angle_deg
+	if limit_angle > 0:
+		var angle_ratio: float = abs_angle_deg / limit_angle
+
+		# Check if moving OUTWARDS (towards the limit)
+		if velocity.dot(tangential_unit) * sign(signed_angle) > 0.0:
+			# Apply braking starting from 30% of the swing (early onset)
+			if angle_ratio > 0.3:
+				# Strength goes from 0.0 to 1.0 (squared for exponential feel)
+				var t: float = (angle_ratio - 0.3) / 0.7
+				var brake_strength: float = t * t
+
+				# Aggressive reduction:
+				# At 30% angle: multiplier 1.0 (no braking)
+				# At 100% angle: multiplier 0.85 (15% speed loss PER FRAME)
+				# This guarantees a stop.
+				var brake_factor: float = lerp(1.0, 0.85, brake_strength)
+				velocity *= brake_factor
+
+	# GLOBAL AIR RESISTANCE (Always active to prevent infinite energy)
+	velocity *= 0.998
 
 	# INITIAL IMPULSE: removed for natural swinging
 	# The pendulum physics will naturally start the swing

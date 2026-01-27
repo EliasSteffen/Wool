@@ -49,16 +49,10 @@ func _update_position() -> void:
 
 	position = Vector2(clamped_x, clamped_y)
 
-	# Optional: Rotate to point towards the target off-screen center?
-	# Or just keep it upright. The user didn't ask for rotation but "Show ... where the enemy is".
-	# Placing it at the edge is "showing where".
-	# I will keep it upright for now as it Is an exclamation mark.
-	# If I were to rotate it, I'd need to rotate the parent or sprite.
-	# Let's keep it simple: Position on edge.
-
 func _start_pulsing() -> void:
 	var tween = create_tween().set_loops()
-	# Scale up
-	tween.tween_property(exclamation_mark, "scale", Vector2(0.2, 0.2), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	# Scale down
-	tween.tween_property(exclamation_mark, "scale", Vector2(0.15, 0.15), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale up to 1.0
+	tween.tween_property(exclamation_mark, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale down to 0.8
+	tween.tween_property(exclamation_mark, "scale", Vector2(0.8, 0.8), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
