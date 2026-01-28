@@ -16,10 +16,84 @@ const NODE_FRONT_SPRITE = "FrontSprite"
 const NODE_GRAPPLE_POINT = "GrapplePoint"
 const NODE_SHADOW_SPRITE = "ShadowSprite"
 
+# === HIGHLIGHTING LOGIC ===
+# Store initial modulations per node instance to handle diverse base colors correctly
+var _initial_modulations: Dictionary = {}
+var _is_highlighted: bool = false
+var _highlight_halo: Sprite2D = null
+var _highlight_tween: Tween = null
+
 func _ready() -> void:
 	super._ready()
 	_enforce_z_ordering()
+	_store_initial_modulations()
+	_create_highlight_sprite()
 	add_to_group("nails")
+
+func _store_initial_modulations() -> void:
+	var nodes = [get_node_or_null(NODE_FRONT_SPRITE), get_node_or_null(NODE_BACK_SPRITE)]
+	for node in nodes:
+		if node and node is CanvasItem:
+			_initial_modulations[node] = node.modulate
+
+func _create_highlight_sprite() -> void:
+	if _highlight_halo: return
+
+	_highlight_halo = Sprite2D.new()
+	_highlight_halo.name = "HighlightHalo"
+
+	# Procedural Gradient Texture
+	var gradient = Gradient.new()
+	# Use WHITE gradient so that modulate (tint) works correctly with any color.
+	# Core: White
+	gradient.set_color(0, Color(1.0, 1.0, 1.0, 1.0))
+	# Edge: Transparent White
+	gradient.set_color(1, Color(1.0, 1.0, 1.0, 0.0))
+
+	var texture = GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(0.5, 0.0) # Radius 0.5
+	texture.width = 256
+	texture.height = 256
+
+	_highlight_halo.texture = texture
+	_highlight_halo.visible = false
+	_highlight_halo.z_index = -1 # Behind nail (0), in front of shadow (-2)
+	_highlight_halo.modulate = Color("#ffd23dff")
+
+	add_child(_highlight_halo)
+
+func set_highlight(active: bool) -> void:
+	if _is_highlighted == active:
+		return
+
+	_is_highlighted = active
+
+	# Nodes modulation removed to avoid washout. Using only Halo.
+
+	if active:
+		# Show and Pulse Halo
+		if _highlight_halo:
+			_highlight_halo.visible = true
+			_start_pulse_animation()
+
+	else:
+		# Hide Halo
+		if _highlight_halo:
+			_highlight_halo.visible = false
+			if _highlight_tween:
+				_highlight_tween.kill()
+
+func _start_pulse_animation() -> void:
+	if _highlight_tween:
+		_highlight_tween.kill()
+
+	_highlight_tween = create_tween().set_loops()
+	# Pulse Scale: 1.0 -> 1.2 -> 1.0
+	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(1.1, 1.1), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.7, 0.7), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _setup_interaction() -> void:
 	interaction_name = "BaseNail"
@@ -72,3 +146,5 @@ func _update_visual() -> void:
 
 func get_boost_multiplier() -> float:
 	return 1.0
+
+

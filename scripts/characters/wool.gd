@@ -76,6 +76,7 @@ func _process(delta: float) -> void:
 
 	_update_pickaxe_visual()
 	_update_shadows()
+	_update_nail_highlight()
 
 # === OVERRIDDEN METHODS FOR BASE PLAYER ===
 
@@ -544,15 +545,32 @@ func _get_jump_held() -> bool:
 
 func _find_best_grapple_target() -> Interaction:
 	var best_target: Interaction = null
-	var best_x: float = -INF
+	var best_score: float = -INF
 
-	# Use built-in nearby_interactions from BaseCharacter
+	# Weights for selection criteria
+	var w_forward: float = 1.0
+	var w_up: float = 1.5 # Slight preference for height to keep momentum
+
+	# Scan all nearby interactions
 	for interaction in nearby_interactions:
 		if interaction is BaseNail and not interaction.is_being_used():
-			var x_pos: float = interaction.global_position.x
-			# Choose the nail with the largest X (most forward)
-			if x_pos > best_x:
-				best_x = x_pos
+			var nail_pos = interaction.global_position
+			var player_pos = global_position
+
+			# Relative Position
+			var dx = nail_pos.x - player_pos.x
+			var dy = player_pos.y - nail_pos.y # Inverted because godot Y is down (-Y is Up)
+
+			# Score Calculation
+			# We want to maximize Forward (dx) and Up (dy)
+			var score = (dx * w_forward) + (dy * w_up)
+
+			# Filter: Optional strict check?
+			# User said PREFER, so let the score handle it.
+			# A nail behind (-dx) will have a negative score and likely be beaten by any forward nail.
+
+			if score > best_score:
+				best_score = score
 				best_target = interaction
 
 	return best_target
@@ -592,6 +610,7 @@ func _update_shadows() -> void:
 			shadow_skin.flip_h = anim_sprite.flip_h
 			shadow_skin.flip_v = anim_sprite.flip_v
 
+
 	# Synchronize Pickaxe Shadow
 	if pickaxe and shadow_pickaxe:
 		shadow_pickaxe.visible = pickaxe.visible
@@ -607,3 +626,32 @@ func _update_shadows() -> void:
 
 		# Keep Z-Index fixed at -1
 		shadow_pickaxe.z_index = -1
+
+# === NAIL HIGHLIGHTING ===
+var _current_highlighted_nail: BaseNail = null
+
+func _update_nail_highlight() -> void:
+	# If we are already grappling, we don't need to highlight new targets
+	# (OR: maybe we DO if we want to show where we'd switch to? For now, disable in grapple state for clarity)
+	var is_grappling = grappling_feature and grappling_feature.is_active()
+
+	var best_nail: BaseNail = null
+	if not is_grappling:
+		# Use the same logic as the actual grapple check
+		var target = _find_best_grapple_target()
+		if target and target is BaseNail:
+			best_nail = target as BaseNail
+
+	# Update State
+	if _current_highlighted_nail != best_nail:
+
+		# Unhighlight old
+		if is_instance_valid(_current_highlighted_nail):
+			_current_highlighted_nail.set_highlight(false)
+
+		_current_highlighted_nail = best_nail
+
+		# Highlight new
+		if is_instance_valid(_current_highlighted_nail):
+			_current_highlighted_nail.set_highlight(true)
+
