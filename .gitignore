@@ -1,12 +1,26 @@
 # Godot 4+ specific ignores
 .godot/
+
 # Android
 android/build/build/
 android/build/.gradle/
 
+# Certificates
+/certificates/
+
 # Build artifacts
 /build/
 ios/
+
+# Vendor
+/.vendor/
+
+# Fastlane
+/fastlane/*
+!/fastlane/Fastfile
+
+# Env
+.env
 
 # Export artifacts
 tweakables_export.json
