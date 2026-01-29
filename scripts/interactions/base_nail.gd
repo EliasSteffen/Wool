@@ -61,7 +61,7 @@ func _create_highlight_sprite() -> void:
 	_highlight_halo.texture = texture
 	_highlight_halo.visible = false
 	_highlight_halo.z_index = -1 # Behind nail (0), in front of shadow (-2)
-	_highlight_halo.modulate = Color("#ffd23dff")
+	_highlight_halo.modulate = Color("#ffffff")
 
 	add_child(_highlight_halo)
 
@@ -92,8 +92,8 @@ func _start_pulse_animation() -> void:
 
 	_highlight_tween = create_tween().set_loops()
 	# Pulse Scale: 1.0 -> 1.2 -> 1.0
-	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(1.1, 1.1), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.7, 0.7), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.8, 0.8), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.5, 0.5), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func _setup_interaction() -> void:
 	interaction_name = "BaseNail"
