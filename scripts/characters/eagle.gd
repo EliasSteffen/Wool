@@ -4,7 +4,7 @@ extends BaseEnemy
 @export var fly_speed: float = 300.0
 
 func _ready() -> void:
-	audio_stream = load("res://assets/sound/eagle.mp3")
+	audio_stream = load("res://assets/sound/eagle.wav")
 	super._ready()
 	# Disable gravity for flying
 	gravity = 0.0

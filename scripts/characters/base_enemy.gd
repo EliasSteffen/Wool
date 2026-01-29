@@ -76,6 +76,10 @@ func _stop_audio() -> void:
 
 # === PUBLIC METHODS ===
 
+func play_audio() -> void:
+	if _sfx_player:
+		_sfx_player.play()
+
 func reset() -> void:
 	velocity = Vector2.ZERO
 	rotation = 0

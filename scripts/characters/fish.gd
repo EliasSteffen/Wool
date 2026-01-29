@@ -10,7 +10,7 @@ var _start_y: float = 0.0
 var _start_x: float = 0.0
 
 func _ready() -> void:
-	audio_stream = load("res://assets/sound/fish.mp3")
+	audio_stream = load("res://assets/sound/fish.wav")
 	super._ready()
 	_start_y = global_position.y
 	_start_x = global_position.x
@@ -66,6 +66,7 @@ func _jump() -> void:
 		var jump_velocity = sqrt(2.0 * gravity * height_diff)
 		velocity.y = -jump_velocity
 		velocity.x = horizontal_speed # Apply lateral movement
+		play_audio()
 		print("DEBUG: Fish jumping with velocity ", velocity)
 	else:
 		velocity.y = -1000.0

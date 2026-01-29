@@ -8,17 +8,18 @@ var _sfx_die_to_enemy_stream: AudioStream
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	
+
 	_music_player = AudioStreamPlayer.new()
 	add_child(_music_player)
 	_music_player.bus = "Music"
+	_music_player.volume_db = linear_to_db(0.5)
 	_music_player.finished.connect(_on_music_finished)
-	
+
 	# Load tracks
 	_main_music_stream = load("res://assets/sound/background-music.mp3")
 	if not _main_music_stream:
 		printerr("AudioManager: Failed to load background-music.mp3")
-		
+
 	_credits_music_stream = load("res://assets/sound/credits-music.mp3")
 	if not _credits_music_stream:
 		printerr("AudioManager: Failed to load credits-music.mp3")
@@ -33,7 +34,7 @@ func _ready() -> void:
 
 func play_main_music() -> void:
 	if not _main_music_stream: return
-	
+
 	# Only switch if playing something else or nothing
 	if _music_player.stream != _main_music_stream:
 		# Crossfade could be added here, but for now simple switch
@@ -45,7 +46,7 @@ func play_main_music() -> void:
 
 func play_credits_music() -> void:
 	if not _credits_music_stream: return
-	
+
 	if _music_player.stream != _credits_music_stream:
 		_music_player.stream = _credits_music_stream
 		_music_player.play()
@@ -74,7 +75,7 @@ func _get_available_sfx_player() -> AudioStreamPlayer:
 	for p in _sfx_pool:
 		if not p.playing:
 			return p
-	
+
 	# Create new if none available
 	var new_player = AudioStreamPlayer.new()
 	add_child(new_player)
