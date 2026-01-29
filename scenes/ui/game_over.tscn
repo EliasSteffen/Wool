@@ -1,9 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://d30ynwp46gi7s"]
+[gd_scene load_steps=5 format=3 uid="uid://d30ynwp46gi7s"]
 
 [ext_resource type="Script" uid="uid://kpvat4vghmvj" path="res://scripts/ui/game_over.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_fu4wh"]
-[ext_resource type="Texture2D" uid="uid://di5efr6n5sflr" path="res://assets/ui/highscore-bar.png" id="3_bar"]
-[ext_resource type="Texture2D" uid="uid://b7v8k1x6j8j6" path="res://assets/character/spucki/spucki-platform.png" id="4_platform"]
+[ext_resource type="Texture2D" uid="uid://db08oomseu5eu" path="res://assets/ui/highscore-bar.png" id="3_bar"]
+[ext_resource type="Texture2D" uid="uid://bygvsfk6jg01t" path="res://assets/character/spucki/spucki-platform.png" id="4_platform"]
 
 [node name="GameOverScreen" type="Control"]
 layout_mode = 3
@@ -94,7 +94,6 @@ anchor_bottom = 0.5
 grow_vertical = 2
 
 [node name="PlatformSprite" type="Sprite2D" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/PlatformContainer"]
-scale = Vector2(1.0, 1.0)
 texture = ExtResource("4_platform")
 
 [node name="WoolMarker" type="Marker2D" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer"]
@@ -105,14 +104,13 @@ position = Vector2(0, 0)
 scale = Vector2(0.15, 0.15)
 
 [node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker"]
-layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -100.0
-offset_top = 80.0
-offset_right = 100.0
-offset_bottom = 125.0
+offset_left = -102.0
+offset_top = 127.0
+offset_right = 104.0
+offset_bottom = 174.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 32

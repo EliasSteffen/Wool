@@ -74,6 +74,7 @@ func _setup_score_display(fade_duration: float) -> void:
 	platform_sprite.rotation = 0
 	platform_sprite.scale = Vector2(1, 1)
 	wool_marker.position.x = 0 # Start at 0
+	wool_marker.position.y = 18.0 # Offset to walk on bar
 
 	# Wait for layout
 	var retries = 0
@@ -100,19 +101,8 @@ func _setup_score_display(fade_duration: float) -> void:
 		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.1, 1.1), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		pulse_tween.tween_property(new_highscore_label, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
-	# Main Animation
-	_move_tween = create_tween().set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
-	# Using Linear for speed matching? No, usually ease-out looks better.
-	# If I use ease-out for both, and same duration, they will desync if distances differ (which they do).
-	# To keep them "together" initially, they must have same SPEED profile.
-
-	# Platform Duration = Base Duration (e.g. 2.0s)
-	# Wool Duration = Base Duration * (wool_target / platform_target) = Base * ratio?
-	# IF we use Linear.
-	# If we use Quad ease-out, speed varies over time. Syncing two different distance tweens is hard.
-
-	# Alternative: Tween a "progress" value from 0.0 to 1.0
-	# Then manually set positions in `tween_method` or `_process`.
+	# Main Animation Sequence
+	_move_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	_move_tween.finished.connect(func():
 		_move_tween = null
@@ -120,23 +110,33 @@ func _setup_score_display(fade_duration: float) -> void:
 	)
 	_move_tween.tween_interval(fade_duration * 0.5)
 
-	# Start Walk
+	# 1. Platform moves FAST to the end
+	var platform_duration = 1.2 # Fast
+	_move_tween.tween_method(_animate_platform.bind(total_width), 0.0, 1.0, platform_duration).set_ease(Tween.EASE_OUT)
+
+	# 2. Wool Waits
+	_move_tween.tween_interval(0.2)
+
+	var wool_limit = total_width * ratio
+
+	# 3. Wool Walks to score
 	_move_tween.tween_callback(func():
 		if internal_wool_sprite: internal_wool_sprite.play("walk")
 	)
 
-	# We will tween a generic float 't' from 0.0 to 1.0
-	_move_tween.tween_method(_animate_progress.bind(total_width, ratio), 0.0, 1.0, 4.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# Duration proportional to distance
+	var walk_duration = 2.0 * ratio
+	if walk_duration < 1.0: walk_duration = 1.0
+
+	_move_tween.tween_method(_animate_wool.bind(wool_limit, current_score), 0.0, 1.0, walk_duration).set_ease(Tween.EASE_OUT)
 
 	# End
 	_move_tween.tween_callback(func():
 		if internal_wool_sprite: internal_wool_sprite.play("idle")
 	)
 
-func _animate_progress(t: float, total_width: float, score_ratio: float) -> void:
+func _animate_platform(t: float, total_width: float) -> void:
 	# T goes 0->1
-
-	# Platform moves full width based on T
 	var platform_x = total_width * t
 	platform_container.position.x = platform_x
 	bar_mask.size.x = platform_x
@@ -152,43 +152,20 @@ func _animate_progress(t: float, total_width: float, score_ratio: float) -> void
 	var shrink_scale = lerp(1.0, 0.25, t)
 	platform_sprite.scale = Vector2(shrink_scale, shrink_scale)
 
-	# "then let him dissappear" -> at the very end
+	# Disappear at very end
 	if t >= 0.99:
 		platform_sprite.visible = false
 	else:
 		platform_sprite.visible = true
 
-	# Wool moves with platform untill it reaches limit
-	# Wool limit = total_width * score_ratio
-	# Wool follows platform position, clamped to limit.
-	var wool_limit = total_width * score_ratio
-	var wool_x = min(platform_x, wool_limit)
-	wool_marker.position.x = wool_x
+func _animate_wool(t: float, max_x: float, max_score: int) -> void:
+	# T goes 0->1
+	var current_x = max_x * t
+	wool_marker.position.x = current_x
 
-	# Update Score Text
-	# Score is proportional to WOOL position, not T
-	var current_score_val = int((wool_x / total_width) * float(GameManager.highscore)) # Approximate?
-	# Better: map wool_x back to score
-	# wool_x / wool_limit = fraction of score? No.
-	# wool_limit matches current_score.
-	# So fraction = wool_x / (total_width * ratio) * current_score?
-	# = wool_x / wool_limit * current_score.
-
-	var disp_score = 0
-	if wool_limit > 0.001:
-		disp_score = int((wool_x / wool_limit) * float(GameManager.max_run_distance))
-
+	# Score
+	var disp_score = int(float(max_score) * t)
 	if score_label: score_label.text = str(disp_score) + "m"
-
-	# Handle Wool Animation state
-	if internal_wool_sprite:
-		if wool_x >= wool_limit and t < 1.0 and score_ratio < 1.0:
-			# Wool stopped moving but platform continues
-			if internal_wool_sprite.animation != "idle":
-				internal_wool_sprite.play("idle")
-		else:
-			if internal_wool_sprite.animation != "walk":
-				internal_wool_sprite.play("walk")
 
 
 func _input(event: InputEvent) -> void:
@@ -214,9 +191,13 @@ func _skip_to_end() -> void:
 	ratio = clampf(ratio, 0.0, 1.0)
 
 	var total_width = highscore_container.size.x
+	var wool_limit = total_width * ratio
 
 	# End state
-	_animate_progress(1.0, total_width, ratio)
+	_animate_platform(1.0, total_width)
+	_animate_wool(1.0, wool_limit, current_score)
+
+	if internal_wool_sprite: internal_wool_sprite.play("idle")
 
 	_can_interact = true
 
