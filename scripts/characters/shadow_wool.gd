@@ -104,5 +104,9 @@ func die() -> void:
 	# Tutorial controller handles reset loop.
 	pass
 
+func _update_nail_highlight() -> void:
+	# Disable highlighting for Shadow Wool
+	pass
+
 func _should_track_as_player() -> bool:
 	return false
