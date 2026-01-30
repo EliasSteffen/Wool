@@ -31,8 +31,8 @@ export-android:
   variables:
     PLATFORM: android
     PRESET_NAME: Android
-    EXPORT_PATH: build/android/${EXPORT_NAME}.apk
-    EXPORT_TYPE: debug
+    EXPORT_PATH: build/android/${EXPORT_NAME}.aab
+    EXPORT_TYPE: release
 
 export-windows:
   extends: .export
@@ -59,3 +59,15 @@ pages:
     expire_in: 1 week
   only:
     - main
+
+deploy-android:
+  stage: deploy
+  image: ruby:3.2
+  dependencies:
+    - export-android
+  before_script:
+    - gem install fastlane
+  script:
+    - fastlane supply --aab build/android/${EXPORT_NAME}.aab --track internal --package_name com.florentinerge.wooly --json_key "$PLAY_STORE_JSON_KEY" --skip_upload_metadata --skip_upload_images --skip_upload_screenshots --release_status draft
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" && $PLAY_STORE_JSON_KEY
