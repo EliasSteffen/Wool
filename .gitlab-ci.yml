@@ -34,6 +34,7 @@ export-android:
     EXPORT_PATH: build/android/${EXPORT_NAME}.aab
     EXPORT_TYPE: release
   before_script:
+    - apt-get update && apt-get install -y curl
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
 
 export-windows:
