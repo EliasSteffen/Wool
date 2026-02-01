@@ -42,6 +42,9 @@ func _ready() -> void:
 	# Ensure enemies render above Nails (Z=0 and Z=2)
 	z_index = 10
 
+	# Disable collision with other enemies (remove own layer from mask)
+	collision_mask &= ~collision_layer
+
 	# Create Shadow
 	_shadow_sprite = AnimatedSprite2D.new()
 	_shadow_sprite.name = "ShadowSprite"

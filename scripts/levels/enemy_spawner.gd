@@ -59,46 +59,83 @@ func _process(delta: float) -> void:
 
 	var current_dist = GameManager.get_current_distance()
 
+	# Segment Logic
+	# 0 - 500: None
+	# 500 - 1000: Fish
+	# 1000 - 1500: Eagle
+	# 1500 - 2000: Plant
+	# 2000+: All
+
+	var spawn_fish = (current_dist >= 500 and current_dist < 1000) or current_dist >= 2000
+	var spawn_eagle = (current_dist >= 1000 and current_dist < 1500) or current_dist >= 2000
+	var spawn_plant = (current_dist >= 1500 and current_dist < 2000) or current_dist >= 2000
+
 	# Process Eagle Spawning
-	_eagle_timer -= delta
-	if _eagle_timer <= 0:
-		if current_dist >= eagle_min_distance:
+	if spawn_eagle:
+		_eagle_timer -= delta
+		if _eagle_timer <= 0:
 			_spawn_eagle()
-			_reset_eagle_timer()
-		else:
-			_eagle_timer = 1.0
+			_reset_eagle_timer(current_dist)
+	else:
+		_eagle_timer = 2.0 # Keep timer ready but not firing
 
 	# Process Fish Spawning
-	_fish_timer -= delta
-	if _fish_timer <= 0:
-		if current_dist >= fish_min_distance:
+	if spawn_fish:
+		_fish_timer -= delta
+		if _fish_timer <= 0:
 			_spawn_fish()
-			_reset_fish_timer()
-		else:
-			_fish_timer = 1.0
+			_reset_fish_timer(current_dist)
+	else:
+		_fish_timer = 2.0
 
 	# Process Plant Spawning
-	_plant_timer -= delta
-	if _plant_timer <= 0:
-		if current_dist >= plant_min_distance:
+	if spawn_plant:
+		_plant_timer -= delta
+		if _plant_timer <= 0:
 			_spawn_plant()
-			_reset_plant_timer()
-		else:
-			_plant_timer = 1.0
+			_reset_plant_timer(current_dist)
+	else:
+		_plant_timer = 2.0
 
-func _reset_eagle_timer() -> void:
-	_eagle_timer = randf_range(eagle_spawn_interval_min, eagle_spawn_interval_max)
+func _get_difficulty_multiplier(current_dist: float) -> float:
+	if current_dist <= 2000:
+		return 1.0
 
-func _reset_fish_timer() -> void:
-	_fish_timer = randf_range(fish_spawn_interval_min, fish_spawn_interval_max)
+	# Every 500m after 2000m, increase difficulty (reduce time)
+	var steps = int((current_dist - 2000) / 500.0)
+	if steps <= 0: return 1.0
 
-func _reset_plant_timer() -> void:
-	_plant_timer = randf_range(plant_spawn_interval_min, plant_spawn_interval_max)
+	# Reduce interval by 10% per step, capped at 50% (0.5 multiplier)
+	var multiplier = pow(0.9, steps)
+	return max(0.5, multiplier)
+
+func _reset_eagle_timer(current_dist: float = 0.0) -> void:
+	var mult = _get_difficulty_multiplier(current_dist)
+	_eagle_timer = randf_range(eagle_spawn_interval_min, eagle_spawn_interval_max) * mult
+
+func _reset_fish_timer(current_dist: float = 0.0) -> void:
+	var mult = _get_difficulty_multiplier(current_dist)
+	_fish_timer = randf_range(fish_spawn_interval_min, fish_spawn_interval_max) * mult
+
+func _reset_plant_timer(current_dist: float = 0.0) -> void:
+	var mult = _get_difficulty_multiplier(current_dist)
+	_plant_timer = randf_range(plant_spawn_interval_min, plant_spawn_interval_max) * mult
 
 func _spawn_eagle() -> void:
 	if not _player: return
 
-	var spawn_x = _player.global_position.x + spawn_distance_x
+	# Get camera center position
+	var cam_pos = _player.get_viewport().get_camera_2d().global_position
+	# Viewport rect size
+	var viewport_rect = _player.get_viewport_rect()
+	# Size scaled by zoom (assuming camera might have zoom, though usually 1.0)
+	var camera_zoom = _player.get_viewport().get_camera_2d().zoom
+	var visible_width = viewport_rect.size.x / camera_zoom.x
+
+	# Spawn 'offset' pixels to the right of the RIGHT EDGE of the camera
+	# Camera is centered, so right edge is cam_pos.x + visible_width/2
+	var spawn_x = cam_pos.x + (visible_width * 0.5) + spawn_distance_x
+
 	var spawn_y = randf_range(eagle_spawn_height_max, eagle_spawn_height_min)
 
 	var eagle = _eagle_pool.acquire()
@@ -118,7 +155,12 @@ func _spawn_eagle() -> void:
 func _spawn_fish() -> void:
 	if not _player: return
 
-	var spawn_x = _player.global_position.x + spawn_distance_x
+	var cam_pos = _player.get_viewport().get_camera_2d().global_position
+	var viewport_rect = _player.get_viewport_rect()
+	var camera_zoom = _player.get_viewport().get_camera_2d().zoom
+	var visible_width = viewport_rect.size.x / camera_zoom.x
+
+	var spawn_x = cam_pos.x + (visible_width * 0.5) + spawn_distance_x
 	var spawn_y = fish_spawn_y
 
 	var fish = _fish_pool.acquire()
@@ -129,13 +171,17 @@ func _spawn_fish() -> void:
 	fish.global_position = Vector2(spawn_x, spawn_y)
 	if fish.has_method("reset"): fish.reset()
 
-	print("DEBUG: Fish spawned at ", fish.global_position)
 	_add_enemy(fish, "Fish")
 
 func _spawn_plant() -> void:
 	if not _player: return
 
-	var spawn_x = _player.global_position.x + spawn_distance_x
+	var cam_pos = _player.get_viewport().get_camera_2d().global_position
+	var viewport_rect = _player.get_viewport_rect()
+	var camera_zoom = _player.get_viewport().get_camera_2d().zoom
+	var visible_width = viewport_rect.size.x / camera_zoom.x
+
+	var spawn_x = cam_pos.x + (visible_width * 0.5) + spawn_distance_x
 	var spawn_y = plant_spawn_y
 
 	var plant = _plant_pool.acquire()

@@ -50,8 +50,6 @@ func trigger() -> void:
 	var scaler = ScaleUtils.scaled_value(fall_delay, decay_percent, steps)
 	var current_delay = max(scaler, min_fall_delay)
 
-	print("DEBUG: Rusty Nail at %.0f px (Step %d). Delay: %.2f s" % [nail_x, steps, current_delay])
-
 	# Emit signal using GameManager
 	GameManager.rusty_nail_timer_started.emit(current_delay)
 

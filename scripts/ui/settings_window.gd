@@ -32,6 +32,7 @@ func _ready() -> void:
 	flat_style.corner_radius_bottom_right = 0
 	close_button.add_theme_stylebox_override("normal", flat_style)
 	close_button.add_theme_stylebox_override("hover", flat_style)
+	close_button.add_theme_stylebox_override("pressed", flat_style)
 	# Use asset icon for close (icon-only)
 	close_button.text = ""
 	var close_icon: Texture2D = preload("res://assets/ui/close-button.png")
@@ -84,36 +85,16 @@ func _build_ui() -> void:
 	for child in container.get_children():
 		child.queue_free()
 
-	# Add Export Button
-	var export_btn = Button.new()
-	export_btn.text = "Export Settings as JSON"
-	export_btn.custom_minimum_size.y = 120 # Larger mobile touch target
-	export_btn.add_theme_font_size_override("font_size", 48)
-	export_btn.pressed.connect(_on_export_pressed)
-	# Apply modern rounded style
-	var UITheme = preload("res://scripts/ui/ui_theme.gd")
-	UITheme.apply_modern_button_style(export_btn, Vector2(0, 100), false)
-	container.add_child(export_btn)
+	# 1. Master Volume
+	_add_volume_slider("Master Volume", "Master")
 
-	# Add separator
-	container.add_child(HSeparator.new())
+	# 2. Music Volume
+	_add_volume_slider("Music Volume", "Music")
 
-	# Build new from all registries
-	for registry in Tweakables.registries:
-		for category in registry.settings:
-			_add_category_header(category)
-			for key in registry.settings[category]:
-				_add_setting_row(registry, category, key, registry.settings[category][key])
+	# 3. SFX Volume
+	_add_volume_slider("SFX Volume", "SFX")
 
-func _add_category_header(text: String) -> void:
-	var label = Label.new()
-	label.text = "--- " + text + " ---"
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_color_override("font_color", Color(0.4, 0.6, 1.0)) # Modern blue
-	label.add_theme_font_size_override("font_size", 48)
-	container.add_child(label)
-
-func _add_setting_row(registry: BaseConstants, category: String, key: String, data: Dictionary) -> void:
+func _add_volume_slider(label_text: String, bus_name: String) -> void:
 	# Create a PanelContainer wrapper for each block
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
@@ -137,112 +118,65 @@ func _add_setting_row(registry: BaseConstants, category: String, key: String, da
 	main_vbox.add_theme_constant_override("separation", 15)
 	panel.add_child(main_vbox)
 
-	# TOP ROW: Name and Value Input
-	var top_hbox = HBoxContainer.new()
-	main_vbox.add_child(top_hbox)
-
+	# Label
 	var label = Label.new()
-	label.text = key
+	label.text = label_text
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_font_size_override("font_size", 36)
 	label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
-	top_hbox.add_child(label)
+	main_vbox.add_child(label)
 
-	var value = data["value"]
-	var type = data.get("type", "")
+	# Slider Row
+	var slider_hbox = HBoxContainer.new()
+	slider_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	# DESCRIPTION ROW (if any)
-	if data.has("description"):
-		var desc_label = Label.new()
-		desc_label.text = data["description"]
-		desc_label.add_theme_font_size_override("font_size", 24)
-		desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
-		desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		main_vbox.add_child(desc_label)
+	var slider = HSlider.new()
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.custom_minimum_size.y = 100 # Larger touch area
 
-	# SLIDER / INPUT ROW
-	if type == "bool" or typeof(value) == TYPE_BOOL:
-		var check = CheckBox.new()
-		check.button_pressed = value
-		check.custom_minimum_size = Vector2(100, 100)
-		check.scale = Vector2(2.0, 2.0)
-		check.toggled.connect(func(toggled):
-			registry.set_value(category, key, toggled)
-		)
-		top_hbox.add_child(check)
+	# Styles
+	var slider_style = StyleBoxFlat.new()
+	slider_style.bg_color = Color(0.2, 0.2, 0.2)
+	slider_style.expand_margin_top = 20
+	slider_style.expand_margin_bottom = 20
+	slider_style.corner_radius_top_left = 20
+	slider_style.corner_radius_top_right = 20
+	slider_style.corner_radius_bottom_left = 20
+	slider_style.corner_radius_bottom_right = 20
 
-	elif type == "color" or typeof(value) == TYPE_COLOR:
-		var picker = ColorPickerButton.new()
-		picker.color = value
-		picker.custom_minimum_size = Vector2(150, 80)
-		picker.color_changed.connect(func(col):
-			registry.set_value(category, key, col)
-		)
-		top_hbox.add_child(picker)
+	var slider_active_style = slider_style.duplicate()
+	slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Modern Blue
+	slider_active_style.expand_margin_left = 10
+	slider_active_style.expand_margin_right = 10
 
-	elif typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT:
-		var spinbox = SpinBox.new()
-		spinbox.min_value = data.get("min", 0.0)
-		spinbox.max_value = data.get("max", 1000.0)
-		spinbox.step = data.get("step", 1.0)
-		spinbox.value = value
-		spinbox.custom_minimum_size = Vector2(220, 90)
-		spinbox.get_line_edit().add_theme_font_size_override("font_size", 32)
-		spinbox.get_line_edit().alignment = HORIZONTAL_ALIGNMENT_CENTER
-		# Hide the up/down buttons
-		var empty_style = StyleBoxEmpty.new()
-		spinbox.add_theme_stylebox_override("up", empty_style)
-		spinbox.add_theme_stylebox_override("down", empty_style)
-		# top_hbox.add_child(spinbox) # REMOVED from top row
+	slider.add_theme_stylebox_override("slider", slider_style)
+	slider.add_theme_stylebox_override("grabber_area", slider_active_style)
+	slider.add_theme_stylebox_override("grabber_area_highlight", slider_active_style)
 
-		# Slider with a "Scroll Lane" (spacer) and the numerical Value
-		var slider_hbox = HBoxContainer.new()
-		slider_hbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Audio Logic
+	var bus_idx = AudioServer.get_bus_index(bus_name)
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.01
 
-		var slider = HSlider.new()
-		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		slider.custom_minimum_size.y = 150 # Larger touch area
+	# Initialize value from current db
+	if bus_idx != -1:
+		slider.value = db_to_linear(AudioServer.get_bus_volume_db(bus_idx))
 
-		var slider_style = StyleBoxFlat.new()
-		slider_style.bg_color = Color(0.2, 0.2, 0.2)
-		slider_style.expand_margin_top = 20
-		slider_style.expand_margin_bottom = 20
-		slider_style.corner_radius_top_left = 20
-		slider_style.corner_radius_top_right = 20
-		slider_style.corner_radius_bottom_left = 20
-		slider_style.corner_radius_bottom_right = 20
+	slider.value_changed.connect(func(val):
+		var b_idx = AudioServer.get_bus_index(bus_name)
+		if b_idx != -1:
+			AudioServer.set_bus_volume_db(b_idx, linear_to_db(val))
+	)
 
-		var slider_active_style = slider_style.duplicate()
-		slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Modern Blue
-		slider_active_style.expand_margin_left = 10
-		slider_active_style.expand_margin_right = 10
+	slider_hbox.add_child(slider)
 
-		slider.add_theme_stylebox_override("slider", slider_style)
-		slider.add_theme_stylebox_override("grabber_area", slider_active_style)
-		slider.add_theme_stylebox_override("grabber_area_highlight", slider_active_style)
+	# Spacer
+	var spacer = Control.new()
+	spacer.custom_minimum_size.x = 20
+	slider_hbox.add_child(spacer)
 
-		slider.min_value = data.get("min", 0.0)
-		slider.max_value = data.get("max", 1000.0)
-		slider.step = data.get("step", 1.0)
-		slider.value = value
-
-		# Sync
-		slider.value_changed.connect(func(new_val):
-			registry.set_value(category, key, new_val)
-		)
-
-		slider_hbox.add_child(slider)
-
-		# The Scroll Lane: 400px spacer for safe swiping
-		var scroll_lane = Control.new()
-		scroll_lane.custom_minimum_size.x = 400
-		slider_hbox.add_child(scroll_lane)
-
-		# Move the numerical value here, after the spacer
-		# slider_hbox.add_child(spinbox)  # Removed as per user request
-
-		main_vbox.add_child(slider_hbox)
-
+	main_vbox.add_child(slider_hbox)
 	container.add_child(panel)
 
 func open() -> void:

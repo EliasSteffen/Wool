@@ -67,7 +67,6 @@ func _jump() -> void:
 		velocity.y = -jump_velocity
 		velocity.x = horizontal_speed # Apply lateral movement
 		play_audio()
-		print("DEBUG: Fish jumping with velocity ", velocity)
 	else:
 		velocity.y = -1000.0
 		velocity.x = horizontal_speed

@@ -29,6 +29,7 @@ func _ready() -> void:
 	flat_style.corner_radius_bottom_right = 0
 	pause_button.add_theme_stylebox_override("normal", flat_style)
 	pause_button.add_theme_stylebox_override("hover", flat_style)
+	pause_button.add_theme_stylebox_override("pressed", flat_style)
 
 	# Configure RustyNailTimer rounded visuals
 	var bg_style := StyleBoxFlat.new()

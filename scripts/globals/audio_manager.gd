@@ -40,7 +40,6 @@ func play_main_music() -> void:
 		# Crossfade could be added here, but for now simple switch
 		_music_player.stream = _main_music_stream
 		_music_player.play()
-		print("AudioManager: Main music started.")
 	elif not _music_player.playing:
 		_music_player.play()
 

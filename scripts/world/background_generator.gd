@@ -290,7 +290,8 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 			else:
 				dec_sprite.rotation = _rng.randf_range(-0.1, 0.1)
 
-			decoration_layer.add_child(dec_sprite)
+			if dec_sprite.get_parent() != decoration_layer:
+				decoration_layer.add_child(dec_sprite)
 			_decoration_nodes.append(dec_sprite)
 
 func _load_background_textures_from_folder() -> void:

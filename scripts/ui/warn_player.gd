@@ -51,8 +51,8 @@ func _update_position() -> void:
 
 func _start_pulsing() -> void:
 	var tween = create_tween().set_loops()
-	# Scale up to 1.0
-	tween.tween_property(exclamation_mark, "scale", Vector2(1.0, 1.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	# Scale down to 0.8
-	tween.tween_property(exclamation_mark, "scale", Vector2(0.8, 0.8), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale up to 2.0 (Double size)
+	tween.tween_property(exclamation_mark, "scale", Vector2(2.0, 2.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Scale down to 1.6 (Double of 0.8)
+	tween.tween_property(exclamation_mark, "scale", Vector2(1.6, 1.6), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 

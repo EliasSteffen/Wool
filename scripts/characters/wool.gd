@@ -59,7 +59,7 @@ func _setup_sounds() -> void:
 	sfx_hook = AudioStreamPlayer.new()
 	sfx_hook.stream = load("res://assets/sound/hook.mp3")
 	sfx_hook.bus = "SFX"
-	# add_child(sfx_hook)
+	add_child(sfx_hook)
 
 	sfx_boost = AudioStreamPlayer.new()
 	sfx_boost.stream = load("res://assets/sound/swing-boost.mp3")

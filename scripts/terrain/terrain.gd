@@ -218,5 +218,3 @@ func _on_body_exited(body: Node2D) -> void:
 
 		_characters_in_terrain.erase(body)
 		_remove_character_from_terrain_logic(body)
-
-

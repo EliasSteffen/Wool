@@ -13,7 +13,13 @@ func _ready() -> void:
 
 	settings_button.text = "Settings"
 
-	register_buttons([resume_button, settings_button, credits_button], false, false)
+	register_buttons([settings_button, credits_button], false, false)
+	# Resume button is icon-only and should not have the button background on press
+	var flat_style = StyleBoxFlat.new()
+	flat_style.bg_color = Color(0,0,0,0)
+	resume_button.add_theme_stylebox_override("pressed", flat_style)
+	resume_button.add_theme_stylebox_override("normal", flat_style)
+	resume_button.add_theme_stylebox_override("hover", flat_style)
 
 	setup_credits_button()
 
