@@ -27,3 +27,6 @@ tweakables_export.json
 
 # macOS specific ignores
 **/.DS_Store
+
+release.keystore
+release.keystore.txt
