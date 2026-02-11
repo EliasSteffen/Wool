@@ -31,6 +31,6 @@ func _on_body_entered(body: Node2D) -> void:
 
 		# Don't play death sound for enemies or tutorial ghosts
 		if body.is_in_group("player"):
-			AudioManager.play_sfx_die_to_void()
+			AudioManager.play_sound(AudioManager.WOOL.DIE)
 
 		body.die()

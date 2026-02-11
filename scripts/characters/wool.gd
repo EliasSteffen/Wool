@@ -50,22 +50,6 @@ func _ready() -> void:
 		_initial_pickaxe_centered = pickaxe.centered
 		_initial_pickaxe_offset = pickaxe.offset
 
-	_setup_sounds()
-
-var sfx_hook: AudioStreamPlayer
-var sfx_boost: AudioStreamPlayer
-
-func _setup_sounds() -> void:
-	sfx_hook = AudioStreamPlayer.new()
-	sfx_hook.stream = load("res://assets/sound/hook.mp3")
-	sfx_hook.bus = "SFX"
-	add_child(sfx_hook)
-
-	sfx_boost = AudioStreamPlayer.new()
-	sfx_boost.stream = load("res://assets/sound/swing-boost.mp3")
-	sfx_boost.bus = "SFX"
-	add_child(sfx_boost)
-
 func _process(delta: float) -> void:
 	super._process(delta)
 
@@ -473,9 +457,6 @@ func _handle_input() -> void:
 			# Game start logic
 			_game_started = true
 
-			# Ensure music overrides on first interaction (iOS fix)
-			AudioManager.play_main_music()
-
 			_ignore_hold_gravity = true
 			_jump()
 			_direction = 1.0
@@ -508,8 +489,7 @@ func _handle_input() -> void:
 					# Reset held latch on grapple start to prevent immediate re-release issues if sync is off?
 					# No, keep it true as long as held.
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
-					# Play Hook Sound
-					if sfx_hook: sfx_hook.play()
+					AudioManager.play_sound(AudioManager.WOOL.HOOK)
 				else:
 					# No nails nearby, but trying to grapple - increase gravity
 					# Only apply if we are not ignoring the hold (initial start hold)
@@ -523,8 +503,7 @@ func _handle_input() -> void:
 			# RELEASED
 			if is_grappling:
 				grappling_feature.release()
-				# Play Boost Sound
-				if sfx_boost: sfx_boost.play()
+				AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 
 			_extra_gravity = 0.0
 

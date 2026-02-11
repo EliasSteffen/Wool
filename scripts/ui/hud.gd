@@ -23,13 +23,19 @@ func _ready() -> void:
 	# Make button background transparent (icon only)
 	var flat_style := StyleBoxFlat.new()
 	flat_style.bg_color = Color(0,0,0,0)
-	flat_style.corner_radius_top_left = 0
-	flat_style.corner_radius_top_right = 0
-	flat_style.corner_radius_bottom_left = 0
-	flat_style.corner_radius_bottom_right = 0
+	flat_style.corner_radius_top_left = 20
+	flat_style.corner_radius_top_right = 20
+	flat_style.corner_radius_bottom_left = 20
+	flat_style.corner_radius_bottom_right = 20
+
 	pause_button.add_theme_stylebox_override("normal", flat_style)
 	pause_button.add_theme_stylebox_override("hover", flat_style)
-	pause_button.add_theme_stylebox_override("pressed", flat_style)
+
+	# Light gray feedback for pressed/focus
+	var feedback_style := flat_style.duplicate()
+	feedback_style.bg_color = Color(1, 1, 1, 0.2)
+	pause_button.add_theme_stylebox_override("pressed", feedback_style)
+	pause_button.add_theme_stylebox_override("focus", feedback_style)
 
 	# Configure RustyNailTimer rounded visuals
 	var bg_style := StyleBoxFlat.new()

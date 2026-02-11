@@ -1,93 +1,82 @@
 extends Node
 
-var _music_player: AudioStreamPlayer
-var _main_music_stream: AudioStream
-var _credits_music_stream: AudioStream
-var _sfx_die_to_void_stream: AudioStream
-var _sfx_die_to_enemy_stream: AudioStream
+# --- Constants for Sound Access ---
+const WOOL = {
+	HOOK = "wool_hook",
+	DIE = "wool_die",
+	SCHWINGEN = "wool_swing",
+	FALLING = "wool_falling"
+}
+
+const ENEMIES = {
+	BIRD = "enemy_bird",
+	SPUCKI = "enemy_spucki"
+}
+
+const GAME = {
+	ANFANG = "game_start",
+	HIGHSCORE = "game_highscore",
+	WARN = "game_warn"
+}
+
+# Values map to file paths
+var _sound_files = {
+	WOOL.HOOK: "res://assets/sound/wool/hook.wav",
+	WOOL.DIE: "res://assets/sound/wool/die.wav",
+	WOOL.SCHWINGEN: "res://assets/sound/wool/schwingen.wav",
+	WOOL.FALLING: "res://assets/sound/wool/falling.wav",
+
+	ENEMIES.BIRD: "res://assets/sound/enemies/bird.wav",
+	ENEMIES.SPUCKI: "res://assets/sound/enemies/spucki.wav",
+
+	GAME.ANFANG: "res://assets/sound/game/anfang.wav",
+	GAME.HIGHSCORE: "res://assets/sound/game/highscore.wav",
+	GAME.WARN: "res://assets/sound/game/warn.wav"
+}
+
+var _loaded_sounds = {}
+var _sfx_pool: Array[AudioStreamPlayer] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	load_sounds()
 
-	_music_player = AudioStreamPlayer.new()
-	add_child(_music_player)
-	_music_player.bus = "Music"
-	_music_player.volume_db = linear_to_db(0.5)
-	_music_player.finished.connect(_on_music_finished)
+func load_sounds() -> void:
+	for key in _sound_files:
+		var path = _sound_files[key]
+		if ResourceLoader.exists(path):
+			var stream = load(path)
+			if stream:
+				_loaded_sounds[key] = stream
+				print("AudioManager: Loaded sound '", key, "' from ", path)
+			else:
+				printerr("AudioManager: Failed to load sound stream from ", path)
+		else:
+			printerr("AudioManager: Sound file not found at ", path)
 
-	# Load tracks
-	_main_music_stream = load("res://assets/sound/background-music.mp3")
-	if not _main_music_stream:
-		printerr("AudioManager: Failed to load background-music.mp3")
+func play_sound(sound_id: String) -> void:
+	if not _loaded_sounds.has(sound_id):
+		printerr("AudioManager: Play requested for unknown or unloaded sound: ", sound_id)
+		return
 
-	_credits_music_stream = load("res://assets/sound/credits-music.mp3")
-	if not _credits_music_stream:
-		printerr("AudioManager: Failed to load credits-music.mp3")
-
-	_sfx_die_to_void_stream = load("res://assets/sound/die-to-void.mp3")
-	if not _sfx_die_to_void_stream:
-		printerr("AudioManager: Failed to load die-to-void.mp3")
-
-	_sfx_die_to_enemy_stream = load("res://assets/sound/die-to-enemy.mp3")
-	if not _sfx_die_to_enemy_stream:
-		printerr("AudioManager: Failed to load die-to-enemy.mp3")
-
-func play_main_music() -> void:
-	if not _main_music_stream: return
-
-	# Only switch if playing something else or nothing
-	if _music_player.stream != _main_music_stream:
-		# Crossfade could be added here, but for now simple switch
-		_music_player.stream = _main_music_stream
-		_music_player.play()
-	elif not _music_player.playing:
-		_music_player.play()
-
-func play_credits_music() -> void:
-	if not _credits_music_stream: return
-
-	if _music_player.stream != _credits_music_stream:
-		_music_player.stream = _credits_music_stream
-		_music_player.play()
-		print("AudioManager: Credits music started.")
-	elif not _music_player.playing:
-		_music_player.play()
-
-
-func play_sfx_die_to_void() -> void:
-	if not _sfx_die_to_void_stream: return
+	var stream = _loaded_sounds[sound_id]
 	var player = _get_available_sfx_player()
-	player.stream = _sfx_die_to_void_stream
+	player.stream = stream
 	player.bus = "SFX"
 	player.play()
 
-func play_sfx_die_to_enemy() -> void:
-	if not _sfx_die_to_enemy_stream: return
-	var player = _get_available_sfx_player()
-	player.stream = _sfx_die_to_enemy_stream
-	player.bus = "SFX"
-	player.play()
-
-var _sfx_pool: Array[AudioStreamPlayer] = []
+func get_sound_stream(sound_id: String) -> AudioStream:
+	if not _loaded_sounds.has(sound_id):
+		printerr("AudioManager: Stream requested for unknown or unloaded sound: ", sound_id)
+		return null
+	return _loaded_sounds[sound_id]
 
 func _get_available_sfx_player() -> AudioStreamPlayer:
 	for p in _sfx_pool:
 		if not p.playing:
 			return p
 
-	# Create new if none available
 	var new_player = AudioStreamPlayer.new()
 	add_child(new_player)
 	_sfx_pool.append(new_player)
 	return new_player
-
-# Deprecated shorthand, maps to main music
-func play_music() -> void:
-	play_main_music()
-
-func stop_music() -> void:
-	_music_player.stop()
-
-func _on_music_finished() -> void:
-	# Loop current track
-	_music_player.play()

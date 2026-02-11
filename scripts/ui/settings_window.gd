@@ -1,38 +1,48 @@
 extends CanvasLayer
 
 @onready var container: VBoxContainer = $Panel/ScrollContainer/VBoxContainer
-@onready var close_button: Button = $Panel/Header/CloseButton
+@onready var close_button: Button = $Panel/CloseButton
 
 func _ready() -> void:
 	close_button.pressed.connect(close)
 
-	# Make panel less transparent (more opaque)
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.2, 0.2, 0.25, 0.95) # Modern blue-grey
-	style.border_color = Color(0.3, 0.3, 0.4, 1.0)
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.border_width_top = 2
-	style.border_width_bottom = 2
-	style.corner_radius_top_left = 16
-	style.corner_radius_top_right = 16
-	style.corner_radius_bottom_left = 16
-	style.corner_radius_bottom_right = 16
+	# --- PAPER / CRAFT THEME ---
+
+	# Main Panel: Paper Beige
+	# Main Panel: Paper Texture Background
+	var style = StyleBoxTexture.new()
+	style.texture = load("res://assets/ui/settings-background.png")
+
+	# Set margins essentially to 0 or appropriate values if the image has borders
+	# Assuming full stretch as requested "scale it to fit"
+	# We can keep content margins if needed for inner padding
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 20
+	style.content_margin_bottom = 20
+
+	# If the image shouldn't be tiled, we assume stretch (default axis stretch mode is STRETCH)
+	# But StyleBoxTexture defaults to scaling to fit.
+
 	$Panel.add_theme_stylebox_override("panel", style)
 
 	# Apply modern rounded style to the close button (icon-like)
 	var UITheme = preload("res://scripts/ui/ui_theme.gd")
 	UITheme.apply_modern_button_style(close_button, Vector2(100, 100), true)
-	# Make close button background transparent (icon-only)
+
+	# Update Close Button to use Light Gray Feedback instead of invisible
 	var flat_style := StyleBoxFlat.new()
 	flat_style.bg_color = Color(0,0,0,0)
-	flat_style.corner_radius_top_left = 0
-	flat_style.corner_radius_top_right = 0
-	flat_style.corner_radius_bottom_left = 0
-	flat_style.corner_radius_bottom_right = 0
+
+	var feedback_style := flat_style.duplicate()
+	feedback_style.bg_color = Color(0, 0, 0, 0.1) # Darker gray for paper theme contrast
+	feedback_style.set_corner_radius_all(50) # Round
+
 	close_button.add_theme_stylebox_override("normal", flat_style)
 	close_button.add_theme_stylebox_override("hover", flat_style)
-	close_button.add_theme_stylebox_override("pressed", flat_style)
+	close_button.add_theme_stylebox_override("pressed", feedback_style)
+	close_button.add_theme_stylebox_override("focus", feedback_style)
+
 	# Use asset icon for close (icon-only)
 	close_button.text = ""
 	var close_icon: Texture2D = preload("res://assets/ui/close-button.png")
@@ -50,15 +60,12 @@ func _ready() -> void:
 		close_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
 	close_icon_rect.texture = close_icon
 
-	# Enhance header visuals (rounded, slight accent)
+	# Enhance header visuals
 	var header = $Panel.get_node_or_null("Header")
 	if header:
+		# Header Background: Transparent to show main background
 		var header_style = StyleBoxFlat.new()
-		header_style.bg_color = Color(0.15, 0.15, 0.2, 0.95) # Slightly lighter blue-grey
-		header_style.border_color = Color(0.25, 0.25, 0.35, 1.0)
-		header_style.border_width_bottom = 1
-		header_style.corner_radius_top_left = 16
-		header_style.corner_radius_top_right = 16
+		header_style.bg_color = Color(0, 0, 0, 0) # Transparent
 		header_style.content_margin_left = 16
 		header_style.content_margin_right = 16
 		header_style.content_margin_top = 12
@@ -66,8 +73,10 @@ func _ready() -> void:
 		header.add_theme_stylebox_override("panel", header_style)
 		for child in header.get_children():
 			if child is Label:
+				# Header Text: Dark Ink
 				child.add_theme_font_size_override("font_size", 40)
-				child.add_theme_color_override("font_color", Color(0.95, 0.95, 1.0))
+				child.add_theme_color_override("font_color", Color(0.2, 0.15, 0.1)) # Dark Ink
+				child.add_theme_color_override("font_shadow_color", Color(0,0,0,0)) # Remove shadow if any
 
 	_build_ui()
 
@@ -98,12 +107,8 @@ func _add_volume_slider(label_text: String, bus_name: String) -> void:
 	# Create a PanelContainer wrapper for each block
 	var panel = PanelContainer.new()
 	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.25, 0.25, 0.3, 0.9) # Lighter blue-grey for contrast
-	style.border_color = Color(0.35, 0.35, 0.45, 1.0)
-	style.border_width_left = 1
-	style.border_width_right = 1
-	style.border_width_top = 1
-	style.border_width_bottom = 1
+	# Slider Row Background: Dark for high contrast against beige/bright background
+	style.bg_color = Color(0.2, 0.2, 0.2, 0.9)
 	style.corner_radius_top_left = 12
 	style.corner_radius_top_right = 12
 	style.corner_radius_bottom_left = 12
@@ -115,15 +120,15 @@ func _add_volume_slider(label_text: String, bus_name: String) -> void:
 	panel.add_theme_stylebox_override("panel", style)
 
 	var main_vbox = VBoxContainer.new()
-	main_vbox.add_theme_constant_override("separation", 15)
+	main_vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(main_vbox)
 
 	# Label
 	var label = Label.new()
 	label.text = label_text
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 36)
-	label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.95))
+	label.add_theme_font_size_override("font_size", 32)
+	label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95)) # Light color
 	main_vbox.add_child(label)
 
 	# Slider Row
@@ -134,24 +139,26 @@ func _add_volume_slider(label_text: String, bus_name: String) -> void:
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.custom_minimum_size.y = 100 # Larger touch area
 
-	# Styles
-	var slider_style = StyleBoxFlat.new()
-	slider_style.bg_color = Color(0.2, 0.2, 0.2)
-	slider_style.expand_margin_top = 20
-	slider_style.expand_margin_bottom = 20
-	slider_style.corner_radius_top_left = 20
-	slider_style.corner_radius_top_right = 20
-	slider_style.corner_radius_bottom_left = 20
-	slider_style.corner_radius_bottom_right = 20
+	# Styles for Slider (Yarn-like)
+	var slider_bg_style = StyleBoxFlat.new()
+	slider_bg_style.bg_color = Color(0.85, 0.8, 0.75) # Cardboard/Dark Beige track
+	slider_bg_style.expand_margin_top = 10
+	slider_bg_style.expand_margin_bottom = 10
+	slider_bg_style.corner_radius_top_left = 10
+	slider_bg_style.corner_radius_top_right = 10
+	slider_bg_style.corner_radius_bottom_left = 10
+	slider_bg_style.corner_radius_bottom_right = 10
 
-	var slider_active_style = slider_style.duplicate()
-	slider_active_style.bg_color = Color(0.4, 0.6, 1.0) # Modern Blue
-	slider_active_style.expand_margin_left = 10
-	slider_active_style.expand_margin_right = 10
+	var slider_fill_style = slider_bg_style.duplicate()
+	slider_fill_style.bg_color = Color(0.4, 0.6, 0.8) # Soft Blue Yarn
 
-	slider.add_theme_stylebox_override("slider", slider_style)
-	slider.add_theme_stylebox_override("grabber_area", slider_active_style)
-	slider.add_theme_stylebox_override("grabber_area_highlight", slider_active_style)
+	# Grabber (Knob) - needs to be handled via theme constants/icons usually, or just stylebox override for "grabber_area"
+	# HSlider uses icons for grabber. We can mimic a "filled bar" style or just colored track.
+	# "grabber_area" is the filled part to the left.
+
+	slider.add_theme_stylebox_override("slider", slider_bg_style)
+	slider.add_theme_stylebox_override("grabber_area", slider_fill_style)
+	slider.add_theme_stylebox_override("grabber_area_highlight", slider_fill_style)
 
 	# Audio Logic
 	var bus_idx = AudioServer.get_bus_index(bus_name)
@@ -190,43 +197,6 @@ func close() -> void:
 		get_tree().paused = false
 
 func _on_export_pressed() -> void:
-	var export_data: Dictionary = {}
-
-	for registry in Tweakables.registries:
-		# Merge settings from all registries
-		# We assume categories are unique across registries
-		for category in registry.settings:
-			export_data[category] = registry.settings[category]
-
-	var json_string = JSON.stringify(export_data, "\t")
-
-	if OS.has_feature("web"):
-		# Web export: Trigger download via JavaScript
-		var buffer = json_string.to_utf8_buffer()
-		JavaScriptBridge.download_buffer(buffer, "tweakables_export.json", "application/json")
-
-		# Visual feedback
-		var original_text = "Export Settings as JSON"
-		var btn = container.get_child(0) as Button
-		if btn:
-			btn.text = "Downloaded!"
-			await get_tree().create_timer(1.0).timeout
-			btn.text = original_text
-	else:
-		# Desktop/Editor: Save to file
-		var file_path = "res://tweakables_export.json"
-		var file = FileAccess.open(file_path, FileAccess.WRITE)
-
-		if file:
-			file.store_string(json_string)
-			file.close()
-
-			# Visual feedback
-			var original_text = "Export Settings as JSON"
-			var btn = container.get_child(0) as Button
-			if btn:
-				btn.text = "Saved!"
-				await get_tree().create_timer(1.0).timeout
-				btn.text = original_text
-		else:
-			push_error("Failed to save settings to " + file_path)
+	# Export feature removed/hidden as per previous simplification,
+	# but keeping method if needed in future or just remove reference.
+	pass

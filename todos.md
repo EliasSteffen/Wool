@@ -1,0 +1,14 @@
+- The close button of the settings should be perfectly positioned at the top right corner of the settings-background image.
+    - Center of close button image should be at the top right corner of the settings-background image.
+    - Remove the background of the sliders.
+- The credits have to be done correctly!
+    - Programmed by 'Elias'
+    - Assets designed by 'Mischa'
+    - The game was developed within a course at the 'FH Münster'
+        - The name of the course is 'Gamedesign' at University of applied science 'FH Münster'
+        - The course is a collaboration between the 'ETI' and 'MSD' departments of the 'FH Münster'
+        - The Professors were 'Prof. Dr. Kathrin Ungru-Baggemann' and 'Prof. Dipl.-Des. Tina Glückselig'
+        - The course was in the Winter Semester 2025/26
+    - Fonts are from google fonts
+    - SFX come from
+        - 'https://freesound.org/'

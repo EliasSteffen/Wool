@@ -33,6 +33,8 @@ var _debug_key_pressed: Dictionary = {}  # Track key state for debouncing
 var _debug_ui: PlayerDebugUI = null
 var _interaction_prompt_label: Label = null
 var _current_prompt_interaction: Interaction = null
+var _falling_player: AudioStreamPlayer = null
+const FALLING_THRESHOLD: float = 800.0 # Speed to trigger sound
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 var _just_jumped: bool = false
 var _coyote_timer: float = 0.0 # Buffer to allow jumping shortly after leaving ground
@@ -78,7 +80,20 @@ func _ready() -> void:
 
 	# Setup debug UI
 	# call_deferred("_setup_debug_ui")
+	# Setup interaction prompt label
 	call_deferred("_setup_interaction_prompt_label")
+
+	# Setup Falling Audio
+	_falling_player = AudioStreamPlayer.new()
+	add_child(_falling_player)
+	_falling_player.bus = "SFX"
+	# Stream will be set in _process if needed, or preloaded
+	# Better to get it once
+	call_deferred("_setup_falling_audio")
+
+func _setup_falling_audio() -> void:
+	if _falling_player:
+		_falling_player.stream = AudioManager.get_sound_stream(AudioManager.WOOL.FALLING)
 
 var _is_dead: bool = false
 
@@ -89,7 +104,7 @@ func die() -> void:
 	if _is_dead:
 		return
 	_is_dead = true
-	current_health = 0 # Ensure health logic is consistent
+	current_health = 0
 
 	# Disable control
 	can_control = false
@@ -98,31 +113,14 @@ func die() -> void:
 	# Haptic feedback on death (Mobile only)
 	_play_death_haptics()
 
+	# Play death sound
+	AudioManager.play_sound(AudioManager.WOOL.DIE)
+
 	# Trigger global Game Over state
 	GameManager.game_over()
 
 	# Slow motion effect
 	Engine.time_scale = 0.5
-
-
-
-	# Show Game Over Screen deferred to separate from physics step
-	call_deferred("_show_game_over_screen")
-
-func _show_game_over_screen() -> void:
-	# Show Game Over Screen immediately as overlay
-	var game_over_scene = load("res://scenes/ui/game_over.tscn")
-	if game_over_scene:
-		# Create a temporary CanvasLayer to ensure UI is drawn on top of the paused game
-		var canvas_layer = CanvasLayer.new()
-		canvas_layer.layer = 100 # High layer priority
-		get_tree().root.add_child(canvas_layer)
-
-		var game_over_instance = game_over_scene.instantiate()
-		canvas_layer.add_child(game_over_instance)
-	else:
-		# Fallback if scene missing
-		get_tree().reload_current_scene()
 
 func attack() -> void:
 	# Virtual method - override in child classes (e.g. Wool)
@@ -240,6 +238,17 @@ func _process(delta: float) -> void:
 	_update_interaction_prompt()
 	_update_camera_and_bounds()
 
+	# --- FALLING AUDIO ---
+	if _falling_player and _falling_player.stream:
+		# Check if falling fast and not on floor
+		if velocity.y > FALLING_THRESHOLD and not is_on_floor() and not is_on_wall():
+			if not _falling_player.playing:
+				_falling_player.play()
+		else:
+			if _falling_player.playing:
+				_falling_player.stop()
+
+
 	# --- ANIMATION STATE MACHINE ---
 	var new_state = _calculate_player_state()
 	if new_state != current_anim_state or _should_force_animation_update():
@@ -284,14 +293,13 @@ func _process_physics(delta: float) -> void:
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		if collider is BaseEnemy and not _is_dead:
-			AudioManager.play_sfx_die_to_enemy()
+			AudioManager.play_sound(AudioManager.WOOL.DIE)
 			take_damage(max_health)
 
 	_handle_input()
 	_handle_feature_inputs()
 	# Specific feature inputs are now handled via _handle_feature_inputs calling feature.handle_input()
 	_handle_movement(delta)
-
 
 func _update_camera_and_bounds() -> void:
 	if not camera or not can_control:
@@ -321,7 +329,7 @@ func _update_camera_and_bounds() -> void:
 	# If player's X (plus some padding/margin if needed) is less than left_edge
 	# And player is technically alive (to avoid double sounds if they die and camera stops/moves)
 	if not _is_dead and global_position.x < left_edge:
-		AudioManager.play_sfx_die_to_void()
+		AudioManager.play_sound(AudioManager.WOOL.DIE)
 		die()
 
 func _play_death_haptics() -> void:

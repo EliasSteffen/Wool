@@ -74,9 +74,11 @@ func _handle_input() -> void:
 			if not is_grappling:
 				var best_nail: Interaction = _find_best_grapple_target()
 				if best_nail:
+					# Reset held latch on grapple start
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
-					if sfx_hook: sfx_hook.play()
+					AudioManager.play_sound(AudioManager.WOOL.HOOK)
 				else:
+					# No nails nearby, but trying to grapple - increase gravity
 					_extra_gravity = gravity * 2.0
 			else:
 				_extra_gravity = 0.0
@@ -84,7 +86,7 @@ func _handle_input() -> void:
 			# RELEASED
 			if is_grappling:
 				grappling_feature.release()
-				if sfx_boost: sfx_boost.play()
+				AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 
 			_extra_gravity = 0.0
 

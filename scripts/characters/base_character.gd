@@ -108,9 +108,13 @@ func _physics_process(delta: float) -> void:
 func _on_grapple_started(target: Vector2) -> void:
 	_is_grapple_initialized = false # Reset on start to force impulse on first constraint frame
 	_grapple_animation_time = 0.1  # 0.1 seconds animation time
+	_grapple_animation_time = 0.1  # 0.1 seconds animation time
 	_grapple_target_position = target
+	AudioManager.play_sound(AudioManager.WOOL.HOOK)
 
 func _on_grapple_ended() -> void:
+	if _is_grapple_initialized: # Only play release sound if we were actually grappling
+		AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 	_is_grapple_initialized = false
 	# The original diff had `current_anim_state = CharacterConstants.PlayerState.IDLE` here,
 	# but `current_anim_state` and `CharacterConstants.PlayerState` are not defined in this BaseCharacter.

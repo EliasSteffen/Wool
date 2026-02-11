@@ -36,9 +36,17 @@ theme_override_font_sizes/font_size = 40
 text = "Settings"
 horizontal_alignment = 1
 
-[node name="CloseButton" type="Button" parent="Panel/Header"]
-custom_minimum_size = Vector2(140, 140)
-layout_mode = 2
+[node name="CloseButton" type="Button" parent="Panel"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -60.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 60.0
+grow_horizontal = 0
+custom_minimum_size = Vector2(80, 80)
 theme_override_font_sizes/font_size = 40
 text = "X"
 
@@ -47,10 +55,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 130.0
-offset_right = -10.0
-offset_bottom = -10.0
+offset_left = 40.0
+offset_top = 80.0
+offset_right = -40.0
+offset_bottom = -40.0
 grow_horizontal = 2
 grow_vertical = 2
 

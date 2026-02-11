@@ -9,6 +9,7 @@ var _fireball_speed: float = 300.0
 
 func _ready() -> void:
 	super._ready()
+	AudioManager.play_sound(AudioManager.ENEMIES.SPUCKI)
 # Tweakables removed as CharacterConstants is missing/broken
 
 func _process(delta: float) -> void:

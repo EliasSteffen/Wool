@@ -15,11 +15,18 @@ func _ready() -> void:
 
 	register_buttons([settings_button, credits_button], false, false)
 	# Resume button is icon-only and should not have the button background on press
+	# Resume button is icon-only and should not have the button background on press
 	var flat_style = StyleBoxFlat.new()
 	flat_style.bg_color = Color(0,0,0,0)
-	resume_button.add_theme_stylebox_override("pressed", flat_style)
+
+	var feedback_style = flat_style.duplicate()
+	feedback_style.bg_color = Color(1, 1, 1, 0.2)
+	feedback_style.set_corner_radius_all(20)
+
 	resume_button.add_theme_stylebox_override("normal", flat_style)
 	resume_button.add_theme_stylebox_override("hover", flat_style)
+	resume_button.add_theme_stylebox_override("pressed", feedback_style)
+	resume_button.add_theme_stylebox_override("focus", feedback_style)
 
 	setup_credits_button()
 

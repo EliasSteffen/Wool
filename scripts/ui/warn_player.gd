@@ -50,6 +50,7 @@ func _update_position() -> void:
 	position = Vector2(clamped_x, clamped_y)
 
 func _start_pulsing() -> void:
+	AudioManager.play_sound(AudioManager.GAME.WARN)
 	var tween = create_tween().set_loops()
 	# Scale up to 2.0 (Double size)
 	tween.tween_property(exclamation_mark, "scale", Vector2(2.0, 2.0), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

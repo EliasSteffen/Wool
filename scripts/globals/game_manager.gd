@@ -17,10 +17,27 @@ enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
 
 # ...
 
+func _show_game_over_screen() -> void:
+	# Show Game Over Screen immediately as overlay
+	var game_over_scene = load("res://scenes/ui/game_over.tscn")
+	if game_over_scene:
+		# Create a temporary CanvasLayer to ensure UI is drawn on top of the paused game
+		var canvas_layer = CanvasLayer.new()
+		canvas_layer.layer = 100 # High layer priority
+		get_tree().root.add_child(canvas_layer)
+
+		var game_over_instance = game_over_scene.instantiate()
+		canvas_layer.add_child(game_over_instance)
+	else:
+		# Fallback if scene missing
+		get_tree().reload_current_scene()
+
 ## Trigger Game Over state
 func game_over() -> void:
 	if current_state == GameState.GAME_OVER:
 		return
+
+	_show_game_over_screen()
 
 	current_state = GameState.GAME_OVER
 	state_changed.emit(current_state)
@@ -78,9 +95,6 @@ func _ready() -> void:
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
 	# Note: Now also added to project.godot directly for redundancy and export stability.
 
-	# Start Background Music
-	AudioManager.play_music()
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if current_state == GameState.PLAYING:
@@ -106,6 +120,7 @@ func start_game() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(LEVEL_1_SCENE)
 	state_changed.emit(current_state)
+	AudioManager.play_sound(AudioManager.GAME.ANFANG)
 
 ## Mark that the game has been started (called by level after first start)
 func mark_game_started() -> void:
@@ -139,6 +154,7 @@ func update_highscore(new_distance: int) -> void:
 		new_highscore_reached_this_run = true
 		highscore = new_distance
 		_save_highscore()
+		AudioManager.play_sound(AudioManager.GAME.HIGHSCORE)
 
 func _load_highscore() -> void:
 	var config = ConfigFile.new()
