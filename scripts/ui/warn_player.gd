@@ -4,7 +4,7 @@ extends Node2D
 @onready var exclamation_mark: Sprite2D = $ExclamationMark
 
 var target: Node2D = null
-var margin: float = 50.0
+var margin: float = GameManager.SIDE_MARGIN
 
 func _ready() -> void:
 	if exclamation_mark:

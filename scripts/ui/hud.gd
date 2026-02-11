@@ -76,6 +76,34 @@ func _ready() -> void:
 	# Ensure the pause button triggers on touch (connect pressed signal)
 	if pause_button:
 		pause_button.pressed.connect(_on_pause_pressed)
+
+		# RESIZED PAUSE BUTTON (50%)
+		pause_button.scale = Vector2(0.5, 0.5)
+
+		# RESET TO TOP LEFT (Small fixed margin)
+		# Ignoring global SIDE_MARGIN (300px) as per request
+		var button_margin = 20.0
+		if pause_button.position.x < button_margin:
+			pause_button.position.x = button_margin
+		if pause_button.position.y < button_margin:
+			pause_button.position.y = button_margin
+
+	if current_distance_label:
+		# Anchor is Top Right.
+		# "Move further into the center"
+		# User set SIDE_MARGIN to 300. We use that, plus maybe extra?
+		# Let's ensure it respects the 300px margin minimum.
+		var margin = GameManager.SIDE_MARGIN
+		var current_gap = abs(current_distance_label.offset_right)
+		if current_gap < margin:
+			var diff = margin - current_gap
+			current_distance_label.offset_right -= diff
+			current_distance_label.offset_left -= diff
+
+		# Match Top Margin to Pause Button (20px)
+		# Assuming offset_top starts at 0 or small value.
+		current_distance_label.offset_top = 20.0
+
 func _on_pause_pressed() -> void:
 	# Prevent a simultaneous jump by ignoring input for a short moment
 	GameManager.ignore_input_for(0.15)
@@ -143,7 +171,7 @@ func _update_off_screen_indicator() -> void:
 
 	# Margin to keep the arrow fully on screen (approx half icon size)
 	# Margin to keep the arrow fully on screen
-	var margin = 50.0
+	var margin = GameManager.SIDE_MARGIN
 
 	# Only show if player is ABOVE the screen (y < 0)
 	if screen_pos.y >= 0:

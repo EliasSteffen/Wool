@@ -13,6 +13,12 @@ func _ready() -> void:
 	tween.tween_property(self, "modulate:a", 1.0, duration).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tween.tween_callback(func(): _can_interact = true)
 
+	# Apply Side Margin
+	var margin_container = $MarginContainer
+	if margin_container:
+		margin_container.add_theme_constant_override("margin_left", int(GameManager.SIDE_MARGIN))
+		margin_container.add_theme_constant_override("margin_right", int(GameManager.SIDE_MARGIN))
+
 	_setup_score_display(duration)
 
 @onready var score_display: Control = $MarginContainer/VBoxContainer/ScoreDisplay

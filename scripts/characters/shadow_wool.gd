@@ -30,8 +30,8 @@ func _ready() -> void:
 	velocity = Vector2.ZERO
 	_game_started = true # Force game start mode so it runs physics logic
 
-func _setup_sounds() -> void:
-	# Do not create SFX players for Shadow Wool to keep it silent
+func _setup_falling_audio() -> void:
+	# Override to prevent creating falling audio player
 	pass
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -76,7 +76,6 @@ func _handle_input() -> void:
 				if best_nail:
 					# Reset held latch on grapple start
 					grappling_feature.set_target(best_nail.get_grapple_point(), best_nail)
-					AudioManager.play_sound(AudioManager.WOOL.HOOK)
 				else:
 					# No nails nearby, but trying to grapple - increase gravity
 					_extra_gravity = gravity * 2.0
@@ -86,7 +85,6 @@ func _handle_input() -> void:
 			# RELEASED
 			if is_grappling:
 				grappling_feature.release()
-				AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 
 			_extra_gravity = 0.0
 
@@ -112,3 +110,16 @@ func _update_nail_highlight() -> void:
 
 func _should_track_as_player() -> bool:
 	return false
+
+func _on_grapple_started(target: Vector2) -> void:
+	# Override BaseCharacter to MUTE SOUND
+	_is_grapple_initialized = false
+	_grapple_animation_time = 0.1
+	_grapple_target_position = target
+	# AudioManager.play_sound(AudioManager.WOOL.HOOK) # MUTED
+
+func _on_grapple_ended() -> void:
+	# Override BaseCharacter to MUTE SOUND
+	# if _is_grapple_initialized:
+	# 	AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN) # MUTED
+	_is_grapple_initialized = false
