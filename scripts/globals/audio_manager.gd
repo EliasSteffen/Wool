@@ -80,3 +80,14 @@ func _get_available_sfx_player() -> AudioStreamPlayer:
 	add_child(new_player)
 	_sfx_pool.append(new_player)
 	return new_player
+
+func create_audio_player(sound_id: String, parent: Node) -> AudioStreamPlayer:
+	if not _loaded_sounds.has(sound_id):
+		printerr("AudioManager: Create player requested for unknown or unloaded sound: ", sound_id)
+		return null
+
+	var new_player = AudioStreamPlayer.new()
+	parent.add_child(new_player)
+	new_player.stream = _loaded_sounds[sound_id]
+	new_player.bus = "SFX"
+	return new_player

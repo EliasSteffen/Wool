@@ -43,7 +43,7 @@ func _setup_visibility_notifier() -> void:
 	add_child(notifier)
 
 	notifier.screen_entered.connect(func():
-		AudioManager.play_fish_sfx(global_position)
+		AudioManager.play_sound(AudioManager.ENEMIES.SPUCKI)
 	)
 
 	# Audio handling moved to BaseEnemy

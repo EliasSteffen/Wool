@@ -34,7 +34,7 @@ var _debug_ui: PlayerDebugUI = null
 var _interaction_prompt_label: Label = null
 var _current_prompt_interaction: Interaction = null
 var _falling_player: AudioStreamPlayer = null
-const FALLING_THRESHOLD: float = 800.0 # Speed to trigger sound
+const FALLING_THRESHOLD: float = 150.0 # Speed to trigger sound
 const INTERACTION_PROMPT_DISTANCE: float = 500.0
 var _just_jumped: bool = false
 var _coyote_timer: float = 0.0 # Buffer to allow jumping shortly after leaving ground
@@ -83,17 +83,10 @@ func _ready() -> void:
 	# Setup interaction prompt label
 	call_deferred("_setup_interaction_prompt_label")
 
-	# Setup Falling Audio
-	_falling_player = AudioStreamPlayer.new()
-	add_child(_falling_player)
-	_falling_player.bus = "SFX"
-	# Stream will be set in _process if needed, or preloaded
-	# Better to get it once
 	call_deferred("_setup_falling_audio")
 
 func _setup_falling_audio() -> void:
-	if _falling_player:
-		_falling_player.stream = AudioManager.get_sound_stream(AudioManager.WOOL.FALLING)
+	_falling_player = AudioManager.create_audio_player(AudioManager.WOOL.FALLING, self)
 
 var _is_dead: bool = false
 
@@ -115,6 +108,9 @@ func die() -> void:
 
 	# Play death sound
 	AudioManager.play_sound(AudioManager.WOOL.DIE)
+
+	if _falling_player and _falling_player.playing:
+		_falling_player.stop()
 
 	# Trigger global Game Over state
 	GameManager.game_over()
@@ -241,7 +237,8 @@ func _process(delta: float) -> void:
 	# --- FALLING AUDIO ---
 	if _falling_player and _falling_player.stream:
 		# Check if falling fast and not on floor
-		if velocity.y > FALLING_THRESHOLD and not is_on_floor() and not is_on_wall():
+		var is_grappling = grappling_feature and grappling_feature.is_active()
+		if velocity.y > FALLING_THRESHOLD and not is_on_floor() and not is_on_wall() and not is_grappling and not _is_dead:
 			if not _falling_player.playing:
 				_falling_player.play()
 		else:
