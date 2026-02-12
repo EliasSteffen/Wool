@@ -109,7 +109,7 @@ func _run_unified_loop() -> void:
 	# The visual vector from Top-Left to Pivot is: (PivotOffset * Scale).rotated(Rotation)
 	var visual_offset = (hand.pivot_offset * hand.scale).rotated(hand.rotation)
 	var target_hand_pos = _touch_pos - visual_offset
-	var start_hand_pos = _touch_pos + Vector2(60, 60)
+	var start_hand_pos = _touch_pos + Vector2(-60, 60)
 
 	hand.global_position = start_hand_pos
 
@@ -195,7 +195,7 @@ func _reset_shadow_wool() -> void:
 
 func _reset_visuals(screen_pos: Vector2) -> void:
 	if _ripple_tween: _ripple_tween.kill()
-	hand.scale = Vector2.ONE * 0.5
+	hand.scale = Vector2(-0.5, 0.5)
 	hand.modulate.a = 0.0
 
 	_reset_circle_state()
@@ -203,11 +203,11 @@ func _reset_visuals(screen_pos: Vector2) -> void:
 
 func _animate_press(duration: float) -> void:
 	var t = create_tween()
-	t.tween_property(hand, "scale", Vector2(0.45, 0.45), duration)
+	t.tween_property(hand, "scale", Vector2(-0.45, 0.45), duration)
 
 func _animate_lift(duration: float) -> void:
 	var t = create_tween()
-	t.tween_property(hand, "scale", Vector2(0.5, 0.5), duration)
+	t.tween_property(hand, "scale", Vector2(-0.5, 0.5), duration)
 
 func _trigger_ripple() -> void:
 	if _ripple_tween: _ripple_tween.kill()
