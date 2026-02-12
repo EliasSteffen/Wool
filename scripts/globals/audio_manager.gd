@@ -29,7 +29,7 @@ var _sound_files = {
 
 	ENEMIES.BIRD: "res://assets/sound/enemies/bird.wav",
 	ENEMIES.SPUCKI: "res://assets/sound/enemies/spucki.wav",
-	ENEMIES.FISH: "res://assets/sound/enemies/fish.wav",
+	ENEMIES.FISH: "res://assets/sound/enemies/fish.mp3",
 
 	GAME.HIGHSCORE: "res://assets/sound/game/highscore.wav",
 	GAME.WARN: "res://assets/sound/game/warn.wav"

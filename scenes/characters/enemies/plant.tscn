@@ -1,11 +1,10 @@
-[gd_scene load_steps=58 format=3 uid="uid://woviubhhahiw"]
+[gd_scene format=3 uid="uid://woviubhhahiw"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_gv240"]
 [ext_resource type="Script" uid="uid://cpmgmbv30piq1" path="res://scripts/characters/plant.gd" id="2_plant_script"]
 [ext_resource type="Texture2D" uid="uid://bygvsfk6jg01t" path="res://assets/character/spucki/spucki-platform.png" id="3_0tivd"]
 [ext_resource type="Texture2D" uid="uid://ceuf4f3n6l662" path="res://assets/character/spucki/pflanze.png" id="3_orb0g"]
-
-[ext_resource type="PackedScene" uid="uid://c5yq4u8x7g2k1" path="res://scenes/interactions/spit_projectile.tscn" id="4_spit"]
+[ext_resource type="PackedScene" uid="uid://bg51h1oqctuxi" path="res://scenes/interactions/spit_projectile.tscn" id="4_spit"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5ok27"]
 size = Vector2(480, 832)
@@ -364,12 +363,10 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_orb0g"]
 size = Vector2(544, 832)
 
-[node name="Plant" instance=ExtResource("1_gv240")]
+[node name="Plant" unique_id=979794430 instance=ExtResource("1_gv240")]
 position = Vector2(0, -16)
 script = ExtResource("2_plant_script")
 fireball_scene = ExtResource("4_spit")
-start_volume_percent = 10.0
-audio_stream = null
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(-4, -120)
@@ -377,10 +374,10 @@ scale = Vector2(0.25, 0.25)
 shape = SubResource("RectangleShape2D_5ok27")
 
 [node name="Skin" parent="." index="1"]
-position = Vector2(0, -135)
+position = Vector2(0, -184)
 scale = Vector2(0.25, 0.25)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skin" index="0"]
+[node name="Sprite2D" type="Sprite2D" parent="Skin" index="0" unique_id=1850274002]
 position = Vector2(64, 956)
 scale = Vector2(4.6574807, 4.6574802)
 texture = ExtResource("3_0tivd")

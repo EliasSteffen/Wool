@@ -57,7 +57,6 @@ func _ready() -> void:
 	# Initialize Config from GameManager (safe to access here)
 	eagle_spawn_height_max = GameManager.PLAYABLE_HEIGHT_TOP
 	fish_spawn_y = GameManager.WATER_LEVEL
-	plant_spawn_y = -128.0
 
 	_reset_eagle_timer()
 	_reset_fish_timer()
