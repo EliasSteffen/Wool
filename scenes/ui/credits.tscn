@@ -1,13 +1,7 @@
 [gd_scene format=3 uid="uid://bggd0jonndu75"]
 
 [ext_resource type="Script" uid="uid://bshgralvd6u5q" path="res://scripts/ui/credits.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://0slpuo3oyni0" path="res://assets/ui/settings-background.png" id="2_bg"]
-[ext_resource type="Texture2D" uid="uid://bwn4r64c34u3s" path="res://assets/ui/close-button.png" id="3_pqmjv"]
-[ext_resource type="Texture2D" uid="uid://c7cu5fm7dgrhd" path="res://assets/map/pin-blue.png" id="4_gleon"]
-[ext_resource type="Texture2D" uid="uid://bnlwwrqooq2b" path="res://assets/map/pin-red.png" id="5_um21f"]
-[ext_resource type="Texture2D" uid="uid://bglxrr10de6ud" path="res://assets/map/pin-yellow.png" id="6_5fsmw"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_close"]
+[ext_resource type="PackedScene" uid="uid://menu_bg_shared" path="res://scenes/ui/menu_background.tscn" id="2_menu_bg"]
 
 [node name="CreditsScreen" type="Control" unique_id=999885070]
 layout_mode = 3
@@ -30,15 +24,13 @@ offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="BackgroundImage" type="TextureRect" parent="Background" unique_id=1240435744]
+[node name="MenuBackground" parent="Background" instance=ExtResource("2_menu_bg")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_bg")
-expand_mode = 1
 
 [node name="ScrollContent" type="Control" parent="Background" unique_id=135651706]
 clip_contents = true
@@ -118,41 +110,3 @@ Our Families
 [/center]"
 fit_content = true
 scroll_active = false
-
-[node name="CloseButton" type="Button" parent="." unique_id=842423654]
-custom_minimum_size = Vector2(100, 100)
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -300.0
-offset_top = 64.0
-offset_right = -200.0
-offset_bottom = 164.0
-grow_horizontal = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_close")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_close")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_close")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_close")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_close")
-icon = ExtResource("3_pqmjv")
-flat = true
-icon_alignment = 1
-expand_icon = true
-
-[node name="PinBlue" type="Sprite2D" parent="CloseButton" unique_id=483710626]
-position = Vector2(-2000.0002, 928.00006)
-rotation = 2.2888744
-texture = ExtResource("4_gleon")
-
-[node name="PinRed" type="Sprite2D" parent="CloseButton" unique_id=296180434]
-position = Vector2(-1975.9307, 62.643555)
-rotation = 2.5148993
-texture = ExtResource("5_um21f")
-
-[node name="PinYellow" type="Sprite2D" parent="CloseButton" unique_id=389931312]
-position = Vector2(56, 936)
-rotation = -2.4545832
-texture = ExtResource("6_5fsmw")
-
-[connection signal="pressed" from="CloseButton" to="." method="_on_close_button_pressed"]

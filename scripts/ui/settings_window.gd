@@ -1,10 +1,9 @@
 extends CanvasLayer
 
 @onready var container: VBoxContainer = $Panel/ScrollContainer/VBoxContainer
-@onready var close_button: Button = $Panel/CloseButton
 
 func _ready() -> void:
-	close_button.pressed.connect(close)
+	$Panel/MenuBackground/CloseButton.pressed.connect(close)
 
 	# Configure ScrollContainer for mobile scrolling
 	var scroll_container = $Panel/ScrollContainer

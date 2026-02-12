@@ -4,6 +4,9 @@ extends Control
 var _can_interact: bool = false
 
 func _ready() -> void:
+	# Connect close button from MenuBackground
+	$MenuBackground/CloseButton.pressed.connect(_on_close_button_pressed)
+
 	# Start invisible
 	modulate.a = 0.0
 

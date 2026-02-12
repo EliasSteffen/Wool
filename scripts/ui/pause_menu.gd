@@ -1,12 +1,11 @@
 extends BaseMenu
 
-@onready var resume_button: Button = $Control/MenuPanel/CloseButton
 @onready var settings_button: Button = $Control/MenuPanel/VBoxContainer/SettingsButton
 @onready var credits_button: Button = $Control/MenuPanel/VBoxContainer/CreditsButton
 
 func _ready() -> void:
 	super._ready()
-	resume_button.pressed.connect(_on_resume_pressed)
+	$Control/MenuPanel/MenuBackground/CloseButton.pressed.connect(_on_resume_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
 
 	# Buttons will use the textured theme from assets/ui/pause_theme.tres
