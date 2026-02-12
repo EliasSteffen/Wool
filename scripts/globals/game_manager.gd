@@ -10,6 +10,7 @@ signal state_changed(new_state: GameState)
 signal rusty_nail_timer_started(duration: float)
 signal rusty_nail_timer_updated(progress: float)
 signal rusty_nail_timer_stopped()
+signal highscore_beaten()
 
 # === ENUMS ===
 # === ENUMS ===
@@ -121,7 +122,6 @@ func start_game() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(LEVEL_1_SCENE)
 	state_changed.emit(current_state)
-	AudioManager.play_sound(AudioManager.GAME.ANFANG)
 
 ## Mark that the game has been started (called by level after first start)
 func mark_game_started() -> void:
@@ -150,12 +150,14 @@ func toggle_pause() -> void:
 
 
 ## Update highscore if new distance is higher
-func update_highscore(new_distance: int) -> void:
+func update_highscore(new_distance: int, silent: bool = false) -> void:
 	if new_distance > highscore:
 		new_highscore_reached_this_run = true
 		highscore = new_distance
 		_save_highscore()
-		AudioManager.play_sound(AudioManager.GAME.HIGHSCORE)
+		highscore_beaten.emit()
+		if not silent:
+			AudioManager.play_sound(AudioManager.GAME.HIGHSCORE)
 
 func _load_highscore() -> void:
 	var config = ConfigFile.new()
@@ -174,6 +176,8 @@ func _save_highscore() -> void:
 func reset_highscore() -> void:
 	highscore = 0
 	_save_highscore()
+
+
 
 func _show_pause_menu() -> void:
 	if not _pause_menu_instance:

@@ -7,10 +7,38 @@ var _shoot_timer: float = 0.0
 var _shoot_interval: float = 3.0
 var _fireball_speed: float = 300.0
 
+var _audio_player: AudioStreamPlayer
+
 func _ready() -> void:
 	super._ready()
-	AudioManager.play_sound(AudioManager.ENEMIES.SPUCKI)
-# Tweakables removed as CharacterConstants is missing/broken
+	_setup_audio()
+
+func _setup_audio() -> void:
+	if not _audio_player:
+		_audio_player = AudioManager.create_audio_player(AudioManager.ENEMIES.SPUCKI, self)
+		if _audio_player:
+			_audio_player.volume_db = linear_to_db(0.25)
+			_audio_player.finished.connect(_on_audio_finished)
+			despawn_requested.connect(_on_despawn_requested)
+			_start_audio()
+
+func _start_audio() -> void:
+	if _audio_player and not _audio_player.playing:
+		_audio_player.play()
+
+func _on_audio_finished() -> void:
+	if _audio_player and is_inside_tree():
+		_audio_player.play()
+
+func _on_despawn_requested(_node: Node) -> void:
+	if _audio_player:
+		_audio_player.stop()
+
+func _on_game_state_changed(new_state: int) -> void:
+	super._on_game_state_changed(new_state)
+	if new_state == GameManager.GameState.GAME_OVER:
+		if _audio_player:
+			_audio_player.stop()
 
 func _process(delta: float) -> void:
 	# Debug timer progress

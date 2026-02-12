@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://c78n028ucyu4x"
-path="res://.godot/imported/anfang.wav-df1312b548f060d98fe28ec4a3f2011f.sample"
+uid="uid://w5p8am4n5d0e"
+path="res://.godot/imported/hook-2.wav-6673ca16ffc35dad16e5f1e02490103a.sample"
 
 [deps]
 
-source_file="res://assets/sound/game/anfang.wav"
-dest_files=["res://.godot/imported/anfang.wav-df1312b548f060d98fe28ec4a3f2011f.sample"]
+source_file="res://assets/sound/wool/hook-2.wav"
+dest_files=["res://.godot/imported/hook-2.wav-6673ca16ffc35dad16e5f1e02490103a.sample"]
 
 [params]
 

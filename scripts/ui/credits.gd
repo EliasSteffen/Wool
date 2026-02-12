@@ -22,11 +22,8 @@ func _reset_position():
 
 		_initial_y = content.position.y
 
-	# Switch music
-	AudioManager.play_credits_music()
-
 func _exit_tree() -> void:
-	AudioManager.play_main_music()
+	pass
 
 func _process(delta: float) -> void:
 	if content:

@@ -20,6 +20,14 @@ func _ready() -> void:
 	var sfx_slider = container.get_node_or_null("SFXVolume/HBoxContainer/HSlider")
 	if sfx_slider: _setup_slider(sfx_slider, "SFX")
 
+	var reset_btn = container.get_node_or_null("ResetHighscoreButton")
+	if reset_btn:
+		reset_btn.pressed.connect(_on_reset_highscore_pressed)
+
+func _on_reset_highscore_pressed() -> void:
+	GameManager.reset_highscore()
+	# Optional: feedback? For now just reset.
+
 func _setup_slider(slider: HSlider, bus_name: String) -> void:
 	var bus_idx = AudioServer.get_bus_index(bus_name)
 	slider.min_value = 0.0

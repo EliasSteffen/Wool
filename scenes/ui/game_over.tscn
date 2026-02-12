@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://kpvat4vghmvj" path="res://scripts/ui/game_over.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://b6ta6xfdcfr3h" path="res://scenes/characters/players/wool.tscn" id="2_fu4wh"]
-[ext_resource type="PackedScene" uid="uid://menu_bg_shared" path="res://scenes/ui/menu_background.tscn" id="3_menu_bg"]
 [ext_resource type="Texture2D" uid="uid://db08oomseu5eu" path="res://assets/ui/highscore-bar.png" id="3_bar"]
+[ext_resource type="PackedScene" uid="uid://rcr5v5hlcmya" path="res://scenes/ui/menu_background.tscn" id="3_menu_bg"]
 [ext_resource type="Texture2D" uid="uid://bygvsfk6jg01t" path="res://assets/character/spucki/spucki-platform.png" id="4_platform"]
 
 [node name="GameOverScreen" type="Control" unique_id=846438768]
@@ -24,17 +24,12 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.7137255, 0.30980393, 0.35686275, 0.6862745)
 
-[node name="MenuBackground" parent="." instance=ExtResource("3_menu_bg")]
+[node name="MenuBackground" parent="." unique_id=212098675 instance=ExtResource("3_menu_bg")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 offset_left = 150.0
 offset_top = 150.0
 offset_right = -150.0
 offset_bottom = -150.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1297617486]
 layout_mode = 1
@@ -112,8 +107,14 @@ grow_vertical = 2
 [node name="PlatformSprite" type="Sprite2D" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/PlatformContainer" unique_id=1079359313]
 texture = ExtResource("4_platform")
 
-[node name="WoolMarker" type="Marker2D" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer" unique_id=995187247]
-position = Vector2(0, 141)
+[node name="WoolMarker" type="Control" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer" unique_id=995187247]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -53.0
+offset_bottom = -53.0
+grow_vertical = 2
 
 [node name="Wool" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker" unique_id=2116525266 instance=ExtResource("2_fu4wh")]
 position = Vector2(58, -44)
@@ -121,7 +122,7 @@ scale = Vector2(0.15, 0.15)
 
 [node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker" unique_id=1474302851]
 visible = false
-anchors_preset = 5
+layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -102.0

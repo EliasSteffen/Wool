@@ -3,12 +3,46 @@ extends BaseEnemy
 
 
 
+var _audio_player: AudioStreamPlayer
+
+func _ready() -> void:
+	super._ready()
+	_setup_audio()
+
 func reset() -> void:
 	super.reset()
 	velocity.x = -fly_speed
 	velocity.y = 0.0
 	_spawn_y = global_position.y # Capture new spawn height on reuse
 	_update_direction()
+	_start_audio()
+
+func _setup_audio() -> void:
+	if not _audio_player:
+		_audio_player = AudioManager.create_audio_player(AudioManager.ENEMIES.BIRD, self)
+		if _audio_player:
+			_audio_player.volume_db = linear_to_db(0.25)
+			_audio_player.finished.connect(_on_audio_finished)
+			despawn_requested.connect(_on_despawn_requested)
+			_start_audio()
+
+func _start_audio() -> void:
+	if _audio_player and not _audio_player.playing:
+		_audio_player.play()
+
+func _on_audio_finished() -> void:
+	if _audio_player and is_inside_tree():
+		_audio_player.play()
+
+func _on_despawn_requested(_node: Node) -> void:
+	if _audio_player:
+		_audio_player.stop()
+
+func _on_game_state_changed(new_state: int) -> void:
+	super._on_game_state_changed(new_state)
+	if new_state == GameManager.GameState.GAME_OVER:
+		if _audio_player:
+			_audio_player.stop()
 
 func _setup_visibility_notifier() -> void:
 	var notifier = VisibleOnScreenNotifier2D.new()
@@ -33,12 +67,12 @@ func _setup_visibility_notifier() -> void:
 	# This prevents immediate despawn since we spawn off-screen to the right.
 	notifier.screen_entered.connect(func():
 		# Play audio when entering screen
-		if not AudioManager.get_eagle_stream(): # Check if playing? No, play once
+		# if not AudioManager.get_eagle_stream(): # Check if playing? No, play once
 			# Actually we want to play it.
-			pass
+			# pass
 
 		# We can trigger the sound here!
-		AudioManager.play_sound(AudioManager.ENEMIES.BIRD)
+		# AudioManager.play_sound(AudioManager.ENEMIES.BIRD)
 
 		# Once we enter the screen, we care about exiting it
 		notifier.screen_exited.connect(func():

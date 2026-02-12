@@ -14,6 +14,13 @@ var _tutorial_timer: float = 0.0
 var _waiting_for_input_after_icons: bool = false
 const TUTORIAL_HINT_SCENE = preload("res://scenes/ui/tutorial_hint.tscn")
 
+# Highscore Bar Logic
+var _highscore_bar: Sprite2D = null
+var _start_x_initialized: bool = false
+var _start_x: float = 0.0
+var _initial_highscore_to_beat: int = 0
+var _highscore_visual_active: bool = false
+
 func _ready() -> void:
 	# Mark that the game has been started
 	GameManager.mark_game_started()
@@ -24,6 +31,13 @@ func _ready() -> void:
 	# Start waiting for player input (Tutorial logic)
 	_waiting_for_input_after_icons = true
 	_tutorial_timer = 0.0
+
+	# Store initial highscore to check against
+	_initial_highscore_to_beat = GameManager.highscore
+
+	# Connect signal
+	if not GameManager.highscore_beaten.is_connected(_on_highscore_beaten):
+		GameManager.highscore_beaten.connect(_on_highscore_beaten)
 
 	# Add Enemy Spawner
 	var spawner_script = load("res://scripts/levels/enemy_spawner.gd")
@@ -36,6 +50,16 @@ func _process(delta: float) -> void:
 	# Try to find player if not found yet
 	if not player:
 		player = get_tree().get_first_node_in_group("player")
+
+	# Initialize Start X for Highscore Bar positioning
+	if player and not _start_x_initialized:
+		_start_x = player.global_position.x
+		_start_x_initialized = true
+		_setup_highscore_bar()
+
+	# Check for Highscore Crossing
+	if _highscore_visual_active:
+		_check_highscore_crossing()
 
 	# Tutorial Hint Timer Logic
 	if _waiting_for_input_after_icons and not _tutorial_hint_instance:
@@ -74,3 +98,57 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _tutorial_hint_instance:
 				_tutorial_hint_instance.queue_free()
 				_tutorial_hint_instance = null
+
+# --- HIGHSCORE BAR IMPLEMENTATION ---
+
+func _setup_highscore_bar() -> void:
+	# Only show bar if we have a valid highscore to beat
+	if _initial_highscore_to_beat <= 0:
+		return
+
+	# Create the visual bar
+	_highscore_bar = Sprite2D.new()
+	_highscore_bar.texture = load("res://assets/ui/highscore-bar.png")
+	_highscore_bar.z_index = -4 # Behind nails (0/2), Front of fetzen/muster (-10/-20)
+
+	# Rotate 90 degrees to make it vertical
+	_highscore_bar.rotation = PI / 2.0
+
+	# Calculate dimensions for scaling
+	# We want to fill [PLAYABLE_HEIGHT_TOP, PLAYABLE_HEIGHT_BOTTOM]
+	var top = GameManager.PLAYABLE_HEIGHT_TOP
+	var bottom = GameManager.PLAYABLE_HEIGHT_BOTTOM
+	var total_height = abs(top - bottom)
+	var center_y = (top + bottom) / 2.0
+
+	if _highscore_bar.texture:
+		# Since we rotated 90 deg, the texture's Width becomes the visual Height
+		# So we scale the X axis of the sprite
+		var tex_width = _highscore_bar.texture.get_width()
+		if tex_width > 0:
+			_highscore_bar.scale.x = total_height / tex_width
+
+	# Position
+	# X = Start + Highscore * 10
+	var bar_x = _start_x + (_initial_highscore_to_beat * 10.0)
+	_highscore_bar.position = Vector2(bar_x, center_y)
+
+	add_child(_highscore_bar)
+	_highscore_visual_active = true
+
+func _check_highscore_crossing() -> void:
+	# We use GameManager distance logic to ensure consistency with "beating" the score
+	var current_dist = GameManager.get_current_distance()
+
+	if current_dist > _initial_highscore_to_beat:
+		_highscore_visual_active = false
+		# REMOVED: if _highscore_bar: _highscore_bar.visible = false
+
+		# Trigger the update in GameManager (plays sound)
+		GameManager.update_highscore(current_dist, false)
+
+func _on_highscore_beaten() -> void:
+	# Determine if we should hide the bar (e.g. if beaten by another mechanism)
+	if _highscore_visual_active:
+		_highscore_visual_active = false
+		# REMOVED: if _highscore_bar: _highscore_bar.visible = false

@@ -31,7 +31,7 @@ func _ready() -> void:
 @onready var platform_container: Control = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/PlatformContainer
 @onready var platform_sprite: Sprite2D = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/PlatformContainer/PlatformSprite
 # Wool Marker is now a sibling of Platform Container
-@onready var wool_marker: Node2D = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker
+@onready var wool_marker: Control = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker
 @onready var wool_instance: Node = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker/Wool
 @onready var score_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/WoolMarker/ScoreLabel
 
@@ -46,7 +46,12 @@ func _setup_score_display(fade_duration: float) -> void:
 	if not score_display: return
 
 	var current_score = GameManager.max_run_distance
-	var highscore = max(GameManager.highscore, current_score)
+
+	# Save highscore (silently) if we beat it
+	if current_score > GameManager.highscore:
+		GameManager.update_highscore(current_score, true)
+
+	var highscore = GameManager.highscore
 
 	score_label.text = str(current_score) + "m"
 	end_label.text = str(highscore) + "m"
