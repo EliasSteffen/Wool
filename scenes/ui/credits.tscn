@@ -2,6 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bshgralvd6u5q" path="res://scripts/ui/credits.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://menu_bg_shared" path="res://scenes/ui/menu_background.tscn" id="2_menu_bg"]
+[ext_resource type="FontFile" uid="uid://p4e5pw2h615r" path="res://assets/font/MomoSignature-Regular.ttf" id="3_momo"]
+[ext_resource type="FontFile" uid="uid://cf3nocp8oopsl" path="res://assets/font/PlaywriteNZBasic-VariableFont_wght.ttf" id="4_playwrite"]
+[ext_resource type="FontFile" uid="uid://bo13heginhkfl" path="res://assets/font/Federant-Regular.ttf" id="5_federant"]
 
 [node name="CreditsScreen" type="Control" unique_id=999885070]
 layout_mode = 3
@@ -52,11 +55,12 @@ anchor_right = 1.0
 offset_bottom = 1383.0
 grow_horizontal = 2
 theme_override_constants/separation = 60
-alignment = 1
+alignment = 0
 
 [node name="Title" type="Label" parent="Background/ScrollContent/VBoxContainer" unique_id=128928405]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_momo")
 theme_override_font_sizes/font_size = 120
 text = "CREDITS"
 horizontal_alignment = 1
@@ -65,46 +69,58 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(1000, 0)
 layout_mode = 2
 theme_override_colors/default_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_fonts/normal_font = ExtResource("4_playwrite")
+theme_override_fonts/bold_font = ExtResource("5_federant")
+theme_override_fonts/italics_font = ExtResource("3_momo")
 theme_override_font_sizes/normal_font_size = 40
+theme_override_font_sizes/bold_font_size = 80
+theme_override_font_sizes/italics_font_size = 60
 bbcode_enabled = true
-text = "[center]
-[font_size=60]Developer[/font_size]
-Elias
 
-[font_size=60]Art & Animation[/font_size]
+text = "[center]
+[b]Art & Animation[/b]
 Mischa
 
-[font_size=60]University[/font_size]
+[b]Developer[/b]
+Elias
+
+[b]University[/b]
 FH Münster
 University of Applied Sciences
 Münster School of Design (MSD) &
 Electrical Engineering and Computer Science (ETI)
 
-[font_size=50]Course[/font_size]
+[i]Course[/i]
 Gamedesign (Winter Semester 2025/26)
 
-[font_size=50]Supervised by[/font_size]
+[i]Supervised by[/i]
 Prof. Dr. Kathrin Ungru-Baggemann
 Prof. Dipl.-Des. Tina Glückselig
 
-[font_size=60]Fonts[/font_size]
-Google Fonts
+[b]Fonts[/b]
+From Google Fonts
 
-[font_size=60]Music & Sound[/font_size]
-\"Cozy Puzzle In-Game 1\" by MintoDog (CC0)
-\"Little Lullaby\" by Alex_089 (CC-BY 4.0)
+[i][font_size=60]Momo Signature[/font_size][/i]
+by Type Associates
+[font_size=60]Playwrite New Zealand Basic[/font_size]
+by TypeTogether, Veronika Burian, José Scaglione
+[b][font_size=60]Federant[/font_size][/b]
+by Cyreal
 
-[font_size=50]SFX (Freesound.org)[/font_size]
-\"die\" by bWpo
-\"swing\" by InspectorJ
-\"warn\" by AnthonyRox
-\"highscore\" by JFRecords
-\"bird\" by Clusman
-\"spucki\" by LilMati
-\"hook\" by SuGu14
-\"anfang\" by Anthousai
+[b]Music & Sound[/b]
+From Freesound.org
 
-[font_size=60]Special Thanks[/font_size]
+[i]SFX[/i]
+\"808BD_T1D7_X2wpo2.wav\" by bWpo
+\"Bamboo Swing, B5.wav\" by InspectorJ
+\"Message Notification 2\" by AnthonyRox
+\"vMax SourCream.wav\" by JFRecords
+\"bird_flapping_9.wav\" by Clusman
+\"Retro, Pew Shot.wav\" by LilMati
+\"fish_swim1\" by Rayo75
+\"CcubMetall01.wav\" by SuGu14
+
+[b]Special Thanks[/b]
 Godot Engine Community
 Our Families
 [/center]"

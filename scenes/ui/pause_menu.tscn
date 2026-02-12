@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cmvg86ssr800a" path="res://scripts/ui/pause_menu.gd" id="1_script"]
 [ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="2_theme"]
 [ext_resource type="PackedScene" uid="uid://rcr5v5hlcmya" path="res://scenes/ui/menu_background.tscn" id="3_menu_bg"]
+[ext_resource type="FontFile" uid="uid://bo13heginhkfl" path="res://assets/font/Federant-Regular.ttf" id="4_playwrite"]
 
 [node name="PauseMenu" type="CanvasLayer" unique_id=783824230]
 process_mode = 3
@@ -77,9 +78,13 @@ alignment = 1
 [node name="SettingsButton" type="Button" parent="Control/MenuPanel/VBoxContainer" unique_id=1654887558]
 custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("4_playwrite")
+theme_override_font_sizes/font_size = 80
 text = "Settings"
 
 [node name="CreditsButton" type="Button" parent="Control/MenuPanel/VBoxContainer" unique_id=659839414]
 custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("4_playwrite")
+theme_override_font_sizes/font_size = 80
 text = "Credits"

@@ -16,7 +16,7 @@ func _ready() -> void:
 func _reset_position():
 	if content:
 		if content.get_parent() is Control:
-			content.position.y = content.get_parent().size.y
+			content.position.y = content.get_parent().size.y - 100.0
 		else:
 			content.position.y = get_viewport_rect().size.y
 

@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://nr77a3ee1y0e"
-path="res://.godot/imported/RubikStorm-Regular.ttf-6be4cf5b8df0ff41efa8fde4edfbbec9.fontdata"
+uid="uid://cf3nocp8oopsl"
+path="res://.godot/imported/PlaywriteNZBasic-VariableFont_wght.ttf-cc837e84682dc0b93803a56b2f8a7806.fontdata"
 
 [deps]
 
-source_file="res://assets/font/RubikStorm-Regular.ttf"
-dest_files=["res://.godot/imported/RubikStorm-Regular.ttf-6be4cf5b8df0ff41efa8fde4edfbbec9.fontdata"]
+source_file="res://assets/font/PlaywriteNZBasic-VariableFont_wght.ttf"
+dest_files=["res://.godot/imported/PlaywriteNZBasic-VariableFont_wght.ttf-cc837e84682dc0b93803a56b2f8a7806.fontdata"]
 
 [params]
 

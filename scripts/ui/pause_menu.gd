@@ -14,9 +14,6 @@ func _ready() -> void:
 
 	register_buttons([settings_button, credits_button], false, false)
 
-	setup_credits_button()
-
-func setup_credits_button() -> void:
 	credits_button.pressed.connect(_on_credits_pressed)
 
 	credits_button.text = "Credits"
