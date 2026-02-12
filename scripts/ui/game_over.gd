@@ -215,3 +215,6 @@ func _restart_game() -> void:
 	if get_parent() is CanvasLayer: get_parent().queue_free()
 	else: queue_free()
 	GameManager.start_game()
+
+func _on_close_button_pressed() -> void:
+	_restart_game()

@@ -101,7 +101,18 @@ func die() -> void:
 
 	# Disable control
 	can_control = false
-	velocity = Vector2.ZERO
+	# Only zero horizontal velocity — let gravity pull wool down
+	velocity.x = 0.0
+
+	# Disable all collisions so wool falls through enemies and terrain
+	collision_layer = 0
+	collision_mask = 0
+	# Disable floor snapping so we don't stick to the ground
+	floor_snap_length = 0.0
+
+	# Release grapple if active
+	if grappling_feature and grappling_feature.is_active():
+		grappling_feature.release()
 
 	# Haptic feedback on death (Mobile only)
 	_play_death_haptics()

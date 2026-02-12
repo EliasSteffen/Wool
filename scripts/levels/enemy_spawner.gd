@@ -6,7 +6,7 @@ var eagle_scene: PackedScene = preload("res://scenes/characters/enemies/eagle.ts
 var fish_scene: PackedScene = preload("res://scenes/characters/enemies/fish.tscn")
 var plant_scene: PackedScene = preload("res://scenes/characters/enemies/plant.tscn")
 
-var spawn_distance_x: float = 2000.0 # Distance ahead of camera
+var spawn_distance_x: float = 1000.0
 
 # Eagle Config
 var eagle_spawn_interval_min: float = 2.0

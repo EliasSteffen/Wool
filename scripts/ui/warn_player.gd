@@ -5,6 +5,7 @@ extends Node2D
 
 var target: Node2D = null
 var margin: float = GameManager.SIDE_MARGIN
+var vertical_margin: float = 50.0
 
 func _ready() -> void:
 	if exclamation_mark:
@@ -45,7 +46,7 @@ func _update_position() -> void:
 	# Clamp position to screen edges
 	# X is always Right Edge
 	var clamped_x = screen_rect.end.x - margin
-	var clamped_y = clamp(screen_pos.y, screen_rect.position.y + margin, screen_rect.end.y - margin)
+	var clamped_y = clamp(screen_pos.y, screen_rect.position.y + vertical_margin, screen_rect.end.y - vertical_margin)
 
 	position = Vector2(clamped_x, clamped_y)
 
