@@ -16,7 +16,11 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 	# Auto despawn if alive too long (safety)
+	# Auto despawn if alive too long (safety)
 	get_tree().create_timer(5.0).timeout.connect(queue_free)
+
+	if has_node("Shadow"):
+		$Shadow.top_level = true
 
 func _process(delta: float) -> void:
 	# Apply gravity
@@ -27,6 +31,12 @@ func _process(delta: float) -> void:
 
 	# Rotate visuals
 	rotation_degrees += rotation_speed * delta
+
+	# Update Shadow
+	if has_node("Shadow"):
+		$Shadow.global_position = global_position + Vector2(20, 20)
+		$Shadow.global_rotation = global_rotation
+		$Shadow.global_scale = global_scale
 
 	# Despawn if too high
 	if global_position.y < -2048.0:

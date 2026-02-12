@@ -97,6 +97,23 @@ func _ready() -> void:
 	# This ensures tapping ANYWHERE on screen (emulated as Left Click) triggers jump
 	# Note: Now also added to project.godot directly for redundancy and export stability.
 
+	# FORCE MOBILE ASPECT RATIO ON PC (Prevent black bars)
+	_enforce_pc_aspect_ratio()
+
+func _enforce_pc_aspect_ratio() -> void:
+	if OS.get_name() in ["Windows", "macOS", "Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD"]:
+		# Target Height (reasonable for windowed mode)
+		var target_height = 600
+		# Aspect Ratio from Project Settings (2532 / 1170 ~= 2.164)
+		var aspect = 2532.0 / 1170.0
+		var target_width = int(target_height * aspect)
+
+		DisplayServer.window_set_size(Vector2i(target_width, target_height))
+		# Center window?
+		var screen_size = DisplayServer.screen_get_size()
+		var center = (screen_size - Vector2i(target_width, target_height)) / 2
+		DisplayServer.window_set_position(center)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if current_state == GameState.PLAYING:

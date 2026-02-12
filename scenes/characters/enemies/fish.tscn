@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dgl3qoynkddvj"]
+[gd_scene format=3 uid="uid://dgl3qoynkddvj"]
 
 [ext_resource type="PackedScene" uid="uid://bkumxcivwme5k" path="res://scenes/characters/enemies/base-enemy.tscn" id="1_base_enemy"]
 [ext_resource type="Script" uid="uid://cxhwad2ddre17" path="res://scripts/characters/fish.gd" id="2_script"]
@@ -102,12 +102,10 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_e65mj"]
 size = Vector2(2011.75, 1173.5)
 
-[node name="Fish" instance=ExtResource("1_base_enemy")]
-scale = Vector2(0.1, 0.1)
+[node name="Fish" unique_id=952113560 instance=ExtResource("1_base_enemy")]
+scale = Vector2(0.075, 0.075)
 script = ExtResource("2_script")
 horizontal_speed = -900.0
-start_volume_percent = 10.0
-audio_stream = null
 
 [node name="PhysicsShape" parent="." index="0"]
 position = Vector2(40, 79.5)

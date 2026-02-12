@@ -83,11 +83,6 @@ func _ready() -> void:
 	# Setup interaction prompt label
 	call_deferred("_setup_interaction_prompt_label")
 
-	call_deferred("_setup_falling_audio")
-
-func _setup_falling_audio() -> void:
-	_falling_player = AudioManager.create_audio_player(AudioManager.WOOL.FALLING, self)
-
 var _is_dead: bool = false
 
 func is_dead() -> bool:

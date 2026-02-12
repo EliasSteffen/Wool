@@ -31,7 +31,7 @@ func _setup_audio() -> void:
 	if not _audio_player:
 		_audio_player = AudioManager.create_audio_player(AudioManager.ENEMIES.FISH, self)
 		if _audio_player:
-			_audio_player.volume_db = linear_to_db(0.25)
+			# VOLUME SET globally in AudioManager now (10%)
 			_audio_player.finished.connect(_on_audio_finished)
 			despawn_requested.connect(_on_despawn_requested)
 			_start_audio()

@@ -3,23 +3,40 @@ extends BaseEnemy
 
 @export var fireball_scene: PackedScene
 
-var _shoot_timer: float = 0.0
-var _shoot_interval: float = 3.0
 var _fireball_speed: float = 300.0
 
 var _audio_player: AudioStreamPlayer
+var _animated_sprite: AnimatedSprite2D
+var _anim_sequence: Array[String] = ["1", "2", "3"]
+var _current_anim_index: int = 0
 
 func _ready() -> void:
 	super._ready()
 	_setup_audio()
+	_setup_animations()
 
 func _setup_audio() -> void:
 	if not _audio_player:
 		_audio_player = AudioManager.create_audio_player(AudioManager.ENEMIES.SPUCKI, self)
 		if _audio_player:
-			_audio_player.volume_db = linear_to_db(0.25)
-			# No looping or auto-start
+			# VOLUME SET globally in AudioManager now (10%)
 			despawn_requested.connect(_on_despawn_requested)
+
+func _setup_animations() -> void:
+	_animated_sprite = $Skin/AnimatedSprite2D
+	if _animated_sprite:
+		_animated_sprite.animation_finished.connect(_on_animation_finished)
+		_current_anim_index = 0
+		_animated_sprite.play(_anim_sequence[0])
+
+func _on_animation_finished() -> void:
+	if not _animated_sprite:
+		return
+
+	# After each animation finishes, spit and move to the next animation
+	shoot_fireball()
+	_current_anim_index = (_current_anim_index + 1) % _anim_sequence.size()
+	_animated_sprite.play(_anim_sequence[_current_anim_index])
 
 func _on_despawn_requested(_node: Node) -> void:
 	if _audio_player:
@@ -31,36 +48,18 @@ func _on_game_state_changed(new_state: int) -> void:
 		if _audio_player:
 			_audio_player.stop()
 
-func _process(delta: float) -> void:
-	# Debug timer progress
-	# print("Plant Time: ", _shoot_timer)
-
-	_shoot_timer += delta
-	if _shoot_timer >= _shoot_interval:
-		_shoot_timer = 0.0
-		# print("Plant: Timer reached! stored scene: ", fireball_scene)
-		shoot_fireball()
-
 func shoot_fireball() -> void:
 	if not fireball_scene:
 		push_warning("Plant: No fireball_scene assigned!")
 		return
 
-	# Play Sound
+	# Play spucki sound
 	if _audio_player:
 		_audio_player.play()
 
 	var fireball = fireball_scene.instantiate()
-
-	# Add projectile to the main scene (usually /root/..., or the parent of behavior)
 	get_parent().add_child(fireball)
 
-	# Spawn relative to the plant's orientation
-	# Local offset (0, -400) accounts for the plant height (since it's scaled down visuals, we assume local space of 1.0)
-	# But wait, children are scaled 0.25, Root is 1.0.
-	# If we want to spawn at the "mouth" (top of plant), that's near -200 to -250 in local unscaled space?
-	# Plant visuals are 270px tall. Mouth is at top. So -270?
-	# Let's say -250.
 	var spawn_pos_local = Vector2(0, -250)
 	fireball.global_position = to_global(spawn_pos_local)
 
@@ -68,12 +67,8 @@ func shoot_fireball() -> void:
 		fireball.speed = _fireball_speed
 
 	if "direction" in fireball:
-		# Shoot in the direction the plant is facing (Up relative to plant)
 		fireball.direction = Vector2.UP.rotated(global_rotation)
 
-	# print("Plant: Shot fireball at ", fireball.global_position)
-
 func _process_ai(_delta: float) -> void:
-	# Override BaseEnemy AI to be static.
 	velocity.x = 0
 	velocity.y = 0

@@ -30,10 +30,6 @@ func _ready() -> void:
 	velocity = Vector2.ZERO
 	_game_started = true # Force game start mode so it runs physics logic
 
-func _setup_falling_audio() -> void:
-	# Override to prevent creating falling audio player
-	pass
-
 func _unhandled_input(event: InputEvent) -> void:
 	pass # Ignore real input
 
