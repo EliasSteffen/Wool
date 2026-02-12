@@ -88,7 +88,9 @@ func die() -> void:
 	# Drop features if any
 
 	# Play death animation if available (TODO)
+	# Play death animation if available (TODO)
 	despawn_requested.emit(self)
+	set_physics_process(false)
 
 	# Update Shadow
 	# Update Shadow - Logic moved to _process

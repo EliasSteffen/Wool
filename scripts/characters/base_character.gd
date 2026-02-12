@@ -60,6 +60,9 @@ func _ready() -> void:
 	_setup_character()
 
 func _physics_process(delta: float) -> void:
+	if not is_inside_tree(): # Safety check
+		return
+
 	# Apply gravity if not on floor (and terrain allows it)
 	var apply_gravity: bool = true
 	if current_terrain and not current_terrain.uses_standard_gravity:
@@ -101,6 +104,9 @@ func _physics_process(delta: float) -> void:
 
 	# Apply swinging constraint
 	_apply_grapple_constraint(delta)
+
+	if not is_inside_tree() or is_queued_for_deletion() or not is_physics_processing():
+		return
 
 	# Apply movement
 	move_and_slide()
@@ -292,6 +298,7 @@ func _on_interaction_lost(interaction: Interaction) -> void:
 
 ## Called when character dies
 func die() -> void:
+	set_physics_process(false) # FIX
 	queue_free()
 
 # === PRIVATE METHODS ===

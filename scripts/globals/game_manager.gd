@@ -114,6 +114,35 @@ func _enforce_pc_aspect_ratio() -> void:
 		var center = (screen_size - Vector2i(target_width, target_height)) / 2
 		DisplayServer.window_set_position(center)
 
+		# Set Min Size
+		DisplayServer.window_set_min_size(Vector2i(640, int(640.0 / aspect)))
+
+# Aspect Ratio Enforcement on PC
+var _last_window_size: Vector2i = Vector2i.ZERO
+const TARGET_ASPECT: float = 2532.0 / 1170.0
+
+func _enforce_aspect_ratio_runtime() -> void:
+	if OS.get_name() in ["Windows", "macOS", "Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD"]:
+		var current_size = DisplayServer.window_get_size()
+		# Tolerance check to avoid fighting too much or float errors
+		if _last_window_size == Vector2i.ZERO:
+			_last_window_size = current_size
+			return
+
+		if current_size == _last_window_size:
+			return
+
+		# If size changed, force aspect ratio
+		# We prioritize Width (usually easier for landscape)
+		var desired_height = int(current_size.x / TARGET_ASPECT)
+
+		# If huge discrepancy, snap back
+		if abs(current_size.y - desired_height) > 2:
+			DisplayServer.window_set_size(Vector2i(current_size.x, desired_height))
+			_last_window_size = Vector2i(current_size.x, desired_height)
+		else:
+			_last_window_size = current_size
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if current_state == GameState.PLAYING:
@@ -226,6 +255,9 @@ func _process(delta: float) -> void:
 	var current_dist = get_current_distance()
 	if current_dist > max_run_distance:
 		max_run_distance = current_dist
+
+	# Enforce PC Window Ratio
+	_enforce_aspect_ratio_runtime()
 
 func get_current_distance() -> int:
 	if not _player_ref or not is_instance_valid(_player_ref) or not _start_initialized:

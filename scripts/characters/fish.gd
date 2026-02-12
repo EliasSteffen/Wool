@@ -86,6 +86,8 @@ func _process_ai(delta: float) -> void:
 	if velocity.y > 0 and global_position.y >= _start_y:
 		# Fish has returned to the water -> Despawn
 		despawn_requested.emit(self)
+		set_physics_process(false)
+		return
 
 	# Rotate based on velocity to face movement direction
 	rotation = velocity.angle() + PI
