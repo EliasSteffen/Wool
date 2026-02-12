@@ -1,10 +1,30 @@
 [gd_scene format=3 uid="uid://cjrvwbot7dfmg"]
 
 [ext_resource type="Script" uid="uid://bl68pdclxkwpe" path="res://scripts/ui/settings_window.gd" id="1_script"]
-[ext_resource type="PackedScene" uid="uid://menu_bg_shared" path="res://scenes/ui/menu_background.tscn" id="2_menu_bg"]
+[ext_resource type="PackedScene" uid="uid://rcr5v5hlcmya" path="res://scenes/ui/menu_background.tscn" id="2_menu_bg"]
+[ext_resource type="FontFile" uid="uid://bo13heginhkfl" path="res://assets/font/Federant-Regular.ttf" id="5_font"]
+[ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="6_theme"]
+[ext_resource type="Script" uid="uid://coa7rwl5kitau" path="res://scripts/ui/rolling_slider.gd" id="7_rolling"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_transparent"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_track"]
+bg_color = Color(0.18, 0.18, 0.18, 1)
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+expand_margin_top = -15.0
+expand_margin_bottom = -15.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
+bg_color = Color(0.44, 0.41, 0.53, 1)
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+expand_margin_top = -15.0
+expand_margin_bottom = -15.0
 
 [node name="SettingsWindow" type="CanvasLayer" unique_id=257957650]
 process_mode = 3
@@ -22,14 +42,10 @@ offset_right = -200.0
 offset_bottom = -100.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("6_theme")
 
-[node name="MenuBackground" parent="Panel" instance=ExtResource("2_menu_bg")]
+[node name="MenuBackground" parent="Panel" unique_id=1795110437 instance=ExtResource("2_menu_bg")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel" unique_id=2052806156]
 layout_mode = 1
@@ -47,12 +63,12 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 15
+theme_override_constants/separation = 40
 alignment = 1
 
 [node name="MasterVolume" type="PanelContainer" parent="Panel/ScrollContainer/VBoxContainer" unique_id=1972588900]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume" unique_id=622689372]
 layout_mode = 2
@@ -61,27 +77,28 @@ theme_override_constants/separation = 10
 [node name="Label" type="Label" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume/VBoxContainer" unique_id=1297441664]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 80
 text = "Master Volume"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume/VBoxContainer" unique_id=1577990243]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume/VBoxContainer" unique_id=1234567890]
 layout_mode = 2
+size_flags_vertical = 4
 
 [node name="HSlider" type="HSlider" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume/VBoxContainer/HBoxContainer" unique_id=1332536432]
-custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/slider = SubResource("StyleBoxFlat_track")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_fill")
 max_value = 1.0
 step = 0.01
-
-[node name="Spacer" type="Control" parent="Panel/ScrollContainer/VBoxContainer/MasterVolume/VBoxContainer/HBoxContainer" unique_id=1474298853]
-custom_minimum_size = Vector2(20, 0)
-layout_mode = 2
+script = ExtResource("7_rolling")
 
 [node name="MusicVolume" type="PanelContainer" parent="Panel/ScrollContainer/VBoxContainer" unique_id=31125164]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume" unique_id=1671754472]
 layout_mode = 2
@@ -90,27 +107,28 @@ theme_override_constants/separation = 10
 [node name="Label" type="Label" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume/VBoxContainer" unique_id=94411424]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 80
 text = "Music Volume"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume/VBoxContainer" unique_id=23306685]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume/VBoxContainer" unique_id=1234567891]
 layout_mode = 2
+size_flags_vertical = 4
 
 [node name="HSlider" type="HSlider" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume/VBoxContainer/HBoxContainer" unique_id=1691790799]
-custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/slider = SubResource("StyleBoxFlat_track")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_fill")
 max_value = 1.0
 step = 0.01
-
-[node name="Spacer" type="Control" parent="Panel/ScrollContainer/VBoxContainer/MusicVolume/VBoxContainer/HBoxContainer" unique_id=366220600]
-custom_minimum_size = Vector2(20, 0)
-layout_mode = 2
+script = ExtResource("7_rolling")
 
 [node name="SFXVolume" type="PanelContainer" parent="Panel/ScrollContainer/VBoxContainer" unique_id=347290260]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_transparent")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume" unique_id=1933693197]
 layout_mode = 2
@@ -119,31 +137,32 @@ theme_override_constants/separation = 10
 [node name="Label" type="Label" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume/VBoxContainer" unique_id=684695647]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 80
 text = "SFX Volume"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume/VBoxContainer" unique_id=2044942011]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume/VBoxContainer" unique_id=1234567892]
 layout_mode = 2
+size_flags_vertical = 4
 
 [node name="HSlider" type="HSlider" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume/VBoxContainer/HBoxContainer" unique_id=1581427817]
-custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/slider = SubResource("StyleBoxFlat_track")
+theme_override_styles/grabber_area = SubResource("StyleBoxFlat_fill")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxFlat_fill")
 max_value = 1.0
 step = 0.01
+script = ExtResource("7_rolling")
 
-[node name="Spacer" type="Control" parent="Panel/ScrollContainer/VBoxContainer/SFXVolume/VBoxContainer/HBoxContainer" unique_id=65504467]
-custom_minimum_size = Vector2(20, 0)
+[node name="Spacer" type="Control" parent="Panel/ScrollContainer/VBoxContainer" unique_id=987654321]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-
-[node name="HSeparator" type="HSeparator" parent="Panel/ScrollContainer/VBoxContainer" unique_id=892301984]
-layout_mode = 2
-theme_override_constants/separation = 20
 
 [node name="ResetHighscoreButton" type="Button" parent="Panel/ScrollContainer/VBoxContainer" unique_id=1498129033]
-custom_minimum_size = Vector2(0, 80)
+custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0, 0, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_fonts/font = ExtResource("5_font")
+theme_override_font_sizes/font_size = 80
 text = "Reset Highscore"

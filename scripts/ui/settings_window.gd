@@ -11,13 +11,13 @@ func _ready() -> void:
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
 	# Find and setup sliders if they exist in the scene
-	var master_slider = container.get_node_or_null("MasterVolume/HBoxContainer/HSlider")
+	var master_slider = container.get_node_or_null("MasterVolume/VBoxContainer/HBoxContainer/HSlider")
 	if master_slider: _setup_slider(master_slider, "Master")
 
-	var music_slider = container.get_node_or_null("MusicVolume/HBoxContainer/HSlider")
+	var music_slider = container.get_node_or_null("MusicVolume/VBoxContainer/HBoxContainer/HSlider")
 	if music_slider: _setup_slider(music_slider, "Music")
 
-	var sfx_slider = container.get_node_or_null("SFXVolume/HBoxContainer/HSlider")
+	var sfx_slider = container.get_node_or_null("SFXVolume/VBoxContainer/HBoxContainer/HSlider")
 	if sfx_slider: _setup_slider(sfx_slider, "SFX")
 
 	var reset_btn = container.get_node_or_null("ResetHighscoreButton")
