@@ -2,7 +2,6 @@ class_name EnemySpawner
 extends Node
 
 # Config
-# Config
 var eagle_scene: PackedScene = preload("res://scenes/characters/enemies/eagle.tscn")
 var fish_scene: PackedScene = preload("res://scenes/characters/enemies/fish.tscn")
 var plant_scene: PackedScene = preload("res://scenes/characters/enemies/plant.tscn")
@@ -28,11 +27,23 @@ var plant_spawn_interval_max: float = 10.0
 var plant_min_distance: int = 0
 var plant_spawn_y: float = 0.0
 
+# Plant Spacing Config
+# 1000 pixels = 100m (since 10px = 1m in GameManager)
+var plant_min_spacing_start: float = 1000.0
+# 500 pixels = 50m
+var plant_min_spacing_end: float = 500.0
+# Distance at which scaling maxes out (e.g. 5000m)
+var plant_spacing_scaling_distance: float = 5000.0
+
 var _eagle_timer: float = 0.0
 var _fish_timer: float = 0.0
 var _plant_timer: float = 0.0
 var _player: Node2D = null
 var _spawn_counts: Dictionary = {}
+
+var _active_eagle_count: int = 0
+var _active_fish_count: int = 0
+var _last_plant_global_x: float = -99999.0
 
 var _eagle_pool: ObjectPool
 var _fish_pool: ObjectPool
@@ -71,29 +82,42 @@ func _process(delta: float) -> void:
 	var spawn_plant = (current_dist >= 1500 and current_dist < 2000) or current_dist >= 2000
 
 	# Process Eagle Spawning
-	if spawn_eagle:
+	# Check active count constraint
+	if spawn_eagle and _active_eagle_count == 0:
 		_eagle_timer -= delta
 		if _eagle_timer <= 0:
 			_spawn_eagle()
 			_reset_eagle_timer(current_dist)
-	else:
-		_eagle_timer = 2.0 # Keep timer ready but not firing
+	elif not spawn_eagle:
+		# Keep timer ready but not firing if outside zone
+		_eagle_timer = 2.0
 
 	# Process Fish Spawning
-	if spawn_fish:
+	# Check active count constraint
+	if spawn_fish and _active_fish_count == 0:
 		_fish_timer -= delta
 		if _fish_timer <= 0:
 			_spawn_fish()
 			_reset_fish_timer(current_dist)
-	else:
+	elif not spawn_fish:
 		_fish_timer = 2.0
 
 	# Process Plant Spawning
 	if spawn_plant:
 		_plant_timer -= delta
 		if _plant_timer <= 0:
-			_spawn_plant()
-			_reset_plant_timer(current_dist)
+			# Check distance constraint before spawning
+			if _can_spawn_plant(current_dist):
+				_spawn_plant()
+				_reset_plant_timer(current_dist)
+			else:
+				# Wait a bit before checking again?
+				# Actually, the timer is already <= 0, so it will retry next frame
+				# But to prevent spamming check every frame if we are just waiting for distance,
+				# we could add a small delay or just let it spin (it's cheap).
+				# However, since we reset timer AFTER spawn, if we don't spawn, timer stays <= 0.
+				# This means it will check every frame until distance is met. This is fine.
+				pass
 	else:
 		_plant_timer = 2.0
 
@@ -108,6 +132,31 @@ func _get_difficulty_multiplier(current_dist: float) -> float:
 	# Reduce interval by 10% per step, capped at 50% (0.5 multiplier)
 	var multiplier = pow(0.9, steps)
 	return max(0.5, multiplier)
+
+func _get_current_min_plant_spacing(current_dist: int) -> float:
+	# Calculate interpolation factor (0.0 to 1.0)
+	# We want spacing start at 0 dist and spacing end at scaling_distance
+	var t: float = clamp(float(current_dist) / plant_spacing_scaling_distance, 0.0, 1.0)
+
+	# Lerp from start (1000) to end (500)
+	return lerp(plant_min_spacing_start, plant_min_spacing_end, t)
+
+func _can_spawn_plant(current_dist: int) -> bool:
+	if not _player: return false
+
+	var cam = _player.get_viewport().get_camera_2d()
+	if not cam: return false
+
+	# Calculate where it WOULD spawn
+	var cam_pos = cam.global_position
+	var viewport_rect = _player.get_viewport_rect()
+	var camera_zoom = cam.zoom
+	var visible_width = viewport_rect.size.x / camera_zoom.x
+	var spawn_x = cam_pos.x + (visible_width * 0.5) + spawn_distance_x
+
+	var min_spacing = _get_current_min_plant_spacing(current_dist)
+
+	return (spawn_x - _last_plant_global_x) >= min_spacing
 
 func _reset_eagle_timer(current_dist: float = 0.0) -> void:
 	var mult = _get_difficulty_multiplier(current_dist)
@@ -151,6 +200,7 @@ func _spawn_eagle() -> void:
 	# Ideally add reset() to BaseEnemy
 
 	_add_enemy(eagle, "Eagle")
+	_active_eagle_count += 1
 
 func _spawn_fish() -> void:
 	if not _player: return
@@ -172,6 +222,7 @@ func _spawn_fish() -> void:
 	if fish.has_method("reset"): fish.reset()
 
 	_add_enemy(fish, "Fish")
+	_active_fish_count += 1
 
 func _spawn_plant() -> void:
 	if not _player: return
@@ -193,6 +244,7 @@ func _spawn_plant() -> void:
 	if plant.has_method("reset"): plant.reset()
 
 	_add_enemy(plant, "Plant")
+	_last_plant_global_x = spawn_x
 
 func _add_enemy(enemy: Node, type_name: String) -> void:
 	# No longer adding child here as pool handles it, but we might need to call ready?
@@ -212,7 +264,9 @@ func _on_enemy_despawn_requested(enemy: Node) -> void:
 	# Determine which pool it belongs to based on type
 	if enemy is Eagle:
 		_eagle_pool.release(enemy)
+		_active_eagle_count = max(0, _active_eagle_count - 1)
 	elif enemy is Fish:
 		_fish_pool.release(enemy)
+		_active_fish_count = max(0, _active_fish_count - 1)
 	elif enemy is Plant:
 		_plant_pool.release(enemy)

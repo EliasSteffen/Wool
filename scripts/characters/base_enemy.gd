@@ -88,7 +88,10 @@ func die() -> void:
 	# Drop features if any
 
 	# Play death animation if available (TODO)
-	queue_free()
+	despawn_requested.emit(self)
+
+	# Update Shadow
+	# Update Shadow - Logic moved to _process
 
 func _process(delta: float) -> void:
 	# Cleanup if too far behind player
@@ -97,7 +100,7 @@ func _process(delta: float) -> void:
 	if player and is_instance_valid(player):
 		# If we are more than 3000px behind the player, we are definitely off screen and safe to remove
 		if global_position.x < player.global_position.x - 3000.0:
-			queue_free()
+			despawn_requested.emit(self)
 
 	# Update Shadow
 	if _shadow_sprite and skin:
@@ -126,6 +129,13 @@ func _process(delta: float) -> void:
 			# BaseCharacter doesn't strictly enforce scale. But Fish.tscn has scale 0.1.
 			# Let's use constant offset vector (100, 100) as per Wool
 			_shadow_sprite.position = skin.position + Vector2(100, 100)
+
+func _process_physics(delta: float) -> void:
+	_process_ai(delta)
+	super._process_physics(delta)
+
+func _process_ai(delta: float) -> void:
+	pass
 
 
 # === PRIVATE METHODS ===

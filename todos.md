@@ -1,6 +1,3 @@
-- The close button of the settings should be perfectly positioned at the top right corner of the settings-background image.
-    - Center of close button image should be at the top right corner of the settings-background image.
-    - Remove the background of the sliders.
 - The credits have to be done correctly!
     - Programmed by 'Elias'
     - Assets designed by 'Mischa'
@@ -10,5 +7,12 @@
         - The Professors were 'Prof. Dr. Kathrin Ungru-Baggemann' and 'Prof. Dipl.-Des. Tina Glückselig'
         - The course was in the Winter Semester 2025/26
     - Fonts are from google fonts
-    - SFX come from
-        - 'https://freesound.org/'
+    - SFX
+        - die: https://freesound.org/people/bWpo/sounds/370658/
+        - swing: https://freesound.org/people/InspectorJ/sounds/394425/
+        - warn: https://freesound.org/people/AnthonyRox/sounds/740421/
+        - highscore: https://freesound.org/people/JFRecords/sounds/420530/
+        - bird: https://freesound.org/people/Clusman/sounds/543117/
+        - spucki: https://freesound.org/people/LilMati/sounds/459145/
+        - hook: https://freesound.org/people/SuGu14/sounds/78285/
+        - anfang: https://freesound.org/people/Anthousai/sounds/405761/

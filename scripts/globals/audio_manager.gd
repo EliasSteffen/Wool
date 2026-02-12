@@ -91,3 +91,12 @@ func create_audio_player(sound_id: String, parent: Node) -> AudioStreamPlayer:
 	new_player.stream = _loaded_sounds[sound_id]
 	new_player.bus = "SFX"
 	return new_player
+
+func play_credits_music() -> void:
+	# For now, we can play the highscore music or any other suitable track
+	# If we have a dedicated credits track, we should add it to the sound files
+	play_sound(GAME.HIGHSCORE)
+
+func play_main_music() -> void:
+	# Play the main game loop or start sound
+	play_sound(GAME.ANFANG)

@@ -1,8 +1,8 @@
 extends BaseMenu
 
-@onready var resume_button: Button = $Control/CenterContainer/VBoxContainer/ResumeButton
-@onready var settings_button: Button = $Control/CenterContainer/VBoxContainer/SettingsButton
-@onready var credits_button: Button = $Control/CenterContainer/VBoxContainer/CreditsButton
+@onready var resume_button: Button = $Control/MenuPanel/CloseButton
+@onready var settings_button: Button = $Control/MenuPanel/VBoxContainer/SettingsButton
+@onready var credits_button: Button = $Control/MenuPanel/VBoxContainer/CreditsButton
 
 func _ready() -> void:
 	super._ready()
@@ -14,19 +14,6 @@ func _ready() -> void:
 	settings_button.text = "Settings"
 
 	register_buttons([settings_button, credits_button], false, false)
-	# Resume button is icon-only and should not have the button background on press
-	# Resume button is icon-only and should not have the button background on press
-	var flat_style = StyleBoxFlat.new()
-	flat_style.bg_color = Color(0,0,0,0)
-
-	var feedback_style = flat_style.duplicate()
-	feedback_style.bg_color = Color(1, 1, 1, 0.2)
-	feedback_style.set_corner_radius_all(20)
-
-	resume_button.add_theme_stylebox_override("normal", flat_style)
-	resume_button.add_theme_stylebox_override("hover", flat_style)
-	resume_button.add_theme_stylebox_override("pressed", feedback_style)
-	resume_button.add_theme_stylebox_override("focus", feedback_style)
 
 	setup_credits_button()
 
@@ -42,4 +29,3 @@ func _on_credits_pressed() -> void:
 
 func _on_resume_pressed() -> void:
 	GameManager.toggle_pause()
-

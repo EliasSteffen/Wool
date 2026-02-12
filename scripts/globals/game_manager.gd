@@ -37,7 +37,7 @@ func game_over() -> void:
 	if current_state == GameState.GAME_OVER:
 		return
 
-	_show_game_over_screen()
+	call_deferred("_show_game_over_screen")
 
 	current_state = GameState.GAME_OVER
 	state_changed.emit(current_state)
