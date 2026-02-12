@@ -80,7 +80,7 @@ func _setup_score_display(fade_duration: float) -> void:
 	platform_sprite.rotation = 0
 	platform_sprite.scale = Vector2(1, 1)
 	wool_marker.position.x = 0 # Start at 0
-	wool_marker.position.y = 18.0 # Offset to walk on bar
+	wool_marker.visible = false
 
 	# Wait for layout
 	var retries = 0
@@ -125,8 +125,9 @@ func _setup_score_display(fade_duration: float) -> void:
 
 	var wool_limit = total_width * ratio
 
-	# 3. Wool Walks to score
+	# 3. Make wool visible and walk to score
 	_move_tween.tween_callback(func():
+		wool_marker.visible = true
 		if internal_wool_sprite: internal_wool_sprite.play("walk")
 	)
 
@@ -201,6 +202,7 @@ func _skip_to_end() -> void:
 
 	# End state
 	_animate_platform(1.0, total_width)
+	wool_marker.visible = true
 	_animate_wool(1.0, wool_limit, current_score)
 
 	if internal_wool_sprite: internal_wool_sprite.play("idle")
