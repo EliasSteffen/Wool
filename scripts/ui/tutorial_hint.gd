@@ -110,7 +110,7 @@ func _run_unified_loop() -> void:
 	# The visual vector from Top-Left to Pivot is: (PivotOffset * Scale).rotated(Rotation)
 	var visual_offset = (hand.pivot_offset * hand.scale).rotated(hand.rotation)
 	var target_hand_pos = _touch_pos - visual_offset
-	var start_hand_pos = _touch_pos + Vector2(-60, 60)
+	var start_hand_pos = target_hand_pos + Vector2(250, 150)
 
 	hand.global_position = start_hand_pos
 

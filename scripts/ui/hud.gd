@@ -42,12 +42,12 @@ func _ready() -> void:
 	# Configure RustyNailTimer rounded visuals
 	var bg_style := StyleBoxFlat.new()
 	bg_style.bg_color = Color(0, 0, 0, 0.5)
-	bg_style.set_corner_radius_all(20) # Half of 40px height
+	bg_style.set_corner_radius_all(25) # Half of 50px height
 	rusty_nail_timer_bg.add_theme_stylebox_override("panel", bg_style)
 
 	var fill_style := StyleBoxFlat.new()
 	fill_style.bg_color = Color(1, 1, 1, 0.95)
-	fill_style.set_corner_radius_all(20)
+	fill_style.set_corner_radius_all(25)
 	rusty_nail_timer_fill.add_theme_stylebox_override("panel", fill_style)
 
 	# Make labels background transparent
