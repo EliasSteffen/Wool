@@ -2,6 +2,8 @@ extends Control
 
 @onready var content: Control = $Background/ScrollContent/VBoxContainer
 @onready var background: Control = $Background
+@onready var title_label: Label = $Background/ScrollContent/VBoxContainer/Title
+@onready var credits_text: RichTextLabel = $Background/ScrollContent/VBoxContainer/CreditsText
 
 var scroll_speed: float = 60.0
 var _initial_y: float = 0.0

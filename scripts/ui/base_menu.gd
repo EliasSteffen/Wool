@@ -7,8 +7,7 @@ var _settings_instance: Node = null
 var _buttons_to_resize: Array[Control] = []
 var _auto_resize_buttons: bool = true
 
-# UI theme helper
-var UITheme = preload("res://scripts/ui/ui_theme.gd")
+# UI theme helper removed (using Global Theme)
 
 func _ready() -> void:
 	get_tree().root.size_changed.connect(_update_button_sizes)
@@ -23,7 +22,8 @@ func register_buttons(buttons: Array[Control], apply_style: bool = true, auto_re
 	if apply_style:
 		for btn in buttons:
 			if btn and btn is Button:
-				UITheme.apply_modern_button_style(btn)
+				# Global Theme handles styling now
+				pass
 
 	if _auto_resize_buttons:
 		_update_button_sizes()
