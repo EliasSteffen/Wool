@@ -72,6 +72,6 @@ deploy-android:
   before_script:
     - gem install fastlane
   script:
-    - fastlane supply --aab build/android/${EXPORT_NAME}.aab --track internal --package_name com.florentinerge.wooly --json_key "$PLAY_STORE_JSON_KEY" --skip_upload_metadata --skip_upload_images --skip_upload_screenshots --release_status draft
+    - fastlane android deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "main" && $PLAY_STORE_JSON_KEY

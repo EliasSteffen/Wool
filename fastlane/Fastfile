@@ -68,3 +68,86 @@ platform :ios do
     )
   end
 end
+
+platform :android do
+  desc "Upload to Google Play Store Internal Track if version is new"
+  lane :deploy do
+    # 1. Parse version code from export_presets.cfg
+    export_presets_path = "../export_presets.cfg"
+    if !File.exist?(export_presets_path)
+      UI.user_error! "Could not find export_presets.cfg at #{export_presets_path}"
+    end
+    
+    version_code = nil
+    File.foreach(export_presets_path) do |line|
+      if line =~ /version\/code=(\d+)/
+        version_code = $1.to_i
+        break
+      end
+    end
+
+    if version_code.nil?
+      UI.user_error! "Could not find version/code in export_presets.cfg"
+    end
+
+    UI.message "Local Android Version Code: #{version_code}"
+
+    # 2. Get Google Play Store version codes
+    # This requires json_key to be set via supply or environment variable (handled by GitLab CI)
+    # Using the google_play_track_version_codes action
+    
+    # Check if we have the JSON key content env var
+    if ENV["PLAY_STORE_JSON_KEY"].to_s.empty?
+       UI.user_error! "PLAY_STORE_JSON_KEY environment variable is not set"
+    end
+
+    json_key = ENV["PLAY_STORE_JSON_KEY"]
+    is_key_file = File.file?(json_key)
+    
+    begin
+        # Prepare parameters based on whether the key is a file or raw data
+        version_check_params = {
+            package_name: "com.florentinerge.wooly",
+            track: "internal"
+        }
+        
+        supply_params = {
+            package_name: "com.florentinerge.wooly",
+            track: "internal",
+            aab: "build/android/wooly.aab",
+            skip_upload_metadata: true,
+            skip_upload_images: true,
+            skip_upload_screenshots: true,
+            release_status: "draft"
+        }
+
+        if is_key_file
+            UI.message "Using JSON key from file: #{json_key}"
+            version_check_params[:json_key] = json_key
+            supply_params[:json_key] = json_key
+        else
+            UI.message "Using JSON key from environment variable data"
+            version_check_params[:json_key_data] = json_key
+            supply_params[:json_key_data] = json_key
+        end
+
+        remote_version_codes = google_play_track_version_codes(version_check_params)
+        
+        UI.message "Remote Version Codes on 'internal' track: #{remote_version_codes}"
+
+        # 3. Compare and Upload
+        if remote_version_codes.include?(version_code)
+            UI.success "Version code #{version_code} already exists on the 'internal' track. Skipping upload."
+        else
+            UI.message "Version code #{version_code} is new. Proceeding with upload..."
+            supply(supply_params)
+            UI.success "Successfully uploaded build with version code #{version_code}!"
+        end
+
+    rescue => ex
+        UI.error "Error checking version codes: #{ex.message}"
+        raise ex
+    end
+
+  end
+end
