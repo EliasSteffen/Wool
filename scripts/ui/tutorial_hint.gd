@@ -32,6 +32,7 @@ func setup(start_pos: Vector2, player_ref: Node2D = null) -> void:
 func _ready() -> void:
 	# CRITICAL: Do not block input!
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hand.z_index = 1 # Ensure hand is drawn on top of the circle
 
 	if _has_context and not _is_initialized:
 		_initialize_content()
@@ -214,7 +215,7 @@ func _trigger_ripple() -> void:
 	_reset_circle_state()
 	_ripple_tween = create_tween()
 	_ripple_tween.tween_property(circle, "modulate:a", 1.0, 0.0)
-	_ripple_tween.parallel().tween_property(circle, "scale", Vector2(0.5, 0.5), 0.3)
+	_ripple_tween.parallel().tween_property(circle, "scale", Vector2(1.0, 1.0), 0.3)
 	_ripple_tween.parallel().tween_property(circle, "modulate:a", 0.0, 0.3).set_delay(0.1)
 
 func _reset_circle_state() -> void:
