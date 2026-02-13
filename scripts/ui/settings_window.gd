@@ -25,6 +25,7 @@ func _ready() -> void:
 		reset_btn.pressed.connect(_on_reset_highscore_pressed)
 
 func _on_reset_highscore_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	GameManager.reset_highscore()
 	# Optional: feedback? For now just reset.
 

@@ -61,6 +61,7 @@ func _ready() -> void:
 		pause_button.pressed.connect(_on_pause_pressed)
 
 func _on_pause_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	# Prevent a simultaneous jump by ignoring input for a short moment
 	GameManager.ignore_input_for(0.15)
 	GameManager.toggle_pause()

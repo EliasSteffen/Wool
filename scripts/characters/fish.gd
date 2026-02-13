@@ -9,7 +9,9 @@ extends BaseEnemy
 var _start_y: float = 0.0
 var _start_x: float = 0.0
 
-var _audio_player: AudioStreamPlayer
+var _start_player: AudioStreamPlayer
+# _end_player removed (using global AudioManager.play_sound)
+var _falling_sound_played: bool = false
 
 func _ready() -> void:
 	super._ready()
@@ -24,35 +26,35 @@ func reset() -> void:
 	super.reset()
 	_start_y = global_position.y
 	_start_x = global_position.x
+	# Reset falling sound flag on reset
+	_falling_sound_played = false
 	_jump()
-	_start_audio()
+	# _start_audio() removed, handled in jump
 
 func _setup_audio() -> void:
-	if not _audio_player:
-		_audio_player = AudioManager.create_audio_player(AudioManager.ENEMIES.FISH, self)
-		if _audio_player:
-			# VOLUME SET globally in AudioManager now (10%)
-			_audio_player.finished.connect(_on_audio_finished)
+	if not _start_player:
+		_start_player = AudioManager.create_audio_player(AudioManager.ENEMIES.FISH_START, self)
+		if _start_player:
 			despawn_requested.connect(_on_despawn_requested)
-			_start_audio()
 
-func _start_audio() -> void:
-	if _audio_player and not _audio_player.playing:
-		_audio_player.play()
+	# _end_player removed
 
-func _on_audio_finished() -> void:
-	if _audio_player and is_inside_tree():
-		_audio_player.play()
+func _play_start_sound() -> void:
+	if _start_player:
+		_start_player.play()
+
+func _play_end_sound() -> void:
+	AudioManager.play_sound(AudioManager.ENEMIES.FISH_END)
+
+# _on_audio_finished removed as we don't loop
 
 func _on_despawn_requested(_node: Node) -> void:
-	if _audio_player:
-		_audio_player.stop()
+	if _start_player: _start_player.stop()
 
 func _on_game_state_changed(new_state: int) -> void:
 	super._on_game_state_changed(new_state)
 	if new_state == GameManager.GameState.GAME_OVER:
-		if _audio_player:
-			_audio_player.stop()
+		if _start_player: _start_player.stop()
 
 func _setup_visibility_notifier() -> void:
 	var notifier = VisibleOnScreenNotifier2D.new()
@@ -89,6 +91,12 @@ func _process_ai(delta: float) -> void:
 		set_physics_process(false)
 		return
 
+	# Play falling sound if moving down and hasn't played yet
+	if velocity.y > 0:
+		if not _falling_sound_played:
+			_falling_sound_played = true
+			_play_end_sound()
+
 	# Rotate based on velocity to face movement direction
 	rotation = velocity.angle() + PI
 
@@ -102,7 +110,10 @@ func _jump() -> void:
 		var jump_velocity = sqrt(2.0 * gravity * height_diff)
 		velocity.y = -jump_velocity
 		velocity.x = horizontal_speed # Apply lateral movement
-		# Audio handled by visibility notifier
+
+		# Reset falling sound flag for new jump (if reused)
+		_falling_sound_played = false
+		_play_start_sound()
 	else:
 		velocity.y = -1000.0
 		velocity.x = horizontal_speed

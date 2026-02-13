@@ -37,6 +37,7 @@ func _update_button_sizes() -> void:
 			btn.custom_minimum_size.x = width
 
 func _on_settings_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	if not _settings_instance:
 		_settings_instance = SETTINGS_SCENE.instantiate()
 		get_tree().root.add_child(_settings_instance)

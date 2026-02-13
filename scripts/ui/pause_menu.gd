@@ -19,6 +19,7 @@ func _ready() -> void:
 	credits_button.text = "Credits"
 
 func _on_credits_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	var credits_scene = preload("res://scenes/ui/credits.tscn").instantiate()
 	add_child(credits_scene)
 
