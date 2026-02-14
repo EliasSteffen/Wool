@@ -77,11 +77,11 @@ pages:
   dependencies:
     - export-web
     - generate-badges
-  script:
-    - cp -r build/web/* public/
-    - echo '/*' > public/_headers
-    - echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
-    - echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
+  script: |
+    cp -r build/web/* public/
+    echo '/*' > public/_headers
+    echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
+    echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
 
 deploy-android:
   extends: .deploy
