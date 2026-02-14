@@ -63,6 +63,8 @@ func _ready() -> void:
 	_reset_plant_timer()
 
 func _process(delta: float) -> void:
+	if GameManager.current_state == GameManager.GameState.GAME_OVER:
+		return
 	if not _player:
 		_player = get_tree().get_first_node_in_group("player")
 		return

@@ -12,7 +12,7 @@ var _active_nodes: Array[Node] = []
 func _init(scene: PackedScene, parent: Node, initial_size: int = 10) -> void:
 	_scene = scene
 	_parent = parent
-	
+
 	for i in range(initial_size):
 		var node = _create_new_node()
 		_release_node_to_pool(node)
@@ -23,13 +23,13 @@ func acquire() -> Node:
 		node = _create_new_node()
 	else:
 		node = _pool.pop_back()
-	
+
 	_active_nodes.append(node)
-	
+
 	if node is Node2D:
 		node.visible = true
 		node.process_mode = Node.PROCESS_MODE_INHERIT
-		
+
 	return node
 
 func release(node: Node) -> void:
@@ -39,14 +39,12 @@ func release(node: Node) -> void:
 
 func _create_new_node() -> Node:
 	if not _scene:
-		printerr("ObjectPool: Scene is null!")
 		return null
-		
+
 	var node = _scene.instantiate()
 	if not node:
-		printerr("ObjectPool: Failed to instantiate node!")
 		return null
-		
+
 	if _parent:
 		_parent.add_child(node)
 	return node
@@ -57,7 +55,7 @@ func _release_node_to_pool(node: Node) -> void:
 		node.process_mode = Node.PROCESS_MODE_DISABLED
 		# Reset position to avoid interference?
 		node.position = Vector2(-9999, -9999)
-	
+
 	_pool.append(node)
 
 # Cleanup all nodes (for level restart)

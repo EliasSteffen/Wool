@@ -59,7 +59,12 @@ func _ready() -> void:
 	GameManager.state_changed.connect(_on_game_state_changed)
 
 func _on_game_state_changed(new_state: int) -> void:
-	pass
+	if new_state == GameManager.GameState.GAME_OVER:
+		set_physics_process(false)
+		set_process(false)
+		if _shadow_sprite:
+			_shadow_sprite.visible = false
+
 
 # === PUBLIC METHODS ===
 

@@ -77,8 +77,9 @@ func get_grapple_offset() -> Vector2:
 	return Vector2.ZERO
 
 func _jump() -> void:
-	AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 	super._jump()
+	if not self is ShadowWool:
+		AudioManager.play_sound(AudioManager.WOOL.SCHWINGEN)
 	_is_jumping_active = true
 
 func _calculate_player_state() -> PlayerState:
