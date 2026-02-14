@@ -2,6 +2,7 @@ import os
 import sys
 from pydub import AudioSegment
 
+
 def trim_audio(input_file, start_sec, end_sec, output_file=None):
     if not os.path.exists(input_file):
         print(f"Error: File '{input_file}' not found.")

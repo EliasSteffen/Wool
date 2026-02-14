@@ -12,6 +12,7 @@ variables:
   script:
     - mkdir -p $(dirname ${EXPORT_PATH})
     - godot --headless --verbose --export-${EXPORT_TYPE} "${PRESET_NAME}" ${EXPORT_PATH}
+    - echo "success" > build/${PLATFORM}/success
   artifacts:
     name: ${EXPORT_NAME}-${PLATFORM}
     paths:
@@ -59,8 +60,10 @@ pages:
   extends: .deploy
   image: alpine
   script: |
+    apk add --no-cache python3
     mkdir -p public
     cp -r build/web/* public/
+    python3 scripts/tools/update_version_json.py
     echo '/*' > public/_headers
     echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
     echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
