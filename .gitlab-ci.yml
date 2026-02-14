@@ -1,9 +1,10 @@
 stages:
   - export
+  - report
   - deploy
 
 variables:
-  EXPORT_NAME: wooly
+  EXPORT_NAME: Wool
 
 .export:
   stage: export
@@ -56,14 +57,29 @@ export-windows:
     EXPORT_PATH: build/windows/${EXPORT_NAME}.exe
     EXPORT_TYPE: release
 
+generate-badges:
+  stage: report
+  image: python:3.11-alpine
+  dependencies:
+    - export-web
+    - export-android
+    - export-windows
+  script:
+    - python3 scripts/tools/update_version_json.py
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+  only:
+    - main
+
 pages:
   extends: .deploy
   image: alpine
   script: |
-    apk add --no-cache python3
-    mkdir -p public
+    # public/ folder already exists from generate-badges artifact
+    # merge the web build into it
     cp -r build/web/* public/
-    python3 scripts/tools/update_version_json.py
     echo '/*' > public/_headers
     echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
     echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers

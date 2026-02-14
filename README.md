@@ -10,9 +10,9 @@
 <br/>
 
 <!-- Dynamic Build Status Badges -->
-![Web Build](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fversion.json&query=%24.build_status.web&style=for-the-badge&label=Web&color=green)
-![Android Build](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fversion.json&query=%24.build_status.android&style=for-the-badge&label=Android&color=green)
-![Windows Build](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fversion.json&query=%24.build_status.windows&style=for-the-badge&label=Windows&color=blue)
+![Web Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fbadges%2Fweb.json)
+![Android Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fbadges%2Fandroid.json)
+![Windows Build](https://img.shields.io/endpoint?url=https%3A%2F%2Fwooly-wield-mobile-9b13c2.fh-muenster.io%2Fbadges%2Fwindows.json)
 
 <br/>
 
@@ -49,7 +49,7 @@ This project is a high-quality 2D mobile platformer featuring:
 
 1.  **Clone the Repository**
     ```bash
-    git clone https://git.fh-muenster.de/vclab/Gameentwicklung/ge-wise25/team1/wooly-wield-mobile.git
+    git clone https://git.fh-muenster.de/vclab/Gameentwicklung/ge-wise25/team1/wool.git
     ```
 
 2.  **Open Godot Engine**
