@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://bl68pdclxkwpe" path="res://scripts/ui/settings_window.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://rcr5v5hlcmya" path="res://scenes/ui/menu_background.tscn" id="2_menu_bg"]
-[ext_resource type="FontFile" uid="uid://bj213cenwc7jk" path="res://assets/font/Outline-Style.ttf" id="5_gletb"]
 [ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="6_theme"]
 [ext_resource type="Script" uid="uid://coa7rwl5kitau" path="res://scripts/ui/rolling_slider.gd" id="7_rolling"]
 
@@ -160,6 +159,5 @@ layout_mode = 2
 [node name="ResetHighscoreButton" type="Button" parent="Panel/ScrollContainer/VBoxContainer" unique_id=1498129033]
 custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("5_gletb")
 theme_override_font_sizes/font_size = 80
 text = "Reset Highscore"

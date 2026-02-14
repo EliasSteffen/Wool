@@ -79,13 +79,11 @@ alignment = 1
 [node name="SettingsButton" type="Button" parent="Control/MenuPanel/VBoxContainer" unique_id=1654887558]
 custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("4_8uki6")
 theme_override_font_sizes/font_size = 80
 text = "Settings"
 
 [node name="CreditsButton" type="Button" parent="Control/MenuPanel/VBoxContainer" unique_id=659839414]
 custom_minimum_size = Vector2(800, 150)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("4_8uki6")
 theme_override_font_sizes/font_size = 80
 text = "Credits"
