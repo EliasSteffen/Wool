@@ -25,6 +25,8 @@ ios/
 # Export artifacts
 tweakables_export.json
 
+public/
+
 # macOS specific ignores
 **/.DS_Store
 

@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+
 def main():
     # Initialize default data structure
     data = {
@@ -78,6 +79,6 @@ def main():
 
         print(f"Generated badge for {key}: {badge_path}")
 
+
 if __name__ == "__main__":
     main()
-```
