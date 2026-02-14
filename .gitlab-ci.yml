@@ -22,12 +22,14 @@ variables:
 
 .deploy:
   stage: deploy
-  dependencies:
-    - export-web
-    - export-android
-    - export-windows
   only:
     - main
+
+.artifacts-settings:
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
 
 export-web:
   extends: .export
@@ -58,35 +60,28 @@ export-windows:
     EXPORT_TYPE: release
 
 generate-badges:
+  extends:
+    - .artifacts-settings
   stage: report
   image: python:3.11-alpine
-  dependencies:
-    - export-web
-    - export-android
-    - export-windows
   script:
     - python3 scripts/tools/update_version_json.py
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 week
   only:
     - main
 
 pages:
-  extends: .deploy
+  extends:
+    - .deploy
+    - .artifacts-settings
   image: alpine
-  script: |
-    # public/ folder already exists from generate-badges artifact
-    # merge the web build into it
-    cp -r build/web/* public/
-    echo '/*' > public/_headers
-    echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
-    echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 week
+  dependencies:
+    - export-web
+    - generate-badges
+  script:
+    - cp -r build/web/* public/
+    - echo '/*' > public/_headers
+    - echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
+    - echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
 
 deploy-android:
   extends: .deploy
