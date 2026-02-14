@@ -18,6 +18,15 @@ variables:
       - build/${PLATFORM}
     expire_in: 1 week
 
+.deploy:
+  stage: deploy
+  dependencies:
+    - export-web
+    - export-android
+    - export-windows
+  only:
+    - main
+
 export-web:
   extends: .export
   variables:
@@ -47,10 +56,8 @@ export-windows:
     EXPORT_TYPE: release
 
 pages:
-  stage: deploy
+  extends: .deploy
   image: alpine
-  dependencies:
-    - export-web
   script: |
     mkdir -p public
     cp -r build/web/* public/
@@ -61,17 +68,11 @@ pages:
     paths:
       - public
     expire_in: 1 week
-  only:
-    - main
 
 deploy-android:
-  stage: deploy
+  extends: .deploy
   image: ruby:3.2
-  dependencies:
-    - export-android
   before_script:
     - gem install fastlane
   script:
     - fastlane android deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main" && $PLAY_STORE_JSON_KEY
