@@ -66,18 +66,14 @@ func _setup_visibility_notifier() -> void:
 	# Only connect exit signal after we have entered the screen at least once.
 	# This prevents immediate despawn since we spawn off-screen to the right.
 	notifier.screen_entered.connect(func():
-		# Play audio when entering screen
-		# if not AudioManager.get_eagle_stream(): # Check if playing? No, play once
-			# Actually we want to play it.
-			# pass
-
-		# We can trigger the sound here!
-		# AudioManager.play_sound(AudioManager.ENEMIES.BIRD)
+		# Increase volume when entering screen
+		if _audio_player:
+			var tween = create_tween()
+			tween.tween_property(_audio_player, "volume_db", linear_to_db(0.5), 0.5)
 
 		# Once we enter the screen, we care about exiting it
-		notifier.screen_exited.connect(func():
-			despawn_requested.emit(self)
-		)
+		if not notifier.screen_exited.is_connected(_on_screen_exited):
+			notifier.screen_exited.connect(_on_screen_exited)
 	)
 
 @export var hover_speed: float = 150.0
@@ -152,3 +148,9 @@ func _update_direction() -> void:
 		# Assuming original sprite faces right.
 		if skin.scale.x > 0:
 			skin.scale.x = -abs(skin.scale.x)
+
+func _on_screen_exited() -> void:
+	# Decrease volume when exiting screen
+	if _audio_player:
+		var tween = create_tween()
+		tween.tween_property(_audio_player, "volume_db", linear_to_db(0.25), 0.5)

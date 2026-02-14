@@ -79,10 +79,8 @@ func play_sound(sound_id: String) -> void:
 
 	if sound_id == AudioManager.WOOL.HOOK:
 		player.volume_db = linear_to_db(0.15)
-	elif sound_id.begins_with("enemy_"):
-		player.volume_db = linear_to_db(0.75)
 	elif sound_id == AudioManager.ENEMIES.FISH_END:
-		player.volume_db = linear_to_db(1.0)
+		player.volume_db = linear_to_db(0.5)
 	else:
 		player.volume_db = 0.0
 
@@ -124,8 +122,14 @@ func create_audio_player(sound_id: String, parent: Node) -> AudioStreamPlayer:
 	parent.add_child(new_player)
 	new_player.stream = _loaded_sounds[sound_id]
 	new_player.bus = "SFX"
-	if sound_id.begins_with("wool_") or sound_id.begins_with("enemy_"):
+	if sound_id == AudioManager.ENEMIES.BIRD:
+		new_player.volume_db = linear_to_db(0.25)
+	if sound_id == AudioManager.ENEMIES.SPUCKI:
 		new_player.volume_db = linear_to_db(0.75)
+	if sound_id == AudioManager.ENEMIES.FISH_START:
+		new_player.volume_db = linear_to_db(0.75)
+	if sound_id == AudioManager.ENEMIES.FISH_END:
+		new_player.volume_db = linear_to_db(1.0)
 	return new_player
 
 func _start_background_music() -> void:

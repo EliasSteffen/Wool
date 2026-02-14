@@ -75,12 +75,6 @@ func _setup_visibility_notifier() -> void:
 	notifier.rect = rect
 	add_child(notifier)
 
-	# notifier.screen_entered.connect(func():
-	# 	AudioManager.play_sound(AudioManager.ENEMIES.SPUCKI)
-	# )
-
-	# Audio handling moved to BaseEnemy
-
 func _process_ai(delta: float) -> void:
 	# BaseCharacter applies gravity in _process_physics.
 	# We just need to check if we fell back to water level.
