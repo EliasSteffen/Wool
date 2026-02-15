@@ -86,7 +86,9 @@ pages:
     - export-web
     - generate-badges
   script: |
-    cp -r build/web/* public/
+    mkdir -p public/demo
+    cp -r build/web/* public/demo/
+    cp -r www/* public/
     echo '/*' > public/_headers
     echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
     echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
