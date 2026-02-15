@@ -9,6 +9,10 @@ variables:
 .export:
   stage: export
   image: barichello/godot-ci:4.5.1
+  before_script:
+    - apt-get update && apt-get install -y curl
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
+    - mv .secure_files/release.keystore release.keystore
 
   script:
     - mkdir -p $(dirname ${EXPORT_PATH})
@@ -46,10 +50,6 @@ export-android:
     PRESET_NAME: Android
     EXPORT_PATH: build/android/${EXPORT_NAME}.aab
     EXPORT_TYPE: release
-  before_script:
-    - apt-get update && apt-get install -y curl
-    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - mv .secure_files/release.keystore release.keystore
 
 export-android-apk:
   extends: .export
