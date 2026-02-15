@@ -31,7 +31,7 @@ def normalize_audio(directory, target_dBFS=-10.0):
                     print(f"Error processing {file}: {e}")
 
 if __name__ == "__main__":
-    target_dir = SCRIPT_DIR / ".." / "assets" / "sound"
+    target_dir = SCRIPT_DIR / ".." / ".." / "assets" / "sound"
     if not os.path.exists(target_dir):
         print(f"Directory {target_dir} does not exist.")
         sys.exit(1)

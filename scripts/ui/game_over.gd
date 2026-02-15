@@ -184,6 +184,9 @@ func _animate_wool(t: float, max_x: float, max_score: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event.is_echo():
+		return
+
 	if (event is InputEventKey and event.pressed) or \
 	   (event is InputEventMouseButton and event.pressed) or \
 	   (event is InputEventScreenTouch and event.pressed) or \

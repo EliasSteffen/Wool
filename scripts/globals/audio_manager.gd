@@ -123,7 +123,7 @@ func create_audio_player(sound_id: String, parent: Node) -> AudioStreamPlayer:
 	new_player.stream = _loaded_sounds[sound_id]
 	new_player.bus = "SFX"
 	if sound_id == AudioManager.ENEMIES.BIRD:
-		new_player.volume_db = linear_to_db(0.25)
+		new_player.volume_db = linear_to_db(0.15)
 	if sound_id == AudioManager.ENEMIES.SPUCKI:
 		new_player.volume_db = linear_to_db(0.75)
 	if sound_id == AudioManager.ENEMIES.FISH_START:

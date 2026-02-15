@@ -244,7 +244,7 @@ size = Vector2(448.00024, 352.00018)
 
 [node name="Eagle" unique_id=867112179 instance=ExtResource("1_base_enemy")]
 position = Vector2(-24, 0)
-scale = Vector2(0.35, 0.35)
+scale = Vector2(0.225, 0.225)
 script = ExtResource("2_script")
 hover_speed = 150.0
 fly_speed = 300.0
