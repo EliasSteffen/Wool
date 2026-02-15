@@ -16,7 +16,7 @@
 
 <br/>
 
-### [👉 Play the Live Demo! 👈](https://wooly-wield-mobile-9b13c2.fh-muenster.io/)
+### [👉 Play the Live Demo! 👈](https://wooly-wield-mobile-9b13c2.fh-muenster.io/demo)
 
 <br/>
 
