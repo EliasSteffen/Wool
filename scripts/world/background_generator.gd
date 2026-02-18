@@ -51,7 +51,7 @@ var _background_tiles: Array[Sprite2D] = [] # Base background tiles
 var _decoration_nodes: Array[Sprite2D] = []
 
 var _background_width: float = 0.0  # Width of a single background tile
-var _background_height: float = abs(GameManager.PLAYABLE_HEIGHT_TOP - GameManager.PLAYABLE_HEIGHT_BOTTOM)
+var _background_height: float = 0.0
 
 # Runtime-loaded pattern textures and pattern nodes
 var _pattern_textures: Array[Texture2D] = []
@@ -70,6 +70,8 @@ func _ready() -> void:
 		_camera_width = get_viewport().get_visible_rect().size.x
 	else:
 		_camera_width = get_viewport().get_visible_rect().size.x
+
+	_background_height = abs(GameManager.PLAYABLE_HEIGHT_TOP - GameManager.PLAYABLE_HEIGHT_BOTTOM)
 
 	# Use preloaded textures
 	_background_textures = BACKGROUND_TEXTURES.duplicate()

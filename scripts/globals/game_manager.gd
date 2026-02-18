@@ -64,7 +64,8 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const LEVEL_1_SCENE: String = "res://scenes/levels/level_1.tscn"
 const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 
-const PLAYABLE_HEIGHT_TOP: float = -1755.0
+const PLAYABLE_HEIGHT_MULTIPLIER: float = 1.5
+var PLAYABLE_HEIGHT_TOP: float = -1755.0
 const PLAYABLE_HEIGHT_BOTTOM: float = 0.0
 const WATER_LEVEL: float = 300.0
 const SIDE_MARGIN: float = 300.0
@@ -85,6 +86,11 @@ func is_input_ignored() -> bool:
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# Calculate playable height based on actual viewport (screen-dependent)
+	var viewport_height: float = get_viewport().get_visible_rect().size.y
+	PLAYABLE_HEIGHT_TOP = -viewport_height * PLAYABLE_HEIGHT_MULTIPLIER
+
 	# Load highscore
 	_load_highscore()
 

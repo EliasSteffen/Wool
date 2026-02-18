@@ -69,6 +69,8 @@ func _ready() -> void:
 	if camera:
 		camera.top_level = true
 		_last_camera_x = camera.global_position.x
+		camera.limit_top = int(GameManager.PLAYABLE_HEIGHT_TOP)
+		camera.limit_bottom = int(GameManager.PLAYABLE_HEIGHT_BOTTOM)
 
 	# Connect terrain signals for debug UI
 	terrain_entered.connect(func(_t): _update_debug_ui())
