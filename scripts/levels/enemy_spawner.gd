@@ -6,7 +6,7 @@ var eagle_scene: PackedScene = preload("res://scenes/characters/enemies/eagle.ts
 var fish_scene: PackedScene = preload("res://scenes/characters/enemies/fish.tscn")
 var plant_scene: PackedScene = preload("res://scenes/characters/enemies/plant.tscn")
 
-var spawn_distance_x: float = 750.0
+var spawn_distance_x: float = 500.0
 
 # Eagle Config
 var eagle_spawn_interval_min: float = 2.0
@@ -155,7 +155,7 @@ func _can_spawn_plant(current_dist: int) -> bool:
 	var viewport_rect = _player.get_viewport_rect()
 	var camera_zoom = cam.zoom
 	var visible_width = viewport_rect.size.x / camera_zoom.x
-	var spawn_x = cam_pos.x + (visible_width * 0.5) + (spawn_distance_x * 0.2)
+	var spawn_x = cam_pos.x + (visible_width * 0.5) + spawn_distance_x
 
 	var min_spacing = _get_current_min_plant_spacing(current_dist)
 
@@ -213,7 +213,7 @@ func _spawn_fish() -> void:
 	var camera_zoom = _player.get_viewport().get_camera_2d().zoom
 	var visible_width = viewport_rect.size.x / camera_zoom.x
 
-	var spawn_x = cam_pos.x + (visible_width * 0.5) + (spawn_distance_x * 0.2)
+	var spawn_x = cam_pos.x + (visible_width * 0.5) +  spawn_distance_x * 0.5
 	var spawn_y = fish_spawn_y
 
 	var fish = _fish_pool.acquire()
