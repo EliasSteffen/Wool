@@ -9,10 +9,6 @@ variables:
 .export:
   stage: export
   image: barichello/godot-ci:4.5.1
-  before_script:
-    - apt-get update && apt-get install -y curl
-    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - mv .secure_files/release.keystore release.keystore
 
   script:
     - mkdir -p $(dirname ${EXPORT_PATH})
@@ -41,22 +37,6 @@ export-web:
     PLATFORM: web
     PRESET_NAME: Web
     EXPORT_PATH: build/web/index.html
-    EXPORT_TYPE: release
-
-export-android:
-  extends: .export
-  variables:
-    PLATFORM: android
-    PRESET_NAME: Android
-    EXPORT_PATH: build/android/${EXPORT_NAME}.aab
-    EXPORT_TYPE: release
-
-export-android-apk:
-  extends: .export
-  variables:
-    PLATFORM: android-apk
-    PRESET_NAME: Android APK
-    EXPORT_PATH: build/android-apk/${EXPORT_NAME}.apk
     EXPORT_TYPE: release
 
 export-windows:
@@ -93,10 +73,3 @@ pages:
     echo '  Cross-Origin-Embedder-Policy: require-corp' >> public/_headers
     echo '  Cross-Origin-Opener-Policy: same-origin' >> public/_headers
 
-deploy-android:
-  extends: .deploy
-  image: ruby:3.2
-  before_script:
-    - gem install fastlane
-  script:
-    - fastlane android deploy
