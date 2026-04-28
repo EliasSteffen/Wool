@@ -17,6 +17,7 @@ func _ready() -> void:
 	GameManager.rusty_nail_timer_updated.connect(_on_rusty_nail_timer_updated)
 	GameManager.rusty_nail_timer_stopped.connect(_on_rusty_nail_timer_stopped)
 	GameManager.state_changed.connect(_on_game_state_changed)
+	get_tree().root.size_changed.connect(_update_layout)
 
 	rusty_nail_timer.visible = false
 	# Ensure initial fill matches (full)
@@ -59,6 +60,34 @@ func _ready() -> void:
 	# Ensure the pause button triggers on touch (connect pressed signal)
 	if pause_button:
 		pause_button.pressed.connect(_on_pause_pressed)
+
+	call_deferred("_update_layout")
+
+func _update_layout() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var base_size: float = min(viewport_size.x, viewport_size.y)
+	var horizontal_margin := clampf(viewport_size.x * 0.05, 20.0, 150.0)
+	var top_margin := clampf(viewport_size.y * 0.05, 20.0, 100.0)
+	var pause_size := clampf(base_size * 0.14, 72.0, 150.0)
+	var distance_width := clampf(viewport_size.x * 0.3, 180.0, 500.0)
+	var timer_width := clampf(viewport_size.x * 0.4, 220.0, 600.0)
+	var timer_height := clampf(viewport_size.y * 0.06, 32.0, 50.0)
+
+	pause_button.offset_left = horizontal_margin
+	pause_button.offset_top = top_margin
+	pause_button.offset_right = horizontal_margin + pause_size
+	pause_button.offset_bottom = top_margin + pause_size
+
+	current_distance_label.offset_left = -(horizontal_margin + distance_width)
+	current_distance_label.offset_top = top_margin
+	current_distance_label.offset_right = -horizontal_margin
+	current_distance_label.offset_bottom = top_margin + clampf(base_size * 0.13, 60.0, 144.0)
+	current_distance_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.09, 36.0, 100.0)))
+
+	rusty_nail_timer.offset_left = -timer_width / 2.0
+	rusty_nail_timer.offset_top = -(top_margin + timer_height + 24.0)
+	rusty_nail_timer.offset_right = timer_width / 2.0
+	rusty_nail_timer.offset_bottom = -(top_margin + 24.0)
 
 func _on_pause_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
@@ -115,8 +144,10 @@ func _on_rusty_nail_timer_stopped() -> void:
 	rusty_nail_timer.visible = false
 
 func _on_game_state_changed(state: int) -> void:
-	# GameManager handles distance reset internally when player resets
-	pass
+	# Keep gameplay HUD controls hidden while overlays are open.
+	var show_pause := state == GameManager.GameState.PLAYING
+	if pause_button:
+		pause_button.visible = show_pause
 
 func _update_off_screen_indicator() -> void:
 	if not off_screen_indicator:

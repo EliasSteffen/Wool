@@ -108,20 +108,20 @@ func _ready() -> void:
 
 func _enforce_pc_aspect_ratio() -> void:
 	if OS.get_name() in ["Windows", "macOS", "Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD"]:
-		# Target Height (reasonable for windowed mode)
-		var target_height = 600
+		var screen_size = DisplayServer.screen_get_size()
+		# Scale the initial window down on smaller displays while keeping the intended aspect.
+		var target_height = min(600, int(screen_size.y * 0.75))
 		# Aspect Ratio from Project Settings (2532 / 1170 ~= 2.164)
 		var aspect = 2532.0 / 1170.0
 		var target_width = int(target_height * aspect)
 
 		DisplayServer.window_set_size(Vector2i(target_width, target_height))
 		# Center window?
-		var screen_size = DisplayServer.screen_get_size()
 		var center = (screen_size - Vector2i(target_width, target_height)) / 2
 		DisplayServer.window_set_position(center)
 
 		# Set Min Size
-		DisplayServer.window_set_min_size(Vector2i(640, int(640.0 / aspect)))
+		DisplayServer.window_set_min_size(Vector2i(480, int(480.0 / aspect)))
 
 # Aspect Ratio Enforcement on PC
 var _last_window_size: Vector2i = Vector2i.ZERO

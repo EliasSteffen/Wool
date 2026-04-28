@@ -6,6 +6,8 @@ var _can_interact: bool = false
 func _ready() -> void:
 	# Connect close button from MenuBackground
 	$MenuBackground/CloseButton.pressed.connect(_on_close_button_pressed)
+	get_tree().root.size_changed.connect(_update_layout)
+	call_deferred("_update_layout")
 
 	# Start invisible
 	modulate.a = 0.0
@@ -15,12 +17,6 @@ func _ready() -> void:
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, duration).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tween.tween_callback(func(): _can_interact = true)
-
-	# Apply Side Margin
-	var margin_container = $MarginContainer
-	if margin_container:
-		margin_container.add_theme_constant_override("margin_left", int(GameManager.SIDE_MARGIN))
-		margin_container.add_theme_constant_override("margin_right", int(GameManager.SIDE_MARGIN))
 
 	_setup_score_display(duration)
 
@@ -38,9 +34,36 @@ func _ready() -> void:
 
 @onready var end_label: Label = $MarginContainer/VBoxContainer/ScoreDisplay/EndLabel
 @onready var new_highscore_label: Label = $MarginContainer/VBoxContainer/NewHighscoreLabel
+@onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
+@onready var instruction_label: Label = $MarginContainer/VBoxContainer/InstructionLabel
 
 var _move_tween: Tween = null
 var internal_wool_sprite: AnimatedSprite2D = null
+
+func _update_layout() -> void:
+	var viewport_size := get_viewport().get_visible_rect().size
+	var base_size: float = min(viewport_size.x, viewport_size.y)
+	var outer_margin_x := clampf(viewport_size.x * 0.08, 150.0, GameManager.SIDE_MARGIN)
+	var outer_margin_y := clampf(viewport_size.y * 0.08, 150.0, 200.0)
+	var inner_margin_x := clampf(viewport_size.x * 0.1, 24.0, 250.0)
+	var inner_margin_y := clampf(viewport_size.y * 0.1, 24.0, 200.0)
+
+	$MenuBackground.offset_left = outer_margin_x
+	$MenuBackground.offset_top = outer_margin_y
+	$MenuBackground.offset_right = -outer_margin_x
+	$MenuBackground.offset_bottom = -outer_margin_y
+
+	$MarginContainer.add_theme_constant_override("margin_left", int(inner_margin_x))
+	$MarginContainer.add_theme_constant_override("margin_top", int(inner_margin_y))
+	$MarginContainer.add_theme_constant_override("margin_right", int(inner_margin_x))
+	$MarginContainer.add_theme_constant_override("margin_bottom", int(inner_margin_y))
+
+	title_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.1, 44.0, 150.0)))
+	new_highscore_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.05, 24.0, 60.0)))
+	end_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.035, 22.0, 40.0)))
+	instruction_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.035, 22.0, 40.0)))
+	score_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.03, 18.0, 32.0)))
+	score_display.custom_minimum_size.y = clampf(viewport_size.y * 0.18, 120.0, 200.0)
 
 func _setup_score_display(fade_duration: float) -> void:
 	if not score_display: return
