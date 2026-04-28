@@ -96,8 +96,9 @@ func _process_ai(delta: float) -> void:
 
 func _jump() -> void:
 	# Recalculate or reuse jump velocity
-	# Target significantly above the top of the playable area for a high jump
-	var target_y = GameManager.PLAYABLE_HEIGHT_TOP - 1000.0
+	# Target above the playable area, scaled to viewport
+	var viewport_height: float = get_viewport().get_visible_rect().size.y
+	var target_y: float = GameManager.PLAYABLE_HEIGHT_TOP - viewport_height
 	var height_diff = _start_y - target_y
 
 	if height_diff > 0:

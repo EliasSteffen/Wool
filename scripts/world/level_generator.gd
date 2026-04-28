@@ -8,8 +8,8 @@ enum NailType { NORMAL, RUSTY, BOOST }
 
 ## Vertical generation range
 ## Vertical generation range
-@export var gen_min_y: float = GameManager.PLAYABLE_HEIGHT_TOP + 155.0 # Margin from top
-@export var gen_max_y: float = GameManager.PLAYABLE_HEIGHT_BOTTOM - 150.0 # Margin from bottom
+@export var gen_min_y: float = -1600.0 # Recalculated in _ready()
+@export var gen_max_y: float = -150.0 # Recalculated in _ready()
 
 const NAILS_PER_SEGMENT: int = 10
 
@@ -42,6 +42,10 @@ func _ready() -> void:
 		_normal_nail_pool = ObjectPool.new(nail_scene, self, 20)
 		_rusty_nail_pool = ObjectPool.new(rusty_nail_scene, self, 10)
 		_boost_nail_pool = ObjectPool.new(boost_nail_scene, self, 10)
+
+	# Recalculate generation bounds from dynamic playable height
+	gen_min_y = GameManager.PLAYABLE_HEIGHT_TOP + 155.0
+	gen_max_y = GameManager.PLAYABLE_HEIGHT_BOTTOM - 150.0
 
 	# Initialize RNG with session seed from GameManager
 	_rng.seed = GameManager.current_seed
