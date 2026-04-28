@@ -21,6 +21,8 @@ func _ready() -> void:
 	_setup_score_display(duration)
 
 @onready var score_display: Control = $MarginContainer/VBoxContainer/ScoreDisplay
+@onready var menu_background: Control = $MenuBackground
+@onready var content_margin: MarginContainer = $MarginContainer
 # New References
 @onready var highscore_container: Control = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer
 @onready var bar_mask: Control = $MarginContainer/VBoxContainer/ScoreDisplay/HighscoreContainer/BarMask
@@ -41,22 +43,28 @@ var _move_tween: Tween = null
 var internal_wool_sprite: AnimatedSprite2D = null
 
 func _update_layout() -> void:
-	var viewport_size := get_viewport().get_visible_rect().size
-	var base_size: float = min(viewport_size.x, viewport_size.y)
-	var outer_margin_x := clampf(viewport_size.x * 0.08, 150.0, GameManager.SIDE_MARGIN)
-	var outer_margin_y := clampf(viewport_size.y * 0.08, 150.0, 200.0)
-	var inner_margin_x := clampf(viewport_size.x * 0.1, 24.0, 250.0)
-	var inner_margin_y := clampf(viewport_size.y * 0.1, 24.0, 200.0)
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var base_size: float = minf(viewport_size.x, viewport_size.y)
+	var outer_margin_x: float = clampf(viewport_size.x * 0.08, 12.0, 150.0)
+	var outer_margin_y: float = clampf(viewport_size.y * 0.08, 12.0, 150.0)
+	var inner_margin_x: float = clampf(viewport_size.x * 0.06, 16.0, 90.0)
+	var inner_margin_y: float = clampf(viewport_size.y * 0.06, 16.0, 90.0)
 
-	$MenuBackground.offset_left = outer_margin_x
-	$MenuBackground.offset_top = outer_margin_y
-	$MenuBackground.offset_right = -outer_margin_x
-	$MenuBackground.offset_bottom = -outer_margin_y
+	menu_background.offset_left = outer_margin_x
+	menu_background.offset_top = outer_margin_y
+	menu_background.offset_right = -outer_margin_x
+	menu_background.offset_bottom = -outer_margin_y
 
-	$MarginContainer.add_theme_constant_override("margin_left", int(inner_margin_x))
-	$MarginContainer.add_theme_constant_override("margin_top", int(inner_margin_y))
-	$MarginContainer.add_theme_constant_override("margin_right", int(inner_margin_x))
-	$MarginContainer.add_theme_constant_override("margin_bottom", int(inner_margin_y))
+	# Keep text/content bound to the same panel rect as MenuBackground.
+	content_margin.offset_left = outer_margin_x
+	content_margin.offset_top = outer_margin_y
+	content_margin.offset_right = -outer_margin_x
+	content_margin.offset_bottom = -outer_margin_y
+
+	content_margin.add_theme_constant_override("margin_left", int(inner_margin_x))
+	content_margin.add_theme_constant_override("margin_top", int(inner_margin_y))
+	content_margin.add_theme_constant_override("margin_right", int(inner_margin_x))
+	content_margin.add_theme_constant_override("margin_bottom", int(inner_margin_y))
 
 	title_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.1, 44.0, 150.0)))
 	new_highscore_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.05, 24.0, 60.0)))

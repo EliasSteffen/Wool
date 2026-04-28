@@ -10,6 +10,7 @@ extends CanvasLayer
 const UI_TOP_MARGIN: float = 20.0
 
 var player: BasePlayer = null
+var _last_pause_press_ms: int = -10000
 
 
 func _ready() -> void:
@@ -90,6 +91,12 @@ func _update_layout() -> void:
 	rusty_nail_timer.offset_bottom = -(top_margin + 24.0)
 
 func _on_pause_pressed() -> void:
+	var now_ms: int = Time.get_ticks_msec()
+	# Touch input can trigger both Button.pressed and ScreenTouch in the same frame.
+	if now_ms - _last_pause_press_ms < 250:
+		return
+	_last_pause_press_ms = now_ms
+
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	# Prevent a simultaneous jump by ignoring input for a short moment
 	GameManager.ignore_input_for(0.15)
