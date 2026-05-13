@@ -40,6 +40,7 @@
 }
 
 html {
+    height: 100%;
     scroll-behavior: smooth;
 }
 
@@ -58,9 +59,29 @@ body {
     font-family: var(--font);
     color: var(--wool-deep);
     background: var(--wool-cream);
-    min-height: 100vh;
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+    position: relative;
+    z-index: 1;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: var(--content-max);
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
+}
+
+.wrap > main {
+    flex: 1 1 auto;
 }
 
 .bg-orbs {
@@ -114,14 +135,6 @@ body {
     }
 }
 
-.wrap {
-    position: relative;
-    z-index: 1;
-    max-width: var(--content-max);
-    margin: 0 auto;
-    padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
-}
-
 .site-header {
     display: flex;
     align-items: center;
@@ -129,6 +142,7 @@ body {
     gap: 1rem;
     margin-bottom: 2rem;
     padding-top: 0.25rem;
+    flex-shrink: 0;
 }
 
 .brand {
@@ -136,6 +150,15 @@ body {
     font-size: 1.05rem;
     letter-spacing: -0.02em;
     color: var(--wool-deep);
+}
+
+a.brand {
+    text-decoration: none;
+    color: inherit;
+}
+
+a.brand:hover {
+    color: var(--accent);
 }
 
 .nav-mini {
@@ -675,12 +698,13 @@ button.platform-tile {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
+    margin-top: auto;
+    padding-top: 1.75rem;
     border-top: 1px solid rgba(107, 94, 86, 0.15);
     text-align: center;
     font-size: 0.85rem;
     color: var(--wool-muted);
+    flex-shrink: 0;
 }
 
 .footer-stores {
@@ -765,4 +789,105 @@ button.platform-tile {
     .platform-tile:hover {
         transform: none;
     }
+}
+
+/* Support & privacy (subpages) */
+main .legal-card {
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.legal-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    border-radius: 22px;
+    padding: 2rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: var(--shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+    .legal-card {
+        border-color: rgba(255, 255, 255, 0.06);
+    }
+}
+
+.legal-card h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.5rem, 4vw, 1.85rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: var(--wool-deep);
+    text-align: center;
+}
+
+.legal-lead {
+    margin: 0 0 1.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--wool-muted);
+}
+
+.legal-panel {
+    text-align: left;
+    padding: 1.25rem 1.2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(107, 94, 86, 0.12);
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.12) 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+    .legal-panel {
+        border-color: rgba(255, 255, 255, 0.08);
+        background: linear-gradient(165deg, rgba(50, 44, 40, 0.88) 0%, rgba(28, 24, 22, 0.55) 100%);
+    }
+}
+
+.legal-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--wool-muted);
+    margin-bottom: 0.3rem;
+}
+
+.legal-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--wool-deep);
+    margin-bottom: 1.15rem;
+    line-height: 1.45;
+}
+
+.legal-value:last-child {
+    margin-bottom: 0;
+}
+
+.legal-value a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.legal-value a:hover {
+    text-decoration: underline;
+}
+
+.legal-card--policy h1 {
+    text-align: left;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(107, 94, 86, 0.12);
+}
+
+.legal-card--policy .legal-lead {
+    text-align: left;
+}
+
+.legal-card--policy .legal-panel {
+    margin-top: 0.25rem;
 }
