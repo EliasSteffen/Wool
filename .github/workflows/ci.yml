@@ -113,14 +113,9 @@ jobs:
 
       - name: Assemble site
         run: |
-          mkdir -p public/demo public/img/game
+          mkdir -p public/demo
           cp -r build/web/* public/demo/
           cp -r www/* public/
-          cp assets/character/wool/swing.png  public/img/game/wool-swing.png
-          cp assets/character/wool/idle.png   public/img/game/wool-idle.png
-          cp assets/character/eagle/fly.png   public/img/game/eagle.png
-          cp assets/character/fish/fish.png   public/img/game/fish.png
-          cp assets/map/background.png        public/img/game/background.png
 
       - name: Add COOP/COEP service worker for Godot threading
         run: |

@@ -7,8 +7,8 @@
       name="description"
       content="Wool — ein schneller 2D-Plattformer fürs Handy: springen, haken, schwingen. Offizielle Seite mit Web-Demo und Source-Code."
     />
-    <meta name="theme-color" content="#1a0e0a" />
-    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#faf6f0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Wool — Mobile Plattformer</title>
     <link rel="canonical" href="https://eliassteffen.github.io/Wool/" />
     <meta property="og:type" content="website" />
@@ -79,13 +79,23 @@
 
     <!-- ── Hero ─────────────────────────────────────────────────── -->
     <div class="hero-wrap">
-      <div class="hero-bg" aria-hidden="true">
-        <img src="img/game/background.png" alt="" class="hero-bg-img" />
-      </div>
+      <div class="hero-glow" aria-hidden="true"></div>
+      <img
+        src="img/game/yarn-basket.webp"
+        alt=""
+        class="hero-basket"
+        aria-hidden="true"
+      />
+      <img
+        src="img/game/patch-1.webp"
+        alt=""
+        class="hero-patch"
+        aria-hidden="true"
+      />
 
       <div class="hero-inner">
         <header class="site-header">
-          <a href="/" class="brand">Wool</a>
+          <a href="./" class="brand">Wool</a>
           <nav class="nav-mini" aria-label="Kurznavigation">
             <a href="support-info/">Support</a>
             <a href="privacy-policy/">Datenschutz</a>
@@ -105,14 +115,15 @@
 
         <div class="hero-content">
           <div class="hero-text">
-            <img
-              class="hero-icon"
-              src="img/app-icon.png"
-              width="88"
-              height="88"
-              alt="Wool App-Symbol"
-            />
-            <h1>Wool</h1>
+            <h1 class="hero-logo-wrap">
+              <img
+                class="hero-logo"
+                src="img/game/logo-wordmark.webp"
+                alt="Wool"
+                width="420"
+                height="260"
+              />
+            </h1>
             <p class="tagline">Springen. Haken. Schwingen.</p>
             <p class="sub-en">A tight 2D platformer for mobile — built for landscape play.</p>
             <div class="hero-ctas">
@@ -156,7 +167,7 @@
           </div>
 
           <div class="hero-art" aria-hidden="true">
-            <img src="img/game/wool-swing.png" alt="" class="hero-character" />
+            <img src="img/game/wool-hero.webp" alt="" class="hero-character" />
           </div>
         </div>
       </div>
@@ -221,6 +232,12 @@
 
         <!-- Characters -->
         <section class="section characters-section" aria-labelledby="chars-title">
+          <img
+            src="img/game/patch-2.webp"
+            alt=""
+            class="characters-patch"
+            aria-hidden="true"
+          />
           <header class="section-head">
             <span class="kicker">Figuren</span>
             <h2 id="chars-title">Wem du begegnest</h2>
@@ -228,21 +245,21 @@
           <div class="char-grid">
             <div class="char-card char-card--hero">
               <div class="char-card__sprite-wrap">
-                <img src="img/game/wool-idle.png" alt="Wool" class="char-sprite" />
+                <img src="img/game/wool-card.webp" alt="Wool" class="char-sprite" />
               </div>
               <h3>Wool</h3>
               <p>Schnell, wendig, hängt sich automatisch ein. Der Held dieses Abenteuers.</p>
             </div>
             <div class="char-card char-card--eagle">
               <div class="char-card__sprite-wrap">
-                <img src="img/game/eagle.png" alt="Adler" class="char-sprite" />
+                <img src="img/game/eagle-card.webp" alt="Adler" class="char-sprite" />
               </div>
               <h3>Adler</h3>
               <p>Greift aus der Luft an und verfolgt Wool quer durch den Level.</p>
             </div>
             <div class="char-card char-card--fish">
               <div class="char-card__sprite-wrap">
-                <img src="img/game/fish.png" alt="Fisch" class="char-sprite" />
+                <img src="img/game/fish-card.webp" alt="Fisch" class="char-sprite" />
               </div>
               <h3>Fisch</h3>
               <p>Springt aus dem Wasser — unerwartet und schwer auszuweichen.</p>
