@@ -1031,3 +1031,81 @@ main .legal-card {
 .legal-card--policy .legal-panel {
   margin-top: 0.25rem;
 }
+
+/* ─── Release notes ──────────────────────────────────────────────── */
+.release-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.release-entry {
+  padding: 1.25rem 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(107, 94, 86, 0.12);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+}
+
+@media (prefers-color-scheme: dark) {
+  .release-entry {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: linear-gradient(
+      165deg,
+      rgba(50, 44, 40, 0.88) 0%,
+      rgba(28, 24, 22, 0.55) 100%
+    );
+  }
+}
+
+.release-entry__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.release-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+}
+
+.release-date {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.release-entry__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--deep);
+}
+
+.release-changes {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--deep);
+}
+
+.release-changes li {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin-bottom: 0.4rem;
+}
+
+.release-changes li:last-child {
+  margin-bottom: 0;
+}
