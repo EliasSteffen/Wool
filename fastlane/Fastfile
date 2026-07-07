@@ -107,14 +107,14 @@ platform :android do
     begin
         # Prepare parameters based on whether the key is a file or raw data
         version_check_params = {
-            package_name: "com.florentinerge.wooly",
+            package_name: "de.eliassteffen.wool",
             track: "internal"
         }
-        
+
         supply_params = {
-            package_name: "com.florentinerge.wooly",
+            package_name: "de.eliassteffen.wool",
             track: "internal",
-            aab: "build/android/wooly.aab",
+            aab: "build/android/wool.aab",
             skip_upload_metadata: true,
             skip_upload_images: true,
             skip_upload_screenshots: true,
