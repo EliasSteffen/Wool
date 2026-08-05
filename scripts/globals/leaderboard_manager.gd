@@ -16,6 +16,7 @@ signal submit_finished(result: LeaderboardResult)
 signal player_name_changed(new_name: String)
 signal availability_changed(available: bool)
 signal player_rank_updated(rank: int)
+signal entry_deleted(result: LeaderboardResult)
 
 # === CONSTANTS ===
 const CONFIG_PATH: String = "res://resources/leaderboard_config.tres"
@@ -55,6 +56,7 @@ var _pending_time_ms: int = 0
 var _fetching: bool = false
 var _submitting: bool = false
 var _renaming: bool = false
+var _deleting: bool = false
 var _connecting: bool = false
 var _availability_settled: bool = false
 var _retry_index: int = 0
@@ -200,6 +202,64 @@ func refresh_player_rank() -> int:
 	_player_entry = result.entries[0]
 	player_rank_updated.emit(_player_entry.rank)
 	return _player_entry.rank
+
+## True while an erasure is in flight, so the UI can keep the button disabled
+## instead of firing a second delete at an identity that is already gone.
+func is_deleting() -> bool:
+	return _deleting
+
+## Erase this player's leaderboard presence: the published row, the identity
+## behind it, and every local trace that would put it back.
+##
+## Clearing the queued run matters as much as the delete itself - a pending
+## score left in player.cfg would flush straight back onto the board on the next
+## connect, and the player would reasonably conclude the deletion did nothing.
+func delete_entry() -> LeaderboardResult:
+	if _backend == null:
+		return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "no backend")
+	if _deleting:
+		return LeaderboardResult.failure(LeaderboardResult.Code.UNKNOWN, "delete already running")
+	if not is_available:
+		# Deleting is not something to queue for later: the player is owed a clear
+		# yes or no, not a promise that something happened while they were away.
+		retry_now()
+		return LeaderboardResult.failure(LeaderboardResult.Code.NETWORK, "offline")
+
+	_deleting = true
+	# Let an in-flight write land first - a submit or rename completing after the
+	# delete would recreate the row moments after we removed it.
+	while _submitting or _renaming:
+		await get_tree().process_frame
+
+	var result: LeaderboardResult = await _backend.delete_entry()
+	_deleting = false
+
+	if result.ok:
+		_forget_local_identity()
+	else:
+		push_warning("LeaderboardManager: delete failed (%s)" % result.message)
+		_handle_connectivity_failure(result)
+
+	entry_deleted.emit(result)
+	return result
+
+## Local half of the erasure. The name goes with it: it is the only personal
+## data the row carried, and keeping it would republish it unprompted after the
+## next run. Losing it means the name prompt appears again, which is the right
+## moment to ask.
+func _forget_local_identity() -> void:
+	player_name = ""
+	_name_declined = false
+	_pending_score = 0
+	_pending_time_ms = 0
+	_player_entry = null
+	_save_player_state()
+
+	# The board no longer contains our row - never serve a cached list that does.
+	_cached_top.clear()
+	_last_fetch_unix = 0
+
+	player_name_changed.emit(player_name)
 
 func is_using_remote_backend() -> bool:
 	return is_remote

@@ -80,6 +80,19 @@ func rename(new_name: String) -> LeaderboardResult:
 	_save()
 	return LeaderboardResult.success()
 
+## Drops this player's row and issues a new id, mirroring what the Firebase
+## backend does when it deletes the anonymous account: the next run publishes as
+## a stranger rather than reoccupying the deleted slot. The seeded rows stay -
+## they are scenery, not other people's data.
+func delete_entry() -> LeaderboardResult:
+	var own: LeaderboardEntry = _find_own_entry()
+	if own != null:
+		_entries.erase(own)
+
+	_player_id = "local-%08X" % (randi() & 0x7FFFFFFF)
+	_save()
+	return LeaderboardResult.success()
+
 func get_player_id() -> String:
 	return _player_id
 

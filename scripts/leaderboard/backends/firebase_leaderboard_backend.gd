@@ -14,6 +14,7 @@ extends LeaderboardBackend
 const AUTH_PATH: String = "user://firebase_auth.cfg"
 const SIGNUP_URL: String = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=%s"
 const REFRESH_URL: String = "https://securetoken.googleapis.com/v1/token?key=%s"
+const DELETE_ACCOUNT_URL: String = "https://identitytoolkit.googleapis.com/v1/accounts:delete?key=%s"
 const FIRESTORE_BASE: String = "https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents"
 
 ## Refresh a little before the hour is up so a long request cannot straddle expiry.
@@ -250,6 +251,69 @@ func rename(new_name: String) -> LeaderboardResult:
 	entry.player_name = new_name
 	entry.updated_at_unix = int(Time.get_unix_time_from_system())
 	return await submit(entry)
+
+## Erases the published row and then the anonymous account that owns it.
+##
+## Order is not interchangeable: deleting the document needs a valid id token,
+## and deleting the account invalidates it. Doing it the other way round would
+## strand a row nobody can ever remove, because the rules only accept writes
+## from the uid in the document path.
+##
+## Requires `allow delete: if request.auth.uid == uid;` in the Firestore rules -
+## without it every attempt comes back 403 and the player is told it failed.
+func delete_entry() -> LeaderboardResult:
+	var auth: LeaderboardResult = await _ensure_token()
+	if not auth.ok:
+		return auth
+
+	var url: String = "%s/%s/%s" % [_documents_url(), _config.collection, _uid]
+	var response: Dictionary = await _client.request_json(
+		HTTPClient.METHOD_DELETE, url, _auth_headers()
+	)
+
+	if response["error"] != OK:
+		return _transport_failure(response)
+
+	var code: int = response["code"]
+	# 404 is the end state the caller wanted - nothing was ever published.
+	if code != 200 and code != 404:
+		if code == 401:
+			return LeaderboardResult.failure(LeaderboardResult.Code.AUTH, _error_text(response))
+		if code == 403:
+			return LeaderboardResult.failure(LeaderboardResult.Code.REJECTED, _error_text(response))
+		return LeaderboardResult.failure(
+			LeaderboardResult.Code.UNKNOWN, "delete HTTP %d: %s" % [code, _error_text(response)]
+		)
+
+	await _delete_account()
+	return LeaderboardResult.success()
+
+## Best effort by design: the row is already gone, which is what the player
+## asked for. A surviving empty anonymous account is worth a log line, not an
+## error that makes them think their score is still on the board.
+func _delete_account() -> void:
+	if not _id_token.is_empty():
+		var response: Dictionary = await _client.request_json(
+			HTTPClient.METHOD_POST,
+			DELETE_ACCOUNT_URL % _config.api_key,
+			PackedStringArray(),
+			{"idToken": _id_token}
+		)
+		if response["error"] != OK or response["code"] != 200:
+			push_warning("FirebaseLeaderboardBackend: account delete failed, row already removed")
+
+	_forget_auth()
+
+## Drops the local identity so the next play signs up fresh instead of trying to
+## reuse a uid the server no longer knows.
+func _forget_auth() -> void:
+	_uid = ""
+	_id_token = ""
+	_refresh_token = ""
+	_token_expires_unix = 0
+	# Passing the user:// path straight through: globalize_path() has nothing
+	# meaningful to return on web, where user:// lives in IndexedDB.
+	DirAccess.remove_absolute(AUTH_PATH)
 
 func get_player_id() -> String:
 	return _uid

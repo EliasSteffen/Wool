@@ -7,12 +7,7 @@
     <meta name="color-scheme" content="light dark" />
     <title>Datenschutz — Wool</title>
     <link rel="icon" type="image/png" href="../img/app-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="../fonts.css" />
     <link rel="stylesheet" href="../marketing.css" />
   </head>
   <body>
@@ -73,13 +68,189 @@
       <main>
         <div class="legal-card legal-card--policy">
           <h1>Datenschutz</h1>
-          <p class="legal-lead">Wool nimmt den Schutz deiner Daten ernst.</p>
+          <p class="legal-lead">
+            Wool kommt ohne Werbung, ohne Tracking und ohne Analyse-SDKs aus.
+            Personenbezogene Daten verlassen dein Gerät an genau einer Stelle:
+            wenn du dich mit einem Namen in die globale Bestenliste einträgst.
+            Diese Erklärung beschreibt, was dabei passiert.
+          </p>
+
           <div class="legal-panel">
+            <div class="legal-label">Verantwortlicher</div>
             <div class="legal-value">
-              Wool erhebt, speichert und gibt keine personenbezogenen
-              Nutzerdaten weiter.
+              Elias Steffen<br />
+              <span class="legal-todo">[Straße Hausnummer, PLZ Ort]</span>
+            </div>
+            <div class="legal-label">E-Mail</div>
+            <div class="legal-value">
+              <a href="mailto:elias.steffen@fh-muenster.de"
+                >elias.steffen@fh-muenster.de</a
+              >
             </div>
           </div>
+
+          <h2>1. Wenn du die Bestenliste nicht nutzt</h2>
+          <p class="legal-prose">
+            Ohne Eintrag in die Bestenliste werden keine personenbezogenen Daten
+            an uns oder an Dritte übertragen. Einstellungen, Lautstärke und dein
+            persönlicher Highscore bleiben ausschließlich lokal auf deinem
+            Gerät. Die Bestenliste ist freiwillig: Erst wenn du nach einem Lauf
+            einen Namen eingibst, wird überhaupt etwas hochgeladen. Lehnst du
+            die Abfrage ab, bleibt dein Ergebnis auf dem Gerät.
+          </p>
+
+          <h2>2. Welche Daten die Bestenliste verarbeitet</h2>
+          <p class="legal-prose">
+            Trägst du dich ein, speichern wir pro Installation genau einen
+            Datensatz:
+          </p>
+          <ul class="legal-list">
+            <li>
+              <strong>Spielername</strong> – frei wählbar, maximal 16 Zeichen.
+              Das Spiel schlägt einen zufälligen Namen vor. Du entscheidest, ob
+              du einen Namen wählst, der dich identifizierbar macht – wir
+              empfehlen ausdrücklich ein Pseudonym.
+            </li>
+            <li>
+              <strong>Ergebnis</strong> – erreichte Strecke in Metern und Dauer
+              des Laufs in Millisekunden.
+            </li>
+            <li>
+              <strong>Zeitstempel</strong> der letzten Aktualisierung deines
+              Eintrags.
+            </li>
+            <li>
+              <strong>Anonyme Nutzerkennung (UID)</strong> – eine zufällige
+              Zeichenkette aus der anonymen Anmeldung bei Firebase. Sie enthält
+              keine Namens-, Geräte- oder Kontodaten, ist aber dauerhaft mit
+              deiner Installation verknüpft und gilt deshalb als
+              personenbezogenes Datum.
+            </li>
+            <li>
+              <strong>IP-Adresse</strong> – technisch bei jeder Verbindung an
+              den Server übermittelt und dort protokolliert. Wir speichern sie
+              nicht gesondert und werten sie nicht aus.
+            </li>
+          </ul>
+          <p class="legal-prose">
+            Name, Ergebnis und Zeit sind für alle Spielerinnen und Spieler
+            weltweit sichtbar – das ist der Zweck einer globalen Bestenliste.
+            Gib dort nichts ein, was du nicht veröffentlichen möchtest.
+          </p>
+
+          <h2>3. Zweck und Rechtsgrundlage</h2>
+          <p class="legal-prose">
+            Die Verarbeitung dient allein dem Betrieb der Bestenliste, also der
+            Anzeige und Sortierung von Ergebnissen. Rechtsgrundlage ist deine
+            Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch die
+            Eingabe eines Namens erteilst. Du kannst sie jederzeit mit Wirkung
+            für die Zukunft widerrufen, indem du deinen Eintrag im Spiel löschst
+            (siehe Abschnitt 6).
+          </p>
+
+          <h2>4. Empfänger und Übermittlung in Drittländer</h2>
+          <p class="legal-prose">
+            Für Anmeldung und Speicherung nutzen wir Firebase Authentication und
+            Cloud Firestore der Google Ireland Limited, Gordon House, Barrow
+            Street, Dublin 4, Irland. Google verarbeitet die Daten als
+            Auftragsverarbeiter auf Grundlage eines Vertrags nach Art. 28 DSGVO.
+            Dabei können Daten auch an die Google LLC in den USA übermittelt
+            werden. Grundlage sind die Standardvertragsklauseln der
+            EU-Kommission sowie die Zertifizierung von Google nach dem
+            EU-US Data Privacy Framework. Weitere Informationen:
+            <a
+              href="https://firebase.google.com/support/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              >firebase.google.com/support/privacy</a
+            >.
+          </p>
+          <p class="legal-prose">
+            Darüber hinaus geben wir keine Daten weiter. Es findet kein Verkauf
+            und keine Nutzung zu Werbezwecken statt.
+          </p>
+
+          <h2>5. Speicherdauer</h2>
+          <p class="legal-prose">
+            Dein Bestenlisten-Eintrag bleibt gespeichert, bis du ihn löschst.
+            Eine automatische Löschung nach Ablauf einer Frist findet nicht
+            statt, weil eine Bestenliste ihren Sinn verlöre, wenn Einträge von
+            selbst verschwinden. Serverseitige Protokolle von Google
+            unterliegen den dortigen Löschfristen.
+          </p>
+
+          <h2>6. Eintrag selbst löschen</h2>
+          <p class="legal-prose">
+            In der Bestenliste im Spiel findest du unter deinem eigenen Rang die
+            Schaltfläche <strong>„Eintrag löschen“</strong>. Nach einer
+            Sicherheitsabfrage werden dein Datensatz und die dazugehörige
+            anonyme Nutzerkennung endgültig gelöscht – auf dem Server und auf
+            deinem Gerät. Auch dein gespeicherter Spielername wird dabei
+            entfernt. Der Vorgang lässt sich nicht rückgängig machen. Spielst du
+            danach erneut, wirst du wie beim ersten Start nach einem Namen
+            gefragt und erhältst eine neue Kennung.
+          </p>
+
+          <h2>7. Deine Rechte</h2>
+          <p class="legal-prose">
+            Dir stehen gegenüber dem Verantwortlichen die Rechte auf Auskunft
+            (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17),
+            Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit
+            (Art. 20) und Widerspruch (Art. 21 DSGVO) zu. Für Auskunft und
+            Löschung genügt eine formlose E-Mail an die oben genannte Adresse;
+            teile uns dabei bitte deinen Spielernamen mit, damit wir den
+            Eintrag zuordnen können. Unabhängig davon kannst du dich bei einer
+            Datenschutz-Aufsichtsbehörde beschweren, etwa der
+            <span class="legal-todo"
+              >[zuständigen Aufsichtsbehörde deines Wohnsitzes]</span
+            >.
+          </p>
+
+          <h2>8. Diese Website</h2>
+          <p class="legal-prose">
+            Die Seite wird über GitHub Pages der GitHub, Inc., 88 Colin P.
+            Kelly Jr. Street, San Francisco, CA 94107, USA, bereitgestellt. Beim
+            Aufruf verarbeitet GitHub technisch notwendige Verbindungsdaten
+            einschließlich deiner IP-Adresse in Server-Logfiles.
+            Rechtsgrundlage ist unser berechtigtes Interesse am sicheren und
+            störungsfreien Betrieb der Seite (Art. 6 Abs. 1 lit. f DSGVO).
+            Näheres unter
+            <a
+              href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement"
+              target="_blank"
+              rel="noopener noreferrer"
+              >docs.github.com</a
+            >.
+          </p>
+          <p class="legal-prose">
+            Schriftarten werden vollständig von diesem Server ausgeliefert. Es
+            werden keine Google Fonts nachgeladen, deine IP-Adresse wird dafür
+            also an keinen Dritten übermittelt. Cookies setzt diese Seite nicht,
+            und es findet keine Reichweitenmessung statt.
+          </p>
+          <p class="legal-prose">
+            Die unter <a href="../demo/">/demo/</a> eingebundene Web-Version des
+            Spiels verhält sich wie die App: Auch dort wird nur dann etwas
+            übertragen, wenn du dich in die Bestenliste einträgst.
+          </p>
+
+          <h2>9. Kinder</h2>
+          <p class="legal-prose">
+            Wool richtet sich an ein allgemeines Publikum. Wir erheben wissentlich
+            keine Daten von Kindern unter 16 Jahren. Sollte ein Eintrag von einem
+            Kind stammen, löschen wir ihn auf Hinweis eines Sorgeberechtigten
+            unverzüglich.
+          </p>
+
+          <h2>10. Änderungen</h2>
+          <p class="legal-prose">
+            Ändert sich der Funktionsumfang des Spiels, passen wir diese
+            Erklärung an. Die jeweils aktuelle Fassung ist auf dieser Seite
+            abrufbar; wesentliche Änderungen halten wir zusätzlich in den
+            <a href="../release-notes/">Release Notes</a> fest.
+          </p>
+
+          <p class="legal-updated">Stand: August 2026</p>
         </div>
       </main>
 

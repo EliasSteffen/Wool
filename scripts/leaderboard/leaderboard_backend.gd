@@ -38,6 +38,16 @@ func rename(_new_name: String) -> LeaderboardResult:
 	push_error("LeaderboardBackend.rename() is abstract")
 	return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "abstract backend")
 
+## Erase this install's published entry and the identity behind it, so nothing
+## on the backend still points at this player. Succeeds as a no-op when nothing
+## has been published yet - the caller asked for an end state, not an event.
+##
+## Implementations must leave the backend usable afterwards: playing again
+## creates a fresh identity rather than resurrecting the deleted one.
+func delete_entry() -> LeaderboardResult:
+	push_error("LeaderboardBackend.delete_entry() is abstract")
+	return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "abstract backend")
+
 ## Stable identifier for this install. Empty until initialize() succeeds.
 func get_player_id() -> String:
 	return ""

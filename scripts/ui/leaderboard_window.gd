@@ -11,6 +11,14 @@ signal close_requested
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_row.tscn")
 const OWN_ROW_COLOR: Color = Color(0.44, 0.41, 0.53, 1)
 
+const DELETE_WARNING: String = "Dein Eintrag und dein Name werden endgültig gelöscht."
+const DELETE_RUNNING: String = "Wird gelöscht ..."
+const DELETE_DONE: String = "Eintrag gelöscht."
+
+## Survives repopulating the list, so the outcome of a delete stays on screen
+## while the refreshed board loads in behind it. Cleared when the window reopens.
+var _delete_message: String = ""
+
 @onready var root_control: Control = $Control
 @onready var panel: Control = $Control/OuterMargin/CenterContainer/Panel
 @onready var outer_margin: MarginContainer = $Control/OuterMargin
@@ -22,6 +30,11 @@ const OWN_ROW_COLOR: Color = Color(0.44, 0.41, 0.53, 1)
 @onready var own_rank_separator: HSeparator = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/OwnRankSeparator
 @onready var own_rank_container: VBoxContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/OwnRankContainer
 @onready var retry_button: Button = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/RetryButton
+@onready var delete_button: Button = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/DeleteButton
+@onready var confirm_row: HBoxContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/ConfirmRow
+@onready var confirm_delete_button: Button = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/ConfirmRow/ConfirmDeleteButton
+@onready var cancel_delete_button: Button = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/ConfirmRow/CancelDeleteButton
+@onready var delete_status_label: Label = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/DeleteStatusLabel
 
 func _ready() -> void:
 	var close_button := get_node_or_null("Control/OuterMargin/CenterContainer/Panel/MenuBackground/CloseButton") as Button
@@ -30,6 +43,9 @@ func _ready() -> void:
 
 	root_control.gui_input.connect(_on_overlay_gui_input)
 	retry_button.pressed.connect(_on_retry_pressed)
+	delete_button.pressed.connect(_on_delete_pressed)
+	confirm_delete_button.pressed.connect(_on_confirm_delete_pressed)
+	cancel_delete_button.pressed.connect(_on_cancel_delete_pressed)
 
 	scroll_container.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -44,6 +60,7 @@ func _ready() -> void:
 ## is revealed again after a window above it closed, so a sub-window does not
 ## trigger a redundant refetch.
 func on_opened() -> void:
+	_delete_message = ""
 	_show_loading()
 	LeaderboardManager.refresh_top()
 
@@ -87,6 +104,18 @@ func _update_layout() -> void:
 		clampf(base_size * 0.1, 64.0, 110.0)
 	)
 
+	# A touch smaller than Retry: destructive, so it should not read as the
+	# obvious thing to press.
+	var delete_font_size: int = int(clampf(base_size * 0.037, 20.0, 44.0))
+	var delete_button_size := Vector2(
+		clampf(panel_width * 0.32, 180.0, 380.0),
+		clampf(base_size * 0.085, 56.0, 96.0)
+	)
+	for button in [delete_button, confirm_delete_button, cancel_delete_button]:
+		button.add_theme_font_size_override("font_size", delete_font_size)
+		button.custom_minimum_size = delete_button_size
+	delete_status_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.032, 18.0, 38.0)))
+
 	scroll_container.custom_minimum_size.y = clampf(viewport_size.y * 0.42, 220.0, 520.0)
 
 	var row_font_size: int = int(clampf(base_size * 0.038, 20.0, 46.0))
@@ -99,6 +128,8 @@ func _show_loading() -> void:
 	status_label.visible = true
 	status_label.text = "Loading..."
 	retry_button.visible = false
+	delete_button.visible = false
+	confirm_row.visible = false
 	_clear_rows()
 
 func _on_top_updated(entries: Array[LeaderboardEntry]) -> void:
@@ -106,6 +137,7 @@ func _on_top_updated(entries: Array[LeaderboardEntry]) -> void:
 
 	if not entries.is_empty():
 		_populate(entries)
+		_update_delete_controls()
 		return
 
 	# An empty list means either "backend is down" or "nobody has played yet" -
@@ -114,6 +146,7 @@ func _on_top_updated(entries: Array[LeaderboardEntry]) -> void:
 	retry_button.visible = not available
 	status_label.visible = true
 	status_label.text = "No scores yet" if available else "Leaderboard unavailable"
+	_update_delete_controls()
 
 func _populate(entries: Array[LeaderboardEntry]) -> void:
 	status_label.visible = false
@@ -195,6 +228,54 @@ func _on_retry_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
 	_show_loading()
 	LeaderboardManager.refresh_top(true)
+
+## Offered only when there is a published row to remove, and never while a
+## delete is already running.
+func _update_delete_controls() -> void:
+	var has_entry: bool = LeaderboardManager.get_player_entry() != null
+	var busy: bool = LeaderboardManager.is_deleting()
+
+	delete_button.visible = has_entry and not busy and not confirm_row.visible
+	delete_status_label.visible = not _delete_message.is_empty()
+	delete_status_label.text = _delete_message
+	_update_layout()
+
+## Irreversible and unauthenticated - anyone holding the phone can press it - so
+## it takes a second, explicitly worded tap rather than firing on the first.
+func _on_delete_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	_delete_message = DELETE_WARNING
+	confirm_row.visible = true
+	_update_delete_controls()
+
+func _on_cancel_delete_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	_delete_message = ""
+	confirm_row.visible = false
+	_update_delete_controls()
+
+func _on_confirm_delete_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	_delete_message = DELETE_RUNNING
+	confirm_row.visible = false
+	_update_delete_controls()
+
+	var result: LeaderboardResult = await LeaderboardManager.delete_entry()
+
+	# UIManager frees this window on close, and the player can close it while the
+	# request is still in flight - everything below would touch freed nodes.
+	if not is_instance_valid(self) or not is_inside_tree():
+		return
+
+	if not result.ok:
+		_delete_message = result.get_display_message()
+		_update_delete_controls()
+		return
+
+	# Our row is gone from the board; reload it so the list matches reality.
+	_delete_message = DELETE_DONE
+	LeaderboardManager.refresh_top(true)
+	_update_delete_controls()
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
 	if not PointerInput.is_pointer_press(event):

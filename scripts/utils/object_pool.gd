@@ -33,9 +33,12 @@ func acquire() -> Node:
 	return node
 
 func release(node: Node) -> void:
-	if node in _active_nodes:
-		_active_nodes.erase(node)
-		_release_node_to_pool(node)
+	# One scan, not two: `in` followed by erase() walked the array twice.
+	var idx := _active_nodes.find(node)
+	if idx == -1:
+		return
+	_active_nodes.remove_at(idx)
+	_release_node_to_pool(node)
 
 func _create_new_node() -> Node:
 	if not _scene:

@@ -124,7 +124,9 @@ func _process(delta: float) -> void:
 			_shadow_sprite.speed_scale = main_sprite.speed_scale
 			_shadow_sprite.flip_h = main_sprite.flip_h
 			_shadow_sprite.flip_v = main_sprite.flip_v
-			_shadow_sprite.scale = skin.scale
+			# The shadow is a sibling of Skin, so it must also pick up the inner
+			# sprite's own scale, which compensates for the downscaled atlas.
+			_shadow_sprite.scale = skin.scale * main_sprite.scale
 			_shadow_sprite.rotation = skin.rotation
 			_shadow_sprite.offset = main_sprite.offset
 			_shadow_sprite.centered = main_sprite.centered

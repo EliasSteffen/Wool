@@ -132,8 +132,15 @@ func _enforce_pc_aspect_ratio() -> void:
 var _last_window_size: Vector2i = Vector2i.ZERO
 const TARGET_ASPECT: float = 2532.0 / 1170.0
 
+## The platform cannot change while the game is running, so this is resolved
+## once instead of rebuilding a string array and searching it every frame -
+## which is all mobile ever got out of _enforce_aspect_ratio_runtime().
+static var _is_desktop: bool = OS.get_name() in [
+	"Windows", "macOS", "Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD"
+]
+
 func _enforce_aspect_ratio_runtime() -> void:
-	if OS.get_name() in ["Windows", "macOS", "Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD"]:
+	if _is_desktop:
 		var current_size = DisplayServer.window_get_size()
 		# Tolerance check to avoid fighting too much or float errors
 		if _last_window_size == Vector2i.ZERO:
