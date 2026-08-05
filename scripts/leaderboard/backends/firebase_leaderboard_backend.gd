@@ -154,6 +154,23 @@ func fetch_player() -> LeaderboardResult:
 	var entries: Array[LeaderboardEntry] = [entry]
 	return LeaderboardResult.success(entries)
 
+## Re-PATCHes the stored row with the same score and duration but a new name.
+## Depends on the isRename() clause in the security rules - without it the write
+## is rejected, because isImprovement() alone never permits an equal score.
+func rename(new_name: String) -> LeaderboardResult:
+	var existing: LeaderboardResult = await fetch_player()
+	if not existing.ok:
+		return existing
+
+	# Nothing published yet - the new name applies on the first submit anyway.
+	if existing.entries.is_empty():
+		return LeaderboardResult.success()
+
+	var entry: LeaderboardEntry = existing.entries[0]
+	entry.player_name = new_name
+	entry.updated_at_unix = int(Time.get_unix_time_from_system())
+	return await submit(entry)
+
 ## Equality filter on a single field - Firestore auto-indexes single fields, so
 ## this needs no extra composite index.
 func find_by_name(name: String) -> LeaderboardResult:

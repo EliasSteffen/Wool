@@ -45,6 +45,7 @@ var _pending_score: int = 0
 var _pending_time_ms: int = 0
 var _fetching: bool = false
 var _submitting: bool = false
+var _renaming: bool = false
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
@@ -70,6 +71,10 @@ func set_player_name(new_name: String) -> void:
 	_name_declined = false
 	_save_player_state()
 	player_name_changed.emit(player_name)
+
+	# Push the new label to the already-published row, otherwise it would keep
+	# the old name until the player next beats their own record.
+	_push_rename()
 
 ## Player dismissed the prompt - do not ask again, but keep the score locally.
 func decline_name_prompt() -> void:
@@ -154,6 +159,28 @@ func is_name_available(candidate: String) -> bool:
 		return true
 
 	return result.entries.is_empty()
+
+func _push_rename() -> void:
+	if not is_available or _backend == null or _renaming:
+		return
+
+	_renaming = true
+	var target: String = player_name
+	var result: LeaderboardResult = await _backend.rename(target)
+	_renaming = false
+
+	if not result.ok:
+		push_warning("LeaderboardManager: rename failed (%s)" % result.message)
+		return
+
+	# The visible row changed - do not serve a stale cached list.
+	_last_fetch_unix = 0
+	if _player_entry != null:
+		_player_entry.player_name = target
+
+	# The name moved on while we were waiting; run it again.
+	if player_name != target:
+		_push_rename()
 
 func _random_name() -> String:
 	return "%s%04d" % [NAME_NOUNS[randi() % NAME_NOUNS.size()], randi() % 10000]

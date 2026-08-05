@@ -244,6 +244,14 @@ alignment = 1
 max_length = 16
 caret_blink = true
 
+[node name="NameStatusLabel" type="Label" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PlayerName/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.19, 0.24, 1)
+theme_override_font_sizes/font_size = 34
+text = "Name schon vergeben"
+horizontal_alignment = 1
+
 [node name="Spacer" type="Control" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=987654321]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2

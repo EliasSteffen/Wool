@@ -70,6 +70,16 @@ func fetch_player() -> LeaderboardResult:
 	var result: Array[LeaderboardEntry] = [own]
 	return LeaderboardResult.success(result)
 
+func rename(new_name: String) -> LeaderboardResult:
+	var own: LeaderboardEntry = _find_own_entry()
+	if own == null:
+		return LeaderboardResult.success()
+
+	own.player_name = new_name
+	own.updated_at_unix = int(Time.get_unix_time_from_system())
+	_save()
+	return LeaderboardResult.success()
+
 func find_by_name(name: String) -> LeaderboardResult:
 	var matches: Array[LeaderboardEntry] = []
 	for entry in _entries:
