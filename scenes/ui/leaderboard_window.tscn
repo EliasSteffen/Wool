@@ -106,36 +106,3 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 60
 text = "Retry"
 
-[node name="DeleteButton" type="Button" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content"]
-visible = false
-custom_minimum_size = Vector2(320, 96)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 44
-text = "Eintrag löschen"
-
-[node name="ConfirmRow" type="HBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content"]
-visible = false
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 24
-
-[node name="ConfirmDeleteButton" type="Button" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/ConfirmRow"]
-custom_minimum_size = Vector2(320, 96)
-layout_mode = 2
-theme_override_font_sizes/font_size = 44
-text = "Endgültig löschen"
-
-[node name="CancelDeleteButton" type="Button" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content/ConfirmRow"]
-custom_minimum_size = Vector2(320, 96)
-layout_mode = 2
-theme_override_font_sizes/font_size = 44
-text = "Abbrechen"
-
-[node name="DeleteStatusLabel" type="Label" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/Content"]
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.29, 0.22, 1)
-theme_override_font_sizes/font_size = 36
-horizontal_alignment = 1
-autowrap_mode = 3

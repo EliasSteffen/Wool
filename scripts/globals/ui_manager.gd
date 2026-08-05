@@ -22,10 +22,12 @@ const WINDOW_SCENES: Dictionary = {
 	&"settings": preload("res://scenes/ui/settings_window.tscn"),
 	&"leaderboard": preload("res://scenes/ui/leaderboard_window.tscn"),
 	&"credits": preload("res://scenes/ui/credits.tscn"),
+	&"username": preload("res://scenes/ui/username_prompt.tscn"),
 }
 
 ## Windows kept alive (hidden) between opens. Credits is deliberately absent: it
 ## scrolls from a position computed at _ready, so it must be rebuilt each time.
+## So is username: it opens once per install and never again.
 const CACHED_WINDOWS: Array[StringName] = [&"pause", &"settings", &"leaderboard"]
 
 ## Entries are {id, node, host}. "node" carries the window script; "host" is the

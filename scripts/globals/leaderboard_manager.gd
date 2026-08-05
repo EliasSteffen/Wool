@@ -17,9 +17,9 @@ signal player_name_changed(new_name: String)
 signal availability_changed(available: bool)
 signal player_rank_updated(rank: int)
 signal entry_deleted(result: LeaderboardResult)
-## Publishing was switched on or off - by the settings toggle, by the game over
-## prompt, or by deleting the entry. The settings window follows this rather
-## than assuming it is the only thing that can change it.
+## Publishing was switched on or off. The settings toggle is the only thing that
+## starts this, but it arrives back through the signal rather than being assumed:
+## switching off completes asynchronously, once the row is actually gone.
 signal publish_consent_changed(consented: bool)
 
 # === CONSTANTS ===
@@ -54,9 +54,8 @@ var _backend: LeaderboardBackend = null
 var _cached_top: Array[LeaderboardEntry] = []
 var _player_entry: LeaderboardEntry = null
 var _last_fetch_unix: int = 0
-## The player has agreed, at least once, to appear on the global board. Until
-## they do, a run never leaves the device; afterwards every run publishes on its
-## own. Deleting the entry clears this, which is what brings the ask back.
+## The "Scores veröffentlichen" switch in the settings. While it is off a run
+## never leaves the device; while it is on every run publishes on its own.
 var _publish_consented: bool = false
 var _pending_score: int = 0
 var _pending_time_ms: int = 0
@@ -88,18 +87,13 @@ func _notification(what: int) -> void:
 func has_player_name() -> bool:
 	return not player_name.is_empty()
 
-## True while the player has yet to agree to being on the global board, so a run
-## may only be published if they explicitly say so.
-##
-## Deliberately does not require a connection: names are not unique - the
-## document id is - so nothing about the decision needs the network. Consenting
-## offline lets the queued run travel the moment we reconnect.
-func needs_publish_consent() -> bool:
-	return not _publish_consented
+## True while the settings switch is on, so every run goes to the global board.
+func is_publishing() -> bool:
+	return _publish_consented
 
-## Storing a name never publishes anything: before consent it is a local label
-## and nothing more, which is what lets the game over screen keep a name the
-## player typed but chose not to submit.
+## Storing a name never publishes anything: with the switch off it is a local
+## label and nothing more, which is what lets the player rename themselves
+## without being put on the board for it.
 func set_player_name(new_name: String) -> void:
 	var cleaned: String = LeaderboardEntry.sanitize_name(new_name)
 	if cleaned.is_empty() or cleaned == player_name:
@@ -113,61 +107,39 @@ func set_player_name(new_name: String) -> void:
 	# the old name until the player next beats their own record.
 	_push_rename()
 
-## Turn publishing on or off directly - the settings switch. Turning it on is
-## the same go-ahead the game over prompt asks for, so the prompt stops
-## appearing; turning it off puts the player back to local-only scores.
+## Turn publishing on - the settings switch. The stored best goes up right away,
+## so the switch takes effect now rather than at the next death.
 ##
-## Switching off deliberately does not delete an entry that is already up:
-## erasing published data is destructive and stays behind the confirmed button
-## in the leaderboard window. It does drop the queued run, so nothing the player
-## has already declined to publish sneaks up on the next reconnect.
-func set_publish_consent(consented: bool) -> void:
-	if consented == _publish_consented:
+## The go-ahead is stored on the press rather than on a successful write. It is
+## the player's decision, not the network's: switching on with no signal has to
+## publish when the connection returns, not silently do nothing.
+##
+## A zero score is not an error. submit_run() drops it, so a player who switches
+## this on before their first run simply appears once they have something to show.
+##
+## Switching off is delete_entry(), not this - it has to erase a row that is
+## already up, which can fail, so the caller needs the result.
+func enable_publishing(score: int, duration_ms: int) -> void:
+	if _publish_consented:
 		return
 
-	# A row cannot exist without a name, and there is no prompt behind this
-	# switch to ask for one - so give them a usable name up front. It stays
-	# editable in the field this switch reveals.
-	if consented and not has_player_name():
-		set_player_name(_random_name())
-
-	_publish_consented = consented
-	if not consented:
-		_clear_pending()
-	_save_player_state()
-	publish_consent_changed.emit(_publish_consented)
-
-	if not consented:
-		return
-
-	# Anything banked while publishing was off belongs on the board now.
-	if is_available:
-		_flush_pending()
-	else:
-		retry_now()
-
-## The player asked to be on the board: record the go-ahead, keep the name, and
-## put the run up.
-##
-## Consent is stored on the press rather than on a successful write. It is the
-## player's decision, not the network's - an offline run has to publish when the
-## connection returns, instead of quietly asking again after the next death.
-func publish_run(chosen_name: String, score: int, duration_ms: int) -> void:
-	set_player_name(chosen_name)
-
-	# sanitize_name() can strip a name down to nothing, and a row cannot exist
-	# without one - fall back rather than dropping the run they just asked to
-	# publish.
+	# A row cannot exist without a name. The first-launch prompt guarantees one;
+	# this is the backstop for a player.cfg that somehow lost it.
 	if not has_player_name():
 		set_player_name(_random_name())
 
-	set_publish_consent(true)
+	_publish_consented = true
+	_save_player_state()
+	publish_consent_changed.emit(true)
+
+	# Banks the score, then either sends it or arms a retry. Anything already
+	# queued from a run played with the switch off goes up with it.
 	submit_run(score, duration_ms)
 
 ## Queue a run for upload. Safe to call at any time; returns immediately.
 ##
-## Does nothing beyond banking the score locally until the player has consented
-## once - that first publish only ever happens through publish_run().
+## Does nothing beyond banking the score locally while the switch is off - the
+## banked run then goes up the moment it is switched on.
 func submit_run(score: int, duration_ms: int) -> void:
 	if score <= 0 or duration_ms <= 0:
 		return
@@ -271,12 +243,15 @@ func refresh_player_rank() -> int:
 func is_deleting() -> bool:
 	return _deleting
 
-## Erase this player's leaderboard presence: the published row, the identity
-## behind it, and every local trace that would put it back.
+## Switch publishing off: erase the published row and the anonymous identity
+## behind it, and stop anything local from putting it back.
 ##
 ## Clearing the queued run matters as much as the delete itself - a pending
 ## score left in player.cfg would flush straight back onto the board on the next
 ## connect, and the player would reasonably conclude the deletion did nothing.
+##
+## Returns the result rather than swallowing it: the settings switch has to stay
+## on when this fails, because the row is still up there.
 func delete_entry() -> LeaderboardResult:
 	if _backend == null:
 		return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "no backend")
@@ -298,7 +273,7 @@ func delete_entry() -> LeaderboardResult:
 	_deleting = false
 
 	if result.ok:
-		_forget_local_identity()
+		_forget_published_entry()
 	else:
 		push_warning("LeaderboardManager: delete failed (%s)" % result.message)
 		_handle_connectivity_failure(result)
@@ -306,15 +281,14 @@ func delete_entry() -> LeaderboardResult:
 	entry_deleted.emit(result)
 	return result
 
-## Local half of the erasure. The name goes with it: it is the only personal
-## data the row carried, and keeping it would republish it unprompted after the
-## next run. Losing it means the name prompt appears again, which is the right
-## moment to ask.
-func _forget_local_identity() -> void:
-	player_name = ""
-	# Back to square one: with no entry on the board, publishing the next run is
-	# a fresh decision, so the game over screen asks again before anything goes up.
+## Local half of the erasure.
+##
+## The name deliberately survives: it is no longer the row's, it is the player's
+## - asked for once at first launch and owned in the settings from then on.
+## Switching publishing back on republishes under it, with no run in between.
+func _forget_published_entry() -> void:
 	_publish_consented = false
+	# A queued run would flush straight back onto the board on the next connect.
 	_pending_score = 0
 	_pending_time_ms = 0
 	_player_entry = null
@@ -324,9 +298,7 @@ func _forget_local_identity() -> void:
 	_cached_top.clear()
 	_last_fetch_unix = 0
 
-	player_name_changed.emit(player_name)
-	# Switches the settings toggle back off: with the entry gone, publishing
-	# again is a fresh decision rather than something already agreed to.
+	# Settles the settings toggle into its off state, now that the row is gone.
 	publish_consent_changed.emit(_publish_consented)
 
 func is_using_remote_backend() -> bool:
@@ -341,8 +313,8 @@ func generate_name() -> String:
 	return _random_name()
 
 func _push_rename() -> void:
-	# Nothing has been published yet, so there is no row to relabel - and writing
-	# one from here would put the player on the board without ever asking.
+	# The switch is off, so there is no row to relabel - and writing one from here
+	# would put the player on the board purely for renaming themselves.
 	if not _publish_consented:
 		return
 	if not is_available or _backend == null or _renaming:
@@ -533,9 +505,10 @@ func _load_player_state() -> void:
 	if config_file.load(PLAYER_PATH) != OK:
 		return
 	player_name = str(config_file.get_value("player", "name", ""))
-	# Consent predates nothing for players upgrading from a build that published
-	# on its own: a stored name is exactly what "already on the board" looked
-	# like back then, and asking them again would undo an entry they can see.
+	# The key predates nothing for players upgrading from a build that published
+	# on its own: a stored name is exactly what "already on the board" looked like
+	# back then, and defaulting them to off would leave that row behind with no
+	# switch pointing at it. Every build since writes the key explicitly.
 	_publish_consented = bool(config_file.get_value(
 		"player", "published", not player_name.is_empty()
 	))

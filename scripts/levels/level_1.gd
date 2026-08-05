@@ -25,6 +25,15 @@ func _ready() -> void:
 	# Mark that the game has been started
 	GameManager.mark_game_started()
 
+	# First launch: the game boots straight into gameplay with no menu in front
+	# of it, so this is the only place there is to ask for a name. UIManager
+	# pauses the tree while the prompt is up, and the run clock does not start
+	# until the first jump (GameManager.notify_run_started), so the wait costs
+	# the player nothing. Deferred because the scene tree is still being swapped
+	# in around us.
+	if not LeaderboardManager.has_player_name():
+		UIManager.open.call_deferred(&"username")
+
 	if hud:
 		hud.visible = true
 

@@ -4,6 +4,10 @@ extends CanvasLayer
 ## actual closing - see the "windows never close themselves" rule in ui_manager.gd.
 signal close_requested
 
+## Shown while the published row is being deleted. Switching off is the one
+## action in this window that is not instant.
+const PUBLISH_REMOVING: String = "Wird entfernt ..."
+
 @onready var container: VBoxContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer
 @onready var content_margin: MarginContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin
 @onready var scroll_container: ScrollContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer
@@ -34,9 +38,10 @@ func _ready() -> void:
 	_setup_publish_toggle()
 	_setup_name_edit()
 
-## The switch is a view onto LeaderboardManager's consent flag, not a setting of
-## its own - so it follows the signal rather than only its own presses. Deleting
-## the entry from the leaderboard window flips it from the other side.
+## The switch is a view onto LeaderboardManager's publish flag, not a setting of
+## its own - so it follows the signal rather than only its own presses. Switching
+## off in particular only settles once the row has actually been deleted, which
+## happens well after the press.
 func _setup_publish_toggle() -> void:
 	var toggle := _publish_toggle()
 	if not toggle:
@@ -44,10 +49,13 @@ func _setup_publish_toggle() -> void:
 
 	toggle.toggled.connect(_on_publish_toggled)
 	LeaderboardManager.publish_consent_changed.connect(_apply_publish_state)
-	_apply_publish_state(not LeaderboardManager.needs_publish_consent())
+	_apply_publish_state(LeaderboardManager.is_publishing())
 
 func _publish_toggle() -> Button:
 	return container.get_node_or_null("PublishScores/VBoxContainer/PublishToggle") as Button
+
+func _publish_status() -> Label:
+	return container.get_node_or_null("PublishScores/VBoxContainer/PublishStatus") as Label
 
 func _name_edit() -> LineEdit:
 	return container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
@@ -66,24 +74,62 @@ func _apply_publish_state(consented: bool) -> void:
 		# what makes the state visible at a glance rather than only readable.
 		toggle.modulate = Color(1.0, 1.0, 1.0, 1.0 if consented else 0.6)
 
-	# A name is only meaningful once something is published under it.
-	var player_name_section := container.get_node_or_null("PlayerName") as Control
-	if player_name_section:
-		player_name_section.visible = consented
-
-	# Switching on mints a name, and deleting the entry clears it - either way
-	# the field would otherwise still show the previous value.
+	# The name section stays visible either way: the name is the player's, asked
+	# for at first launch and theirs to change whether or not anything is
+	# published under it. Only re-read the field, in case switching on had to
+	# mint a name.
 	var name_edit := _name_edit()
 	if name_edit:
 		name_edit.text = LeaderboardManager.player_name
 
 	_update_layout()
 
+func _set_publish_status(message: String) -> void:
+	var status := _publish_status()
+	if not status:
+		return
+	status.text = message
+	status.visible = not message.is_empty()
+	_update_layout()
+
+## On is instant and local; off has to erase a row that is already up there, so
+## it waits on the network and can fail.
 func _on_publish_toggled(pressed: bool) -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	# set_publish_consent emits publish_consent_changed, which lands back in
-	# _apply_publish_state - the display is not updated a second time here.
-	LeaderboardManager.set_publish_consent(pressed)
+
+	if pressed:
+		_set_publish_status("")
+		# The stored best, not the last run: the switch publishes what the player
+		# already has rather than making them earn it again.
+		LeaderboardManager.enable_publishing(
+			GameManager.highscore, GameManager.highscore_time_ms
+		)
+		return
+
+	var toggle := _publish_toggle()
+	if toggle:
+		# A second press mid-delete would fire delete_entry at an identity that
+		# is already being torn down.
+		toggle.disabled = true
+	_set_publish_status(PUBLISH_REMOVING)
+
+	var result: LeaderboardResult = await LeaderboardManager.delete_entry()
+
+	if not is_instance_valid(self) or not is_inside_tree():
+		return
+	if toggle:
+		toggle.disabled = false
+
+	if result.ok:
+		# delete_entry already emitted publish_consent_changed(false), which came
+		# back through _apply_publish_state and flipped the switch.
+		_set_publish_status("")
+		return
+
+	# Offline or refused - the row is still on the board, so the switch must not
+	# sit there claiming otherwise.
+	_set_publish_status(result.get_display_message())
+	_apply_publish_state(true)
 
 func _setup_name_edit() -> void:
 	var name_edit := _name_edit()
@@ -152,6 +198,14 @@ func _update_layout() -> void:
 			clampf(base_size * 0.085, 56.0, 96.0)
 		)
 
+	# Smaller than a section heading: it is a transient status line under the
+	# switch, not a fifth setting.
+	var status := _publish_status()
+	if status:
+		status.add_theme_font_size_override(
+			"font_size", int(clampf(base_size * 0.03, 18.0, 38.0))
+		)
+
 	for label_path in [
 		"MasterVolume/VBoxContainer/Label",
 		"MusicVolume/VBoxContainer/Label",
@@ -187,6 +241,10 @@ func close() -> void:
 ## The name field commits on focus_exited; hiding a CanvasLayer does not drop
 ## focus, so a name typed and then dismissed by tap-outside would be lost.
 func on_closed() -> void:
-	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	var name_edit := _name_edit()
 	if name_edit and name_edit.has_focus():
 		name_edit.release_focus()
+
+	# This window is cached and reused, so a failure message left on screen would
+	# be waiting - stale - the next time it opens.
+	_set_publish_status("")
