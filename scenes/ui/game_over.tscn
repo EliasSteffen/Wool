@@ -7,6 +7,44 @@
 [ext_resource type="PackedScene" uid="uid://rcr5v5hlcmya" path="res://scenes/ui/menu_background.tscn" id="3_menu_bg"]
 [ext_resource type="Texture2D" uid="uid://bygvsfk6jg01t" path="res://assets/character/spucki/spucki-platform.png" id="4_platform"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
+content_margin_left = 28.0
+content_margin_top = 12.0
+content_margin_right = 28.0
+content_margin_bottom = 12.0
+bg_color = Color(1, 0.98823529, 0.94901961, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.44, 0.41, 0.53, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.2, 0.15, 0.1, 0.15)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field_focus"]
+content_margin_left = 28.0
+content_margin_top = 12.0
+content_margin_right = 28.0
+content_margin_bottom = 12.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.31, 0.27, 0.42, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.2, 0.15, 0.1, 0.2)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
 [node name="GameOverScreen" type="Control" unique_id=846438768]
 layout_mode = 3
 anchors_preset = 15
@@ -148,41 +186,48 @@ horizontal_alignment = 2
 [node name="NamePrompt" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
 visible = false
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="PromptLabel" type="Label" parent="MarginContainer/VBoxContainer/NamePrompt"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
 theme_override_font_sizes/font_size = 40
-text = "Name für die Bestenliste"
+text = "Dein Name für die Bestenliste"
 horizontal_alignment = 1
 
-[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/NamePrompt"]
-custom_minimum_size = Vector2(420, 84)
+[node name="NameRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer/NamePrompt"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 44
+theme_override_constants/separation = 20
+
+[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/NamePrompt/NameRow"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_placeholder_color = Color(0.2, 0.15, 0.1, 0.4)
+theme_override_colors/caret_color = Color(0.31, 0.27, 0.42, 1)
+theme_override_font_sizes/font_size = 48
+theme_override_styles/normal = SubResource("StyleBoxFlat_field")
+theme_override_styles/focus = SubResource("StyleBoxFlat_field_focus")
 placeholder_text = "Dein Name"
 alignment = 1
 max_length = 16
 caret_blink = true
 
-[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBoxContainer/NamePrompt"]
+[node name="RerollButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/NameRow"]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/separation = 24
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 40
+text = "Neu"
 
-[node name="SubmitButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/Buttons"]
-custom_minimum_size = Vector2(240, 84)
+[node name="NameStatusLabel" type="Label" parent="MarginContainer/VBoxContainer/NamePrompt"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 44
-text = "Speichern"
-
-[node name="SkipButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/Buttons"]
-custom_minimum_size = Vector2(240, 84)
-layout_mode = 2
-theme_override_font_sizes/font_size = 44
-text = "Überspringen"
+theme_override_colors/font_color = Color(0.65, 0.19, 0.24, 1)
+theme_override_font_sizes/font_size = 34
+text = "Name schon vergeben"
+horizontal_alignment = 1
 
 [node name="InstructionLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1877545117]
 layout_mode = 2
@@ -191,3 +236,18 @@ theme_override_font_sizes/font_size = 40
 text = "Drücke auf den Bildschirm,
 um das Level neu zu starten"
 horizontal_alignment = 1
+
+[node name="ActionButtons" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 32
+
+[node name="ContinueButton" type="Button" parent="MarginContainer/VBoxContainer/ActionButtons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Weiter"
+
+[node name="LeaderboardButton" type="Button" parent="MarginContainer/VBoxContainer/ActionButtons"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Bestenliste"

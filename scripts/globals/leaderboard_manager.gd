@@ -22,6 +22,13 @@ const PLAYER_PATH: String = "user://player.cfg"
 const LOCAL_BACKEND_SCRIPT: GDScript = preload("res://scripts/leaderboard/backends/local_leaderboard_backend.gd")
 const FIREBASE_BACKEND_SCRIPT: GDScript = preload("res://scripts/leaderboard/backends/firebase_leaderboard_backend.gd")
 
+## Kept short so "noun + 4 digits" always fits LeaderboardEntry.MAX_NAME_LENGTH.
+const NAME_NOUNS: Array[String] = [
+	"Schaf", "Knäuel", "Faden", "Masche", "Socke", "Wolke", "Nadel", "Zopf",
+	"Flausch", "Pompom", "Filz", "Strick", "Garn", "Troddel", "Bommel", "Docke",
+]
+const NAME_ATTEMPTS: int = 6
+
 # === PUBLIC VARIABLES ===
 var player_name: String = ""
 var is_available: bool = false
@@ -116,6 +123,40 @@ func get_player_rank() -> int:
 
 func is_using_remote_backend() -> bool:
 	return is_remote
+
+## A generated name nobody else is using yet.
+##
+## Uniqueness is best-effort: the check and the later write are not atomic, so
+## two players generating at the same instant could still collide. Enforcing
+## true uniqueness would need a second collection and a transaction, which the
+## Firestore rules alone cannot express.
+func generate_unique_name() -> String:
+	var candidate: String = _random_name()
+
+	for _attempt in range(NAME_ATTEMPTS):
+		if await is_name_available(candidate):
+			return candidate
+		candidate = _random_name()
+
+	# Give up on pretty and lean on entropy instead.
+	return LeaderboardEntry.sanitize_name("%s%d" % [candidate, randi() % 100])
+
+func is_name_available(candidate: String) -> bool:
+	var cleaned: String = LeaderboardEntry.sanitize_name(candidate)
+	if cleaned.is_empty():
+		return false
+	if not is_available or _backend == null:
+		# Offline we cannot know - do not block the player over it.
+		return true
+
+	var result: LeaderboardResult = await _backend.find_by_name(cleaned)
+	if not result.ok:
+		return true
+
+	return result.entries.is_empty()
+
+func _random_name() -> String:
+	return "%s%04d" % [NAME_NOUNS[randi() % NAME_NOUNS.size()], randi() % 10000]
 
 # === PRIVATE METHODS ===
 

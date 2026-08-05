@@ -70,6 +70,14 @@ func fetch_player() -> LeaderboardResult:
 	var result: Array[LeaderboardEntry] = [own]
 	return LeaderboardResult.success(result)
 
+func find_by_name(name: String) -> LeaderboardResult:
+	var matches: Array[LeaderboardEntry] = []
+	for entry in _entries:
+		# Our own row does not make the name "taken" for us.
+		if entry.player_name == name and entry.player_id != _player_id:
+			matches.append(entry)
+	return LeaderboardResult.success(matches)
+
 func get_player_id() -> String:
 	return _player_id
 

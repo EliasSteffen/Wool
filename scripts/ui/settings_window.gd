@@ -81,10 +81,8 @@ func _update_layout() -> void:
 	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
 	if name_edit:
 		name_edit.add_theme_font_size_override("font_size", int(clampf(base_size * 0.035, 22.0, 44.0)))
-		name_edit.custom_minimum_size = Vector2(
-			clampf(viewport_size.x * 0.3, 240.0, 480.0),
-			clampf(viewport_size.y * 0.1, 56.0, 96.0)
-		)
+		# Width only - the styled box brings its own vertical padding.
+		name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.3, 240.0, 480.0), 0.0)
 
 	for label_path in [
 		"MasterVolume/VBoxContainer/Label",

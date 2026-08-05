@@ -5,6 +5,38 @@
 [ext_resource type="Theme" uid="uid://dfh80kxu23rvv" path="res://assets/ui/pause_theme.tres" id="6_theme"]
 [ext_resource type="Script" uid="uid://coa7rwl5kitau" path="res://scripts/ui/rolling_slider.gd" id="7_rolling"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
+content_margin_left = 28.0
+content_margin_top = 12.0
+content_margin_right = 28.0
+content_margin_bottom = 12.0
+bg_color = Color(1, 0.98823529, 0.94901961, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.44, 0.41, 0.53, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field_focus"]
+content_margin_left = 28.0
+content_margin_top = 12.0
+content_margin_right = 28.0
+content_margin_bottom = 12.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.31, 0.27, 0.42, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_track"]
@@ -198,10 +230,15 @@ text = "Leaderboard Name"
 horizontal_alignment = 1
 
 [node name="NameEdit" type="LineEdit" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PlayerName/VBoxContainer"]
-custom_minimum_size = Vector2(360, 84)
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_colors/font_placeholder_color = Color(0.2, 0.15, 0.1, 0.4)
+theme_override_colors/caret_color = Color(0.31, 0.27, 0.42, 1)
+theme_override_font_sizes/font_size = 48
+theme_override_styles/normal = SubResource("StyleBoxFlat_field")
+theme_override_styles/focus = SubResource("StyleBoxFlat_field_focus")
 placeholder_text = "Dein Name"
 alignment = 1
 max_length = 16

@@ -32,6 +32,12 @@ func fetch_player() -> LeaderboardResult:
 	push_error("LeaderboardBackend.fetch_player() is abstract")
 	return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "abstract backend")
 
+## Look up a name. An ok result with a non-empty entries array means the name
+## is already in use by someone else.
+func find_by_name(_name: String) -> LeaderboardResult:
+	push_error("LeaderboardBackend.find_by_name() is abstract")
+	return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "abstract backend")
+
 ## Stable identifier for this install. Empty until initialize() succeeds.
 func get_player_id() -> String:
 	return ""
