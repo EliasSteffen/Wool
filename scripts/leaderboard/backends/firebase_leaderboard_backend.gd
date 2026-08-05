@@ -251,51 +251,6 @@ func rename(new_name: String) -> LeaderboardResult:
 	entry.updated_at_unix = int(Time.get_unix_time_from_system())
 	return await submit(entry)
 
-## Equality filter on a single field - Firestore auto-indexes single fields, so
-## this needs no extra composite index.
-func find_by_name(name: String) -> LeaderboardResult:
-	var url: String = "%s:runQuery" % _documents_url()
-	var body: Dictionary = {
-		"structuredQuery": {
-			"from": [{"collectionId": _config.collection}],
-			"where": {
-				"fieldFilter": {
-					"field": {"fieldPath": "name"},
-					"op": "EQUAL",
-					"value": {"stringValue": name},
-				}
-			},
-			"limit": 2,
-		}
-	}
-
-	var response: Dictionary = await _client.request_json(
-		HTTPClient.METHOD_POST, url, _auth_headers(), body
-	)
-
-	if response["error"] != OK:
-		return _transport_failure(response)
-
-	if response["code"] != 200:
-		return LeaderboardResult.failure(
-			LeaderboardResult.Code.UNKNOWN, "find_by_name HTTP %d" % response["code"]
-		)
-
-	var payload: Variant = response["body"]
-	if not payload is Array:
-		return LeaderboardResult.failure(LeaderboardResult.Code.UNKNOWN, "unexpected runQuery payload")
-
-	var matches: Array[LeaderboardEntry] = []
-	for element in payload:
-		if not element is Dictionary or not element.has("document"):
-			continue
-		var entry: LeaderboardEntry = _parse_document(element["document"])
-		# Our own row does not make the name "taken" for us.
-		if entry != null and entry.player_id != _uid:
-			matches.append(entry)
-
-	return LeaderboardResult.success(matches)
-
 func get_player_id() -> String:
 	return _uid
 

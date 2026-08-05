@@ -10,10 +10,8 @@ func _ready() -> void:
 	call_deferred("_update_layout")
 
 	name_prompt.visible = false
-	name_status_label.visible = false
 	rank_label.visible = false
 	reroll_button.pressed.connect(_on_reroll_pressed)
-	name_edit.text_changed.connect(_on_name_text_changed)
 	name_edit.text_submitted.connect(_on_name_edit_submitted)
 
 	# Start invisible
@@ -51,7 +49,6 @@ func _ready() -> void:
 @onready var prompt_label: Label = $MarginContainer/VBoxContainer/NamePrompt/PromptLabel
 @onready var name_edit: LineEdit = $MarginContainer/VBoxContainer/NamePrompt/NameRow/NameEdit
 @onready var reroll_button: Button = $MarginContainer/VBoxContainer/NamePrompt/NameRow/RerollButton
-@onready var name_status_label: Label = $MarginContainer/VBoxContainer/NamePrompt/NameStatusLabel
 @onready var rank_label: Label = $MarginContainer/VBoxContainer/RankLabel
 
 var _move_tween: Tween = null
@@ -63,7 +60,6 @@ var _name_prompt_active: bool = false
 ## The last generated name, already verified free - lets us skip a second
 ## lookup when the player just accepts it.
 var _generated_name: String = ""
-var _committing: bool = false
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
@@ -108,7 +104,6 @@ func _update_name_prompt_layout(viewport_size: Vector2, base_size: float) -> voi
 	var button_font_size: int = int(clampf(base_size * 0.035, 22.0, 44.0))
 
 	prompt_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.032, 20.0, 40.0)))
-	name_status_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.028, 18.0, 34.0)))
 
 	name_edit.add_theme_font_size_override("font_size", field_font_size)
 	# Width only. The styled box supplies its own vertical padding, so forcing a
@@ -353,24 +348,16 @@ func _maybe_show_name_prompt() -> void:
 	_name_prompt_active = true
 	name_prompt.visible = true
 	instruction_label.visible = false
-	name_status_label.visible = false
 	name_edit.text = ""
 	name_edit.editable = false
 	_update_layout()
 
-	await _fill_generated_name()
+	_fill_generated_name()
 
+## Generating a name is local and instant now that names need not be unique, so
+## there is no waiting state to show.
 func _fill_generated_name() -> void:
-	reroll_button.disabled = true
-	name_edit.editable = false
-	name_edit.placeholder_text = "..."
-
-	_generated_name = await LeaderboardManager.generate_unique_name()
-
-	# The player may have closed the screen while we were waiting.
-	if not is_instance_valid(name_edit) or not _name_prompt_active:
-		return
-
+	_generated_name = LeaderboardManager.generate_name()
 	name_edit.text = _generated_name
 	name_edit.placeholder_text = "Dein Name"
 	name_edit.editable = true
@@ -408,24 +395,18 @@ func _close_name_prompt() -> void:
 	instruction_label.visible = true
 	_can_interact = true
 
-func _on_name_text_changed(_text: String) -> void:
-	name_status_label.visible = false
-
 func _on_name_edit_submitted(_text: String) -> void:
 	_restart_game()
 
 func _on_reroll_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	name_status_label.visible = false
-	await _fill_generated_name()
+	_fill_generated_name()
 
-## Saves the chosen name and queues the run. Returns false when the name is
-## taken, so the caller stays on this screen instead of navigating away.
+## Saves the chosen name and queues the run. Still returns a bool so callers can
+## abort navigation, though nothing rejects a name any more.
 func _commit_name() -> bool:
 	if not _name_prompt_active:
 		return true
-	if _committing:
-		return false
 
 	var entered: String = LeaderboardEntry.sanitize_name(name_edit.text)
 	if entered.is_empty():
@@ -436,17 +417,7 @@ func _commit_name() -> bool:
 		_close_name_prompt()
 		return true
 
-	# The generated name was already checked; only verify player edits.
-	if entered != _generated_name:
-		_committing = true
-		var available: bool = await LeaderboardManager.is_name_available(entered)
-		_committing = false
-
-		if not available:
-			if is_instance_valid(name_status_label):
-				name_status_label.visible = true
-			return false
-
+	# No uniqueness check: names may repeat, and this must work with no signal.
 	LeaderboardManager.set_player_name(entered)
 	LeaderboardManager.submit_run(GameManager.max_run_distance, GameManager.max_run_time_ms)
 	_close_name_prompt()

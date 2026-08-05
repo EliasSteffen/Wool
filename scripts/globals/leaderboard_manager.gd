@@ -28,7 +28,6 @@ const NAME_NOUNS: Array[String] = [
 	"Schaf", "Knäuel", "Faden", "Masche", "Socke", "Wolke", "Nadel", "Zopf",
 	"Flausch", "Pompom", "Filz", "Strick", "Garn", "Troddel", "Bommel", "Docke",
 ]
-const NAME_ATTEMPTS: int = 6
 
 ## Backoff between reconnect attempts, in seconds; the last value repeats forever.
 ## Godot exposes no connectivity API, so polling is the only way to notice the
@@ -81,8 +80,12 @@ func has_player_name() -> bool:
 	return not player_name.is_empty()
 
 ## True when the player should be asked for a name before submitting.
+##
+## Deliberately does not require a connection: names are not unique - the
+## document id is - so nothing about picking one needs the network. Choosing a
+## name offline lets the queued run travel with it the moment we reconnect.
 func should_prompt_for_name() -> bool:
-	return is_available and not has_player_name() and not _name_declined
+	return not has_player_name() and not _name_declined
 
 func set_player_name(new_name: String) -> void:
 	var cleaned: String = LeaderboardEntry.sanitize_name(new_name)
@@ -201,36 +204,13 @@ func refresh_player_rank() -> int:
 func is_using_remote_backend() -> bool:
 	return is_remote
 
-## A generated name nobody else is using yet.
+## A suggested display name.
 ##
-## Uniqueness is best-effort: the check and the later write are not atomic, so
-## two players generating at the same instant could still collide. Enforcing
-## true uniqueness would need a second collection and a transaction, which the
-## Firestore rules alone cannot express.
-func generate_unique_name() -> String:
-	var candidate: String = _random_name()
-
-	for _attempt in range(NAME_ATTEMPTS):
-		if await is_name_available(candidate):
-			return candidate
-		candidate = _random_name()
-
-	# Give up on pretty and lean on entropy instead.
-	return LeaderboardEntry.sanitize_name("%s%d" % [candidate, randi() % 100])
-
-func is_name_available(candidate: String) -> bool:
-	var cleaned: String = LeaderboardEntry.sanitize_name(candidate)
-	if cleaned.is_empty():
-		return false
-	if not is_available or _backend == null:
-		# Offline we cannot know - do not block the player over it.
-		return true
-
-	var result: LeaderboardResult = await _backend.find_by_name(cleaned)
-	if not result.ok:
-		return true
-
-	return result.entries.is_empty()
+## Purely local and instant: rows are keyed by document id, so two players
+## sharing a name collide on screen at worst, and the leaderboard marks your own
+## row with "(You)" to keep that unambiguous.
+func generate_name() -> String:
+	return _random_name()
 
 func _push_rename() -> void:
 	if not is_available or _backend == null or _renaming:

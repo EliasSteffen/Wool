@@ -151,7 +151,12 @@ func _update_own_rank_footer() -> void:
 func _build_row(entry: LeaderboardEntry, is_own: bool) -> Control:
 	var row: Control = ROW_SCENE.instantiate()
 	(row.get_node("RankLabel") as Label).text = "%d." % entry.rank
-	(row.get_node("NameLabel") as Label).text = entry.player_name
+	# Names are not unique - the document id is - so the colour tint alone is not
+	# enough to pick yourself out of a list with a duplicate name in it.
+	var display_name: String = entry.player_name
+	if is_own:
+		display_name += " (You)"
+	(row.get_node("NameLabel") as Label).text = display_name
 	(row.get_node("ScoreLabel") as Label).text = entry.format_score()
 	(row.get_node("TimeLabel") as Label).text = entry.format_time()
 

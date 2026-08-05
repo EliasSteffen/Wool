@@ -43,36 +43,17 @@ func _setup_name_edit() -> void:
 	# tap-outside close.
 	name_edit.text_submitted.connect(func(_new_text: String): _commit_name(name_edit))
 	name_edit.focus_exited.connect(func(): _commit_name(name_edit))
-	name_edit.text_changed.connect(func(_new_text: String): _set_name_status(false))
 
+## Commits immediately, offline included - nothing here needs the network.
 func _commit_name(name_edit: LineEdit) -> void:
 	var entered: String = LeaderboardEntry.sanitize_name(name_edit.text)
 
 	# Empty or unchanged - nothing to do, just restore what is stored.
 	if entered.is_empty() or entered == LeaderboardManager.player_name:
 		name_edit.text = LeaderboardManager.player_name
-		_set_name_status(false)
 		return
 
-	name_edit.editable = false
-	var available: bool = await LeaderboardManager.is_name_available(entered)
-	if not is_instance_valid(name_edit):
-		return
-	name_edit.editable = true
-
-	if not available:
-		# Put the old name back so the field never shows a name they do not own.
-		name_edit.text = LeaderboardManager.player_name
-		_set_name_status(true)
-		return
-
-	_set_name_status(false)
 	LeaderboardManager.set_player_name(entered)
-
-func _set_name_status(is_taken: bool) -> void:
-	var status := container.get_node_or_null("PlayerName/VBoxContainer/NameStatusLabel") as Label
-	if status:
-		status.visible = is_taken
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
