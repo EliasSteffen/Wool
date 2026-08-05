@@ -64,6 +64,8 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _decoration_pool: ObjectPool
 var _sprite_scene: PackedScene = preload("res://scenes/utils/pooled_sprite.tscn")
 
+const DECORATION_SHADOW_NAME: String = "FetzenShadow"
+
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player")
 	if _player:
@@ -234,9 +236,11 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 		# Reset properties
 		dec_sprite.offset = Vector2.ZERO
 
-		# CLEANUP CHILDREN (e.g. Pins from previous use)
-		for child in dec_sprite.get_children():
-			child.queue_free()
+		# The shadow is built once per pooled sprite and then reused. Freeing it
+		# and allocating a replacement on every acquire churned one node per
+		# decoration, which is the exact cost the pool exists to avoid.
+		var fetzen_shadow := _get_decoration_shadow(dec_sprite)
+		fetzen_shadow.visible = false
 
 		var use_fetzen = _rng.randf() > 0.5
 		var tex: Texture2D = null
@@ -266,20 +270,13 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 
 				# FETZEN SHADOW (Way smaller than others)
 				# 5px visual offset
-				var fetzen_shadow = Sprite2D.new()
 				fetzen_shadow.texture = tex
-				fetzen_shadow.modulate = Color(0, 0, 0, 0.5)
-				fetzen_shadow.z_index = -1 # Behind fetzen
 
 				# Position relative to fetzen (scaled)
 				# Only apply offset, no position since it's child (0,0)
 				fetzen_shadow.position = Vector2(5, 5) / s
 				fetzen_shadow.scale = Vector2(1.0, 1.0) # Inherit scale
-
-				dec_sprite.add_child(fetzen_shadow)
-
-
-
+				fetzen_shadow.visible = true
 			else:
 				s = _rng.randf_range(0.4, 0.8)
 
@@ -295,6 +292,21 @@ func _spawn_deco_chunk(x: float, width: float) -> void:
 			if dec_sprite.get_parent() != decoration_layer:
 				decoration_layer.add_child(dec_sprite)
 			_decoration_nodes.append(dec_sprite)
+
+## The shadow node a pooled decoration sprite reuses across acquires, created on
+## that sprite's first use. Only the texture, position and visibility change per
+## decoration, so the node itself never needs replacing.
+func _get_decoration_shadow(dec_sprite: Sprite2D) -> Sprite2D:
+	var shadow := dec_sprite.get_node_or_null(DECORATION_SHADOW_NAME) as Sprite2D
+	if shadow:
+		return shadow
+
+	shadow = Sprite2D.new()
+	shadow.name = DECORATION_SHADOW_NAME
+	shadow.modulate = Color(0, 0, 0, 0.5)
+	shadow.z_index = -1 # Behind fetzen
+	dec_sprite.add_child(shadow)
+	return shadow
 
 func _load_background_textures_from_folder() -> void:
 	_background_textures.clear()

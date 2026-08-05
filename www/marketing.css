@@ -1032,6 +1032,89 @@ main .legal-card {
   margin-top: 0.25rem;
 }
 
+.legal-card--policy h2 {
+  margin: 1.9rem 0 0.6rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--deep);
+}
+
+.legal-card--policy h2:first-of-type {
+  margin-top: 1.4rem;
+}
+
+.legal-card--policy h3 {
+  margin: 1.1rem 0 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--deep);
+}
+
+.legal-prose {
+  margin: 0 0 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.62;
+  color: var(--deep);
+}
+
+.legal-prose:last-child {
+  margin-bottom: 0;
+}
+
+.legal-prose a,
+.legal-list a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.legal-prose a:hover,
+.legal-list a:hover {
+  text-decoration: underline;
+}
+
+.legal-list {
+  margin: 0 0 0.9rem;
+  padding-left: 1.15rem;
+  color: var(--deep);
+}
+
+.legal-list li {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 0.4rem;
+}
+
+.legal-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Marks a value the developer still has to fill in, so an incomplete notice is
+   obvious on the page rather than only in the source. */
+.legal-todo {
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  background: rgba(214, 138, 60, 0.18);
+  color: var(--deep);
+}
+
+.legal-updated {
+  margin: 1.8rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(107, 94, 86, 0.12);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+@media (prefers-color-scheme: dark) {
+  .legal-updated {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
 /* ─── Release notes ──────────────────────────────────────────────── */
 .release-list {
   list-style: none;

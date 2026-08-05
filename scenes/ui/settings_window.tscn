@@ -126,6 +126,7 @@ alignment = 1
 
 [node name="MasterVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=1972588900]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/MasterVolume" unique_id=622689372]
@@ -156,6 +157,7 @@ script = ExtResource("7_rolling")
 
 [node name="MusicVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=31125164]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/MusicVolume" unique_id=1671754472]
@@ -186,6 +188,7 @@ script = ExtResource("7_rolling")
 
 [node name="SFXVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=347290260]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/SFXVolume" unique_id=1933693197]
@@ -214,8 +217,40 @@ max_value = 1.0
 step = 0.01
 script = ExtResource("7_rolling")
 
+[node name="PublishScores" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PublishScores"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PublishScores/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_font_sizes/font_size = 80
+text = "Scores veröffentlichen"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PublishToggle" type="Button" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PublishScores/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+toggle_mode = true
+text = "Aus"
+
+[node name="PublishStatus" type="Label" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PublishScores/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.29, 0.22, 1)
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+autowrap_mode = 2
+
 [node name="PlayerName" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PlayerName"]

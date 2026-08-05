@@ -578,7 +578,13 @@ func _update_shadows() -> void:
 		# Skin is a Node2D container, effectively the pivot.
 		shadow_skin.position = skin.position + SHADOW_OFFSET
 		shadow_skin.rotation = skin.rotation
+		# ShadowSkin sits next to Skin, not inside it, so it has to pick up the
+		# inner sprite's scale too. That scale is not 1:1 - it compensates for the
+		# downscaled atlas - and reading only skin.scale renders the shadow at a
+		# fraction of the body.
 		shadow_skin.scale = skin.scale
+		if skin.animated_sprite:
+			shadow_skin.scale *= skin.animated_sprite.scale
 
 		# Sync Animation
 		if skin.animated_sprite:

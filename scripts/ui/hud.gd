@@ -11,6 +11,7 @@ const UI_TOP_MARGIN: float = 20.0
 
 var player: BasePlayer = null
 var _last_pause_press_ms: int = -10000
+var _last_shown_distance: int = -1
 
 
 func _ready() -> void:
@@ -120,9 +121,13 @@ func _process(delta: float) -> void:
 	if player:
 		_update_off_screen_indicator()
 
+	# The distance only ticks over once per metre, so formatting a fresh string
+	# every frame just to assign the same value is wasted allocation.
 	if current_distance_label:
 		var distance_meters: int = GameManager.max_run_distance
-		current_distance_label.text = str(distance_meters) + "m"
+		if distance_meters != _last_shown_distance:
+			_last_shown_distance = distance_meters
+			current_distance_label.text = str(distance_meters) + "m"
 
 
 func _on_rusty_nail_timer_started(duration: float) -> void:

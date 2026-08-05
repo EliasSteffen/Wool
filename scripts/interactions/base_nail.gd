@@ -36,11 +36,16 @@ func _store_initial_modulations() -> void:
 		if node and node is CanvasItem:
 			_initial_modulations[node] = node.modulate
 
-func _create_highlight_sprite() -> void:
-	if _highlight_halo: return
+## Every nail's halo is the same 256x256 radial fade, so it is built once and
+## shared by all of them. Building it per instance cost a CPU gradient fill plus
+## a GPU upload for each of the ~60-80 nails alive at a time - paid mid-run
+## whenever a pool ran dry, which is exactly when a hitch is most visible.
+## Nothing mutates the texture per nail; tint and pulse live on the Sprite2D.
+static var _shared_halo_texture: GradientTexture2D = null
 
-	_highlight_halo = Sprite2D.new()
-	_highlight_halo.name = "HighlightHalo"
+static func _get_halo_texture() -> GradientTexture2D:
+	if _shared_halo_texture:
+		return _shared_halo_texture
 
 	# Procedural Gradient Texture
 	var gradient = Gradient.new()
@@ -58,7 +63,16 @@ func _create_highlight_sprite() -> void:
 	texture.width = 256
 	texture.height = 256
 
-	_highlight_halo.texture = texture
+	_shared_halo_texture = texture
+	return _shared_halo_texture
+
+func _create_highlight_sprite() -> void:
+	if _highlight_halo: return
+
+	_highlight_halo = Sprite2D.new()
+	_highlight_halo.name = "HighlightHalo"
+
+	_highlight_halo.texture = _get_halo_texture()
 	_highlight_halo.visible = false
 	_highlight_halo.z_index = -1 # Behind nail (0), in front of shadow (-2)
 	_highlight_halo.modulate = Color("#ffffff")
@@ -94,6 +108,25 @@ func _start_pulse_animation() -> void:
 	# Pulse Scale: 1.0 -> 1.2 -> 1.0
 	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.8, 0.8), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_highlight_tween.tween_property(_highlight_halo, "scale", Vector2(0.5, 0.5), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+## Restore a pooled nail to its as-spawned state.
+##
+## Pooling reuses the node, so anything the previous life left behind - the
+## highlight halo, the "in use" flag, a stale character in _characters_in_range
+## because the body_exited signal never arrived while the node sat parked
+## offscreen - would otherwise leak into the next spawn. Subclasses override
+## this and call super() to add their own state.
+func reset() -> void:
+	set_highlight(false)
+	if _highlight_tween:
+		_highlight_tween.kill()
+		_highlight_tween = null
+
+	_characters_in_range.clear()
+	is_active = true
+	set_used(false)
+	rotation = 0.0
+	_update_visual()
 
 func _setup_interaction() -> void:
 	interaction_name = "BaseNail"

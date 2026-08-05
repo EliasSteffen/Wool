@@ -76,10 +76,6 @@ func _check_initial_overlaps() -> void:
 	for body in bodies:
 		_on_body_entered(body)
 
-func _process(delta: float) -> void:
-	# Debug visualization (only in editor or if needed)
-	pass
-
 func _physics_process(delta: float) -> void:
 	# Check pending characters
 	for i in range(_pending_characters.size() - 1, -1, -1):

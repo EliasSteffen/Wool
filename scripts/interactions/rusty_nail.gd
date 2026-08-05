@@ -1,6 +1,12 @@
 class_name RustyNail
 extends BaseNail
 
+## Emitted once the nail has finished falling and is ready to be recycled.
+## The nail must NOT free itself: it belongs to LevelGenerator's pool, and
+## freeing it stranded the pool's reference to it - the pool then rebuilt a
+## fresh instance for every rusty nail after the first ten.
+signal despawn_requested(nail: Node2D)
+
 @export var fall_delay: float = 3.0
 @export var min_fall_delay: float = 1.5
 @export var step_size: float = 2000.0 # Distance interval for difficulty increase
@@ -14,6 +20,39 @@ var _shake_tween: Tween
 func _ready() -> void:
 	super._ready()
 	_setup_timer()
+
+## Undo everything a fall leaves behind, so a recycled nail spawns intact.
+## Previously this nail freed itself instead of returning to the pool, so this
+## state never had to be unwound - now it does.
+func reset() -> void:
+	super.reset()
+
+	_is_triggered = false
+	_is_falling = false
+	_was_used = false
+	_fall_time = 0.0
+	_current_active_delay = fall_delay
+
+	if _shake_tween:
+		_shake_tween.kill()
+		_shake_tween = null
+
+	if _fall_timer:
+		_fall_timer.stop()
+
+	# Restore the intact sprites and hide the broken-off ones.
+	for node_name in [NODE_FRONT_SPRITE, NODE_BACK_SPRITE, NODE_SHADOW_SPRITE, "front", "back"]:
+		var node = get_node_or_null(node_name)
+		if node:
+			node.visible = true
+
+	var falloff = get_node_or_null("FalloffSprite")
+	if falloff:
+		falloff.visible = false
+	if _falloff_shadow:
+		_falloff_shadow.visible = false
+
+	_update_visual()
 
 func _setup_interaction() -> void:
 	interaction_name = "RustyNail"
@@ -100,7 +139,8 @@ func _process(delta: float) -> void:
 
 		# Cleanup if too far down
 		if _fall_time > 3.0:
-			queue_free()
+			_is_falling = false
+			despawn_requested.emit(self)
 
 func _start_shake() -> void:
 	if _shake_tween: _shake_tween.kill()

@@ -138,15 +138,29 @@ func _spawn_nail(pos: Vector2, type: NailType) -> void:
 	match type:
 		NailType.RUSTY:
 			nail = _rusty_nail_pool.acquire()
-			if nail.has_method("reset"):
-				nail.reset()
+			# A fallen nail hands itself back instead of freeing itself, which
+			# would strand the pool's reference to it.
+			if not nail.despawn_requested.is_connected(_on_rusty_nail_despawned):
+				nail.despawn_requested.connect(_on_rusty_nail_despawned)
 		NailType.BOOST:
 			nail = _boost_nail_pool.acquire()
 		_:
 			nail = _normal_nail_pool.acquire()
 
+	# Every pooled nail carries state from its previous life - a lit highlight
+	# halo, an "in use" flag - not just the rusty ones that fall.
+	if nail.has_method("reset"):
+		nail.reset()
+
 	nail.global_position = pos
 	_nails.append(nail)
+
+func _on_rusty_nail_despawned(nail: Node2D) -> void:
+	# Drop it from _nails first, so _cleanup below does not release it a second
+	# time. erase() preserves the left-to-right ordering that _cleanup's early
+	# break relies on.
+	_nails.erase(nail)
+	_rusty_nail_pool.release(nail)
 
 func _cleanup(cleanup_x: float) -> void:
 	# Optimization: Only check nails we track, instead of get_children()

@@ -9,9 +9,17 @@ extends LeaderboardBackend
 ## to read in one sitting.
 
 const SAVE_PATH: String = "user://leaderboard_local.json"
-const SEED_NAMES: Array[String] = ["Wollknäuel", "Schafkopf", "Flauschi", "Merino", "Strickliesl"]
-const SEED_SCORES: Array[int] = [820, 610, 455, 300, 175]
-const SEED_TIMES_MS: Array[int] = [96400, 74100, 58900, 41200, 25600]
+## Ten rows rather than a handful: enough to overflow the leaderboard window on
+## every screen size, which is what makes the list actually scroll. Kept in
+## descending score order for readability - fetch_top() sorts anyway.
+const SEED_NAMES: Array[String] = [
+	"Zopfmuster", "Wollknäuel", "Nadelöhr", "Schafkopf", "Bommelbär",
+	"Flauschi", "Maschenwerk", "Merino", "Filzhut", "Strickliesl",
+]
+const SEED_SCORES: Array[int] = [945, 820, 735, 610, 528, 455, 382, 300, 244, 175]
+const SEED_TIMES_MS: Array[int] = [
+	108300, 96400, 88200, 74100, 66700, 58900, 49500, 41200, 33800, 25600,
+]
 
 var _player_id: String = ""
 var _entries: Array[LeaderboardEntry] = []
@@ -77,6 +85,19 @@ func rename(new_name: String) -> LeaderboardResult:
 
 	own.player_name = new_name
 	own.updated_at_unix = int(Time.get_unix_time_from_system())
+	_save()
+	return LeaderboardResult.success()
+
+## Drops this player's row and issues a new id, mirroring what the Firebase
+## backend does when it deletes the anonymous account: the next run publishes as
+## a stranger rather than reoccupying the deleted slot. The seeded rows stay -
+## they are scenery, not other people's data.
+func delete_entry() -> LeaderboardResult:
+	var own: LeaderboardEntry = _find_own_entry()
+	if own != null:
+		_entries.erase(own)
+
+	_player_id = "local-%08X" % (randi() & 0x7FFFFFFF)
 	_save()
 	return LeaderboardResult.success()
 

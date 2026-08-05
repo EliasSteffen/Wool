@@ -114,6 +114,7 @@ func _on_top_updated(entries: Array[LeaderboardEntry]) -> void:
 	retry_button.visible = not available
 	status_label.visible = true
 	status_label.text = "No scores yet" if available else "Leaderboard unavailable"
+	_update_layout()
 
 func _populate(entries: Array[LeaderboardEntry]) -> void:
 	status_label.visible = false
