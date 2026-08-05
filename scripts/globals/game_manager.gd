@@ -174,6 +174,7 @@ func start_game() -> void:
 	_start_x = 0.0
 	_run_elapsed_ms = 0
 	_last_tick_ms = 0
+	_run_active = false
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false
@@ -268,6 +269,15 @@ var _player_ref: Node2D = null
 # leaderboard must not reward playing in slow-mo.
 var _run_elapsed_ms: int = 0
 var _last_tick_ms: int = 0
+## Set by the player's first jump - the clock does not run before that.
+var _run_active: bool = false
+
+## Called by BasePlayer on the first jump of a run. Idempotent.
+func notify_run_started() -> void:
+	if _run_active:
+		return
+	_run_active = true
+	_last_tick_ms = Time.get_ticks_msec()
 
 func _process(delta: float) -> void:
 	# Keep a reference to player for distance checking
@@ -296,7 +306,7 @@ func _process(delta: float) -> void:
 func _accumulate_run_time() -> void:
 	var now_ms: int = Time.get_ticks_msec()
 
-	if current_state != GameState.PLAYING or not _start_initialized:
+	if not _run_active or current_state != GameState.PLAYING or not _start_initialized:
 		_last_tick_ms = now_ms
 		return
 

@@ -15,6 +15,7 @@ signal top_updated(entries: Array[LeaderboardEntry])
 signal submit_finished(result: LeaderboardResult)
 signal player_name_changed(new_name: String)
 signal availability_changed(available: bool)
+signal player_rank_updated(rank: int)
 
 # === CONSTANTS ===
 const CONFIG_PATH: String = "res://resources/leaderboard_config.tres"
@@ -124,6 +125,24 @@ func get_player_id() -> String:
 func get_player_rank() -> int:
 	if _player_entry == null:
 		return 0
+	return _player_entry.rank
+
+## Re-reads this player's standing straight from the backend and returns the
+## rank (0 when unranked). Waits out an in-flight submit so the rank reflects
+## the run that was just sent.
+func refresh_player_rank() -> int:
+	if not is_available or _backend == null:
+		return 0
+
+	while _submitting:
+		await get_tree().process_frame
+
+	var result: LeaderboardResult = await _backend.fetch_player()
+	if not result.ok or result.entries.is_empty():
+		return 0
+
+	_player_entry = result.entries[0]
+	player_rank_updated.emit(_player_entry.rank)
 	return _player_entry.rank
 
 func is_using_remote_backend() -> bool:

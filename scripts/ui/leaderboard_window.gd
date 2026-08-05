@@ -110,27 +110,33 @@ func _populate(entries: Array[LeaderboardEntry]) -> void:
 	retry_button.visible = false
 
 	var own_id: String = LeaderboardManager.get_player_id()
-	var own_is_listed: bool = false
 
 	for entry in entries:
 		var is_own: bool = not own_id.is_empty() and entry.player_id == own_id
-		own_is_listed = own_is_listed or is_own
 		rows_container.add_child(_build_row(entry, is_own))
 
-	_update_own_rank_footer(own_is_listed)
+	_update_own_rank_footer()
 	_update_layout()
 
-## When the player is outside the fetched page, pin their standing below the
-## list so they can still see where they are.
-func _update_own_rank_footer(own_is_listed: bool) -> void:
+## The player's own standing is pinned below the scrolling list at all times, so
+## it stays visible no matter how far they scroll - including when they are
+## already somewhere in the list above.
+func _update_own_rank_footer() -> void:
 	var own_entry: LeaderboardEntry = LeaderboardManager.get_player_entry()
-	var should_show: bool = not own_is_listed and own_entry != null and own_entry.rank > 0
 
-	own_rank_separator.visible = should_show
-	own_rank_container.visible = should_show
+	own_rank_separator.visible = true
+	own_rank_container.visible = true
 
-	if should_show:
+	if own_entry != null and own_entry.rank > 0:
 		own_rank_container.add_child(_build_row(own_entry, true))
+		return
+
+	# Ranked entry not known yet - say so rather than showing an empty strip.
+	var placeholder: Label = Label.new()
+	placeholder.text = "Noch keine Platzierung"
+	placeholder.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	placeholder.add_theme_color_override("font_color", Color(0.35, 0.29, 0.22, 1))
+	own_rank_container.add_child(placeholder)
 
 func _build_row(entry: LeaderboardEntry, is_own: bool) -> Control:
 	var row: Control = ROW_SCENE.instantiate()
@@ -147,6 +153,12 @@ func _build_row(entry: LeaderboardEntry, is_own: bool) -> Control:
 func _apply_row_font(row: Control, font_size: int) -> void:
 	if row == null:
 		return
+
+	# The "no placement yet" strip is a bare Label, not a row.
+	if row is Label:
+		(row as Label).add_theme_font_size_override("font_size", font_size)
+		return
+
 	for label_name in ["RankLabel", "NameLabel", "ScoreLabel"]:
 		var label := row.get_node_or_null(label_name) as Label
 		if label:

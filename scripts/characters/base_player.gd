@@ -501,6 +501,13 @@ func _apply_slope_velocity_adjustment() -> void:
 		velocity.y = tangent.y * (velocity.x / tangent.x)
 
 func _jump() -> void:
+	# The run clock starts on the first real jump, not when the level loads, so
+	# time spent reading the tutorial does not count against the leaderboard.
+	# The group check keeps the tutorial's ShadowWool and the game over screen's
+	# decorative wool from starting it - both leave the "player" group.
+	if is_in_group("player"):
+		GameManager.notify_run_started()
+
 	# Note: jump_velocity is positive in settings, so we negate it for upward movement
 	var effective_jump_velocity = jump_velocity
 	if effective_jump_velocity <= 0.0:

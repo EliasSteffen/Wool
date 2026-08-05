@@ -183,6 +183,14 @@ theme_override_font_sizes/font_size = 40
 text = "Highscore"
 horizontal_alignment = 2
 
+[node name="RankLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.31, 0.27, 0.42, 1)
+theme_override_font_sizes/font_size = 48
+text = "Platz –"
+horizontal_alignment = 1
+
 [node name="NamePrompt" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
 visible = false
 layout_mode = 2

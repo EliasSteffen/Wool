@@ -151,8 +151,85 @@ func fetch_player() -> LeaderboardResult:
 	if entry == null:
 		return LeaderboardResult.success()
 
+	entry.rank = await _fetch_rank(entry.score, entry.duration_ms)
+
 	var entries: Array[LeaderboardEntry] = [entry]
 	return LeaderboardResult.success(entries)
+
+## Rank without downloading the whole collection: count everyone strictly
+## better under the ranking rule, then add one.
+##
+## Two COUNT aggregations rather than one, because "score > mine OR (score ==
+## mine AND time < mine)" spans two fields and cannot be expressed as a single
+## Firestore filter. Neither count includes the player's own document.
+func _fetch_rank(score: int, duration_ms: int) -> int:
+	var higher_score: int = await _count_where({
+		"fieldFilter": {
+			"field": {"fieldPath": "score"},
+			"op": "GREATER_THAN",
+			"value": {"integerValue": str(score)},
+		}
+	})
+	if higher_score < 0:
+		return 0
+
+	var same_but_faster: int = await _count_where({
+		"compositeFilter": {
+			"op": "AND",
+			"filters": [
+				{"fieldFilter": {
+					"field": {"fieldPath": "score"},
+					"op": "EQUAL",
+					"value": {"integerValue": str(score)},
+				}},
+				{"fieldFilter": {
+					"field": {"fieldPath": "duration_ms"},
+					"op": "LESS_THAN",
+					"value": {"integerValue": str(duration_ms)},
+				}},
+			],
+		}
+	})
+	if same_but_faster < 0:
+		return 0
+
+	return higher_score + same_but_faster + 1
+
+## Returns -1 on failure so callers can tell "no rank" from "rank 0".
+func _count_where(filter: Dictionary) -> int:
+	var url: String = "%s:runAggregationQuery" % _documents_url()
+	var body: Dictionary = {
+		"structuredAggregationQuery": {
+			"structuredQuery": {
+				"from": [{"collectionId": _config.collection}],
+				"where": filter,
+			},
+			"aggregations": [{"count": {}, "alias": "n"}],
+		}
+	}
+
+	var response: Dictionary = await _client.request_json(
+		HTTPClient.METHOD_POST, url, _auth_headers(), body
+	)
+
+	if response["error"] != OK or response["code"] != 200:
+		return -1
+
+	var payload: Variant = response["body"]
+	if not payload is Array:
+		return -1
+
+	for element in payload:
+		if not element is Dictionary or not element.has("result"):
+			continue
+		var result_block: Variant = (element as Dictionary)["result"]
+		if not result_block is Dictionary:
+			continue
+		var fields: Variant = (result_block as Dictionary).get("aggregateFields", {})
+		if fields is Dictionary and (fields as Dictionary).has("n"):
+			return _int_field(fields, "n")
+
+	return -1
 
 ## Re-PATCHes the stored row with the same score and duration but a new name.
 ## Depends on the isRename() clause in the security rules - without it the write

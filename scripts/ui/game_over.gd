@@ -11,6 +11,7 @@ func _ready() -> void:
 
 	name_prompt.visible = false
 	name_status_label.visible = false
+	rank_label.visible = false
 	reroll_button.pressed.connect(_on_reroll_pressed)
 	name_edit.text_changed.connect(_on_name_text_changed)
 	name_edit.text_submitted.connect(_on_name_edit_submitted)
@@ -51,6 +52,7 @@ func _ready() -> void:
 @onready var name_edit: LineEdit = $MarginContainer/VBoxContainer/NamePrompt/NameRow/NameEdit
 @onready var reroll_button: Button = $MarginContainer/VBoxContainer/NamePrompt/NameRow/RerollButton
 @onready var name_status_label: Label = $MarginContainer/VBoxContainer/NamePrompt/NameStatusLabel
+@onready var rank_label: Label = $MarginContainer/VBoxContainer/RankLabel
 
 var _move_tween: Tween = null
 var internal_wool_sprite: AnimatedSprite2D = null
@@ -94,6 +96,8 @@ func _update_layout() -> void:
 	score_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.03, 18.0, 32.0)))
 	score_display.custom_minimum_size.y = clampf(viewport_size.y * 0.18, 120.0, 200.0)
 
+	rank_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.042, 26.0, 52.0)))
+
 	_update_name_prompt_layout(viewport_size, base_size)
 
 func _update_name_prompt_layout(viewport_size: Vector2, base_size: float) -> void:
@@ -130,6 +134,10 @@ func _setup_score_display(fade_duration: float) -> void:
 
 	# Queue the run for the global leaderboard (held locally until a name exists).
 	LeaderboardManager.submit_run(current_score, current_time_ms)
+
+	# Deliberately not awaited: the placement resolves in parallel with the
+	# score animation so it is on screen immediately, rather than after it.
+	_refresh_rank_display()
 
 	var highscore = GameManager.highscore
 
@@ -367,6 +375,32 @@ func _fill_generated_name() -> void:
 	name_edit.placeholder_text = "Dein Name"
 	name_edit.editable = true
 	reroll_button.disabled = false
+
+## Show where this run landed globally, but only for a new personal best -
+## otherwise the standing has not moved and the line is noise.
+##
+## Skipped while the name prompt is open, because the run has not been submitted
+## yet at that point (and committing the name immediately leaves this screen).
+func _refresh_rank_display() -> void:
+	if not is_instance_valid(rank_label):
+		return
+	if not GameManager.new_highscore_reached_this_run:
+		return
+	if not LeaderboardManager.is_available or LeaderboardManager.should_prompt_for_name():
+		return
+
+	rank_label.visible = true
+	rank_label.text = "Platz wird geladen …"
+	_update_layout()
+
+	var rank: int = await LeaderboardManager.refresh_player_rank()
+
+	if not is_instance_valid(rank_label):
+		return
+	if rank > 0:
+		rank_label.text = "Platz %d" % rank
+	else:
+		rank_label.visible = false
 
 func _close_name_prompt() -> void:
 	_name_prompt_active = false
