@@ -223,11 +223,11 @@ alignment = 1
 max_length = 16
 caret_blink = true
 
-[node name="RerollButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/NameRow"]
+[node name="PublishButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/NameRow"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 40
-text = "Neu"
+text = "Eintragen"
 
 [node name="InstructionLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1877545117]
 layout_mode = 2

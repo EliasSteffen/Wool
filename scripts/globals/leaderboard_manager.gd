@@ -17,6 +17,10 @@ signal player_name_changed(new_name: String)
 signal availability_changed(available: bool)
 signal player_rank_updated(rank: int)
 signal entry_deleted(result: LeaderboardResult)
+## Publishing was switched on or off - by the settings toggle, by the game over
+## prompt, or by deleting the entry. The settings window follows this rather
+## than assuming it is the only thing that can change it.
+signal publish_consent_changed(consented: bool)
 
 # === CONSTANTS ===
 const CONFIG_PATH: String = "res://resources/leaderboard_config.tres"
@@ -50,7 +54,10 @@ var _backend: LeaderboardBackend = null
 var _cached_top: Array[LeaderboardEntry] = []
 var _player_entry: LeaderboardEntry = null
 var _last_fetch_unix: int = 0
-var _name_declined: bool = false
+## The player has agreed, at least once, to appear on the global board. Until
+## they do, a run never leaves the device; afterwards every run publishes on its
+## own. Deleting the entry clears this, which is what brings the ask back.
+var _publish_consented: bool = false
 var _pending_score: int = 0
 var _pending_time_ms: int = 0
 var _fetching: bool = false
@@ -81,21 +88,24 @@ func _notification(what: int) -> void:
 func has_player_name() -> bool:
 	return not player_name.is_empty()
 
-## True when the player should be asked for a name before submitting.
+## True while the player has yet to agree to being on the global board, so a run
+## may only be published if they explicitly say so.
 ##
 ## Deliberately does not require a connection: names are not unique - the
-## document id is - so nothing about picking one needs the network. Choosing a
-## name offline lets the queued run travel with it the moment we reconnect.
-func should_prompt_for_name() -> bool:
-	return not has_player_name() and not _name_declined
+## document id is - so nothing about the decision needs the network. Consenting
+## offline lets the queued run travel the moment we reconnect.
+func needs_publish_consent() -> bool:
+	return not _publish_consented
 
+## Storing a name never publishes anything: before consent it is a local label
+## and nothing more, which is what lets the game over screen keep a name the
+## player typed but chose not to submit.
 func set_player_name(new_name: String) -> void:
 	var cleaned: String = LeaderboardEntry.sanitize_name(new_name)
 	if cleaned.is_empty() or cleaned == player_name:
 		return
 
 	player_name = cleaned
-	_name_declined = false
 	_save_player_state()
 	player_name_changed.emit(player_name)
 
@@ -103,17 +113,70 @@ func set_player_name(new_name: String) -> void:
 	# the old name until the player next beats their own record.
 	_push_rename()
 
-## Player dismissed the prompt - do not ask again, but keep the score locally.
-func decline_name_prompt() -> void:
-	_name_declined = true
+## Turn publishing on or off directly - the settings switch. Turning it on is
+## the same go-ahead the game over prompt asks for, so the prompt stops
+## appearing; turning it off puts the player back to local-only scores.
+##
+## Switching off deliberately does not delete an entry that is already up:
+## erasing published data is destructive and stays behind the confirmed button
+## in the leaderboard window. It does drop the queued run, so nothing the player
+## has already declined to publish sneaks up on the next reconnect.
+func set_publish_consent(consented: bool) -> void:
+	if consented == _publish_consented:
+		return
+
+	# A row cannot exist without a name, and there is no prompt behind this
+	# switch to ask for one - so give them a usable name up front. It stays
+	# editable in the field this switch reveals.
+	if consented and not has_player_name():
+		set_player_name(_random_name())
+
+	_publish_consented = consented
+	if not consented:
+		_clear_pending()
 	_save_player_state()
+	publish_consent_changed.emit(_publish_consented)
+
+	if not consented:
+		return
+
+	# Anything banked while publishing was off belongs on the board now.
+	if is_available:
+		_flush_pending()
+	else:
+		retry_now()
+
+## The player asked to be on the board: record the go-ahead, keep the name, and
+## put the run up.
+##
+## Consent is stored on the press rather than on a successful write. It is the
+## player's decision, not the network's - an offline run has to publish when the
+## connection returns, instead of quietly asking again after the next death.
+func publish_run(chosen_name: String, score: int, duration_ms: int) -> void:
+	set_player_name(chosen_name)
+
+	# sanitize_name() can strip a name down to nothing, and a row cannot exist
+	# without one - fall back rather than dropping the run they just asked to
+	# publish.
+	if not has_player_name():
+		set_player_name(_random_name())
+
+	set_publish_consent(true)
+	submit_run(score, duration_ms)
 
 ## Queue a run for upload. Safe to call at any time; returns immediately.
+##
+## Does nothing beyond banking the score locally until the player has consented
+## once - that first publish only ever happens through publish_run().
 func submit_run(score: int, duration_ms: int) -> void:
 	if score <= 0 or duration_ms <= 0:
 		return
 
 	_remember_pending(score, duration_ms)
+
+	# Held on disk, not dropped: if they later opt in, this run goes up with it.
+	if not _publish_consented:
+		return
 
 	# Without a name there is nothing valid to write - hold it until they pick one.
 	if not has_player_name():
@@ -249,7 +312,9 @@ func delete_entry() -> LeaderboardResult:
 ## moment to ask.
 func _forget_local_identity() -> void:
 	player_name = ""
-	_name_declined = false
+	# Back to square one: with no entry on the board, publishing the next run is
+	# a fresh decision, so the game over screen asks again before anything goes up.
+	_publish_consented = false
 	_pending_score = 0
 	_pending_time_ms = 0
 	_player_entry = null
@@ -260,6 +325,9 @@ func _forget_local_identity() -> void:
 	_last_fetch_unix = 0
 
 	player_name_changed.emit(player_name)
+	# Switches the settings toggle back off: with the entry gone, publishing
+	# again is a fresh decision rather than something already agreed to.
+	publish_consent_changed.emit(_publish_consented)
 
 func is_using_remote_backend() -> bool:
 	return is_remote
@@ -273,6 +341,10 @@ func generate_name() -> String:
 	return _random_name()
 
 func _push_rename() -> void:
+	# Nothing has been published yet, so there is no row to relabel - and writing
+	# one from here would put the player on the board without ever asking.
+	if not _publish_consented:
+		return
 	if not is_available or _backend == null or _renaming:
 		return
 
@@ -358,9 +430,10 @@ func _schedule_retry() -> void:
 	_retry_index += 1
 	_retry_timer.start(float(RETRY_DELAYS_SECONDS[index]))
 
-## Push a queued run, if there is one and it has a name to travel under.
+## Push a queued run, if there is one, it has a name to travel under, and the
+## player has agreed to it being up there at all.
 func _flush_pending() -> void:
-	if _pending_score > 0 and has_player_name():
+	if _publish_consented and _pending_score > 0 and has_player_name():
 		_submit_pending()
 
 ## A failed call is the only connectivity signal available. Drop back to offline
@@ -460,14 +533,19 @@ func _load_player_state() -> void:
 	if config_file.load(PLAYER_PATH) != OK:
 		return
 	player_name = str(config_file.get_value("player", "name", ""))
-	_name_declined = bool(config_file.get_value("player", "name_declined", false))
+	# Consent predates nothing for players upgrading from a build that published
+	# on its own: a stored name is exactly what "already on the board" looked
+	# like back then, and asking them again would undo an entry they can see.
+	_publish_consented = bool(config_file.get_value(
+		"player", "published", not player_name.is_empty()
+	))
 	_pending_score = int(config_file.get_value("player", "pending_score", 0))
 	_pending_time_ms = int(config_file.get_value("player", "pending_time_ms", 0))
 
 func _save_player_state() -> void:
 	var config_file: ConfigFile = ConfigFile.new()
 	config_file.set_value("player", "name", player_name)
-	config_file.set_value("player", "name_declined", _name_declined)
+	config_file.set_value("player", "published", _publish_consented)
 	config_file.set_value("player", "pending_score", _pending_score)
 	config_file.set_value("player", "pending_time_ms", _pending_time_ms)
 	config_file.save(PLAYER_PATH)

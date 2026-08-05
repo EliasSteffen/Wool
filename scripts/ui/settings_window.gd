@@ -31,10 +31,62 @@ func _ready() -> void:
 	var sfx_slider = container.get_node_or_null("SFXVolume/VBoxContainer/HBoxContainer/HSlider")
 	if sfx_slider: _setup_slider(sfx_slider, "SFX")
 
+	_setup_publish_toggle()
 	_setup_name_edit()
 
+## The switch is a view onto LeaderboardManager's consent flag, not a setting of
+## its own - so it follows the signal rather than only its own presses. Deleting
+## the entry from the leaderboard window flips it from the other side.
+func _setup_publish_toggle() -> void:
+	var toggle := _publish_toggle()
+	if not toggle:
+		return
+
+	toggle.toggled.connect(_on_publish_toggled)
+	LeaderboardManager.publish_consent_changed.connect(_apply_publish_state)
+	_apply_publish_state(not LeaderboardManager.needs_publish_consent())
+
+func _publish_toggle() -> Button:
+	return container.get_node_or_null("PublishScores/VBoxContainer/PublishToggle") as Button
+
+func _name_edit() -> LineEdit:
+	return container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+
+## Shows the state without acting on it - safe to call from the signal, which
+## also fires for changes this window did not make.
+func _apply_publish_state(consented: bool) -> void:
+	var toggle := _publish_toggle()
+	if toggle:
+		# set_pressed_no_signal: assigning button_pressed would re-enter
+		# _on_publish_toggled and hand the manager back its own change.
+		toggle.set_pressed_no_signal(consented)
+		toggle.text = "An" if consented else "Aus"
+		# The theme points every button state at the same style box, so a
+		# toggle would read identically on and off. Fading it back when off is
+		# what makes the state visible at a glance rather than only readable.
+		toggle.modulate = Color(1.0, 1.0, 1.0, 1.0 if consented else 0.6)
+
+	# A name is only meaningful once something is published under it.
+	var player_name_section := container.get_node_or_null("PlayerName") as Control
+	if player_name_section:
+		player_name_section.visible = consented
+
+	# Switching on mints a name, and deleting the entry clears it - either way
+	# the field would otherwise still show the previous value.
+	var name_edit := _name_edit()
+	if name_edit:
+		name_edit.text = LeaderboardManager.player_name
+
+	_update_layout()
+
+func _on_publish_toggled(pressed: bool) -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	# set_publish_consent emits publish_consent_changed, which lands back in
+	# _apply_publish_state - the display is not updated a second time here.
+	LeaderboardManager.set_publish_consent(pressed)
+
 func _setup_name_edit() -> void:
-	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	var name_edit := _name_edit()
 	if not name_edit:
 		return
 
@@ -83,16 +135,28 @@ func _update_layout() -> void:
 	var max_h: float = max(220.0, viewport_size.y - 300.0)
 	scroll_container.custom_minimum_size.y = clampf(desired_h, 260.0, max_h)
 
-	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	var name_edit := _name_edit()
 	if name_edit:
 		name_edit.add_theme_font_size_override("font_size", int(clampf(base_size * 0.035, 22.0, 44.0)))
 		# Width only - the styled box brings its own vertical padding.
 		name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.3, 240.0, 480.0), 0.0)
 
+	# Sized like the leaderboard's buttons rather than left to wrap its label:
+	# "An" and "Aus" are short enough that the button would otherwise change
+	# width as it is pressed.
+	var toggle := _publish_toggle()
+	if toggle:
+		toggle.add_theme_font_size_override("font_size", int(clampf(base_size * 0.04, 22.0, 48.0)))
+		toggle.custom_minimum_size = Vector2(
+			clampf(viewport_size.x * 0.24, 180.0, 320.0),
+			clampf(base_size * 0.085, 56.0, 96.0)
+		)
+
 	for label_path in [
 		"MasterVolume/VBoxContainer/Label",
 		"MusicVolume/VBoxContainer/Label",
 		"SFXVolume/VBoxContainer/Label",
+		"PublishScores/VBoxContainer/Label",
 		"PlayerName/VBoxContainer/Label",
 	]:
 		var label := container.get_node_or_null(label_path) as Label

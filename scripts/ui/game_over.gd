@@ -11,7 +11,7 @@ func _ready() -> void:
 
 	name_prompt.visible = false
 	rank_label.visible = false
-	reroll_button.pressed.connect(_on_reroll_pressed)
+	publish_button.pressed.connect(_on_publish_pressed)
 	name_edit.text_submitted.connect(_on_name_edit_submitted)
 
 	# Start invisible
@@ -48,7 +48,7 @@ func _ready() -> void:
 @onready var name_prompt: VBoxContainer = $MarginContainer/VBoxContainer/NamePrompt
 @onready var prompt_label: Label = $MarginContainer/VBoxContainer/NamePrompt/PromptLabel
 @onready var name_edit: LineEdit = $MarginContainer/VBoxContainer/NamePrompt/NameRow/NameEdit
-@onready var reroll_button: Button = $MarginContainer/VBoxContainer/NamePrompt/NameRow/RerollButton
+@onready var publish_button: Button = $MarginContainer/VBoxContainer/NamePrompt/NameRow/PublishButton
 @onready var rank_label: Label = $MarginContainer/VBoxContainer/RankLabel
 
 var _move_tween: Tween = null
@@ -57,9 +57,15 @@ var internal_wool_sprite: AnimatedSprite2D = null
 ## While the name prompt is up, _input() must not treat taps as "restart" -
 ## otherwise the LineEdit can never be focused or typed into.
 var _name_prompt_active: bool = false
-## The last generated name, already verified free - lets us skip a second
-## lookup when the player just accepts it.
-var _generated_name: String = ""
+## The name the field was pre-filled with, so an emptied field still has
+## something to publish under.
+var _suggested_name: String = ""
+
+## Shown once the prompt is gone - or when it never appeared.
+const RESTART_HINT: String = "Drücke auf den Bildschirm,\num das Level neu zu starten"
+## Shown underneath the open prompt. Leaving is a valid answer, and the player
+## has to be able to tell that it is not the answer that publishes.
+const LOCAL_ONLY_HINT: String = "Ohne \"Eintragen\" bleibt dein Score\nnur auf diesem Gerät"
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
@@ -108,14 +114,18 @@ func _update_name_prompt_layout(viewport_size: Vector2, base_size: float) -> voi
 	name_edit.add_theme_font_size_override("font_size", field_font_size)
 	# Width only. The styled box supplies its own vertical padding, so forcing a
 	# height here would crop the text.
-	name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.3, 280.0, 560.0), 0.0)
+	#
+	# Narrower than it looks like it should be: "Eintragen" plus the button's own
+	# 40px-a-side content margin is a wide neighbour, and the row has no way to
+	# shrink either of them on a narrow phone.
+	name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.26, 220.0, 480.0), 0.0)
 
 	# Deliberately no custom_minimum_size on the themed button: the button
-	# StyleBoxTexture already reserves 60px left/right and 15/40px top/bottom of
+	# StyleBoxTexture already reserves 40px left/right and 20px top/bottom of
 	# content margin, so it sizes itself around the label. Clamping it smaller
-	# is what cropped the texture and overflowed the text.
-	if is_instance_valid(reroll_button):
-		reroll_button.add_theme_font_size_override("font_size", button_font_size)
+	# is what overflowed the text.
+	if is_instance_valid(publish_button):
+		publish_button.add_theme_font_size_override("font_size", button_font_size)
 
 func _setup_score_display(fade_duration: float) -> void:
 	if not score_display: return
@@ -127,7 +137,9 @@ func _setup_score_display(fade_duration: float) -> void:
 	# distance-then-time rule itself.
 	GameManager.update_highscore(current_score, current_time_ms, true)
 
-	# Queue the run for the global leaderboard (held locally until a name exists).
+	# Bank the run. This only reaches the global board once the player has opted
+	# in - before that it goes no further than player.cfg, and the prompt below
+	# is the only thing that can publish it.
 	LeaderboardManager.submit_run(current_score, current_time_ms)
 
 	# Deliberately not awaited: the placement resolves in parallel with the
@@ -311,7 +323,7 @@ func _is_event_over_controls(event: InputEvent) -> bool:
 
 	var position: Vector2 = PointerInput.press_position(event)
 
-	# Taps inside the name prompt belong to the field and its reroll button, not
+	# Taps inside the name prompt belong to the field and its publish button, not
 	# to tap-anywhere-to-restart.
 	return is_instance_valid(name_prompt) and name_prompt.visible \
 		and name_prompt.get_global_rect().has_point(position)
@@ -337,46 +349,51 @@ func _skip_to_end() -> void:
 	_maybe_show_name_prompt()
 	_maybe_request_review()
 
-## Ask for a name only when the run actually earned a leaderboard spot and the
-## player has neither set nor refused one before. The field arrives pre-filled
-## with a generated free name, so tapping anywhere outside the prompt accepts it.
+## Ask before the player's first entry ever goes up, and keep asking after every
+## run until they answer with "Eintragen". Nothing here accepts on their behalf:
+## leaving the screen any other way keeps the run on the device.
+##
+## Once they are on the board the ask stops - later runs publish by themselves -
+## until they delete the entry, which puts them back at this first-time state.
 func _maybe_show_name_prompt() -> void:
 	if _name_prompt_active or not is_instance_valid(name_prompt):
 		return
 	if GameManager.max_run_distance <= 0:
 		return
-	if not LeaderboardManager.should_prompt_for_name():
+	if not LeaderboardManager.needs_publish_consent():
 		return
 
 	_name_prompt_active = true
 	name_prompt.visible = true
-	instruction_label.visible = false
-	name_edit.text = ""
-	name_edit.editable = false
+	instruction_label.text = LOCAL_ONLY_HINT
 	_update_layout()
 
-	_fill_generated_name()
+	_fill_suggested_name()
 
-## Generating a name is local and instant now that names need not be unique, so
-## there is no waiting state to show.
-func _fill_generated_name() -> void:
-	_generated_name = LeaderboardManager.generate_name()
-	name_edit.text = _generated_name
+## Pre-fills the field so the player only has to press once. A name they typed
+## on an earlier game over wins over a fresh suggestion - it was kept locally
+## precisely so they would not have to type it again.
+func _fill_suggested_name() -> void:
+	_suggested_name = LeaderboardManager.player_name
+	if _suggested_name.is_empty():
+		_suggested_name = LeaderboardManager.generate_name()
+	name_edit.text = _suggested_name
 	name_edit.placeholder_text = "Dein Name"
 	name_edit.editable = true
-	reroll_button.disabled = false
+	publish_button.disabled = false
 
 ## Show where this run landed globally, but only for a new personal best -
 ## otherwise the standing has not moved and the line is noise.
 ##
-## Skipped while the name prompt is open, because the run has not been submitted
-## yet at that point (and committing the name immediately leaves this screen).
+## Skipped while consent is still outstanding, because nothing has been
+## submitted at that point. Pressing "Eintragen" calls this again, which is when
+## a first-time player gets their placing.
 func _refresh_rank_display() -> void:
 	if not is_instance_valid(rank_label):
 		return
 	if not GameManager.new_highscore_reached_this_run:
 		return
-	if not LeaderboardManager.is_available or LeaderboardManager.should_prompt_for_name():
+	if not LeaderboardManager.is_available or LeaderboardManager.needs_publish_consent():
 		return
 
 	rank_label.visible = true
@@ -395,7 +412,7 @@ func _refresh_rank_display() -> void:
 func _close_name_prompt() -> void:
 	_name_prompt_active = false
 	name_prompt.visible = false
-	instruction_label.visible = true
+	instruction_label.text = RESTART_HINT
 	_can_interact = true
 	# The review ask queues behind the name prompt, never on top of it.
 	_maybe_request_review()
@@ -419,41 +436,44 @@ func _maybe_request_review() -> void:
 
 	ReviewManager.maybe_prompt()
 
+## Enter in the name field means the same as pressing the button next to it.
 func _on_name_edit_submitted(_text: String) -> void:
-	_restart_game()
+	_on_publish_pressed()
 
-func _on_reroll_pressed() -> void:
+## The one path that puts a score on the global board for the first time.
+func _on_publish_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	_fill_generated_name()
-
-## Saves the chosen name and queues the run. Still returns a bool so callers can
-## abort navigation, though nothing rejects a name any more.
-func _commit_name() -> bool:
-	if not _name_prompt_active:
-		return true
-
-	var entered: String = LeaderboardEntry.sanitize_name(name_edit.text)
-	if entered.is_empty():
-		entered = _generated_name
-	if entered.is_empty():
-		# Nothing usable and no generated fallback - let them move on anyway.
-		LeaderboardManager.decline_name_prompt()
-		_close_name_prompt()
-		return true
 
 	# No uniqueness check: names may repeat, and this must work with no signal.
-	LeaderboardManager.set_player_name(entered)
-	LeaderboardManager.submit_run(GameManager.max_run_distance, GameManager.max_run_time_ms)
+	LeaderboardManager.publish_run(
+		_chosen_name(), GameManager.max_run_distance, GameManager.max_run_time_ms
+	)
 	_close_name_prompt()
-	return true
+
+	# Now that a run is on its way up, the standing is worth showing.
+	_refresh_rank_display()
+
+## Keeps a typed name for the next game over without publishing anything -
+## storing a name is purely local until consent is given. The player edited the
+## field, so discarding it and suggesting a fresh random name after every death
+## would be its own small annoyance.
+func _remember_name_locally() -> void:
+	LeaderboardManager.set_player_name(_chosen_name())
+
+## What the player would go on the board as: whatever is in the field, falling
+## back to the name it was pre-filled with if they cleared it.
+func _chosen_name() -> String:
+	var entered: String = LeaderboardEntry.sanitize_name(name_edit.text)
+	if entered.is_empty():
+		return _suggested_name
+	return entered
 
 
 func _restart_game() -> void:
-	# With no buttons on this screen, leaving is what confirms the name. A taken
-	# name aborts the restart so the player can fix it.
+	# Leaving is not consent. The run was already banked locally when this screen
+	# opened; all that is left is to keep the name they typed for next time.
 	if _name_prompt_active:
-		if not await _commit_name():
-			return
+		_remember_name_locally()
 
 	_can_interact = false
 	Engine.time_scale = 1.0
