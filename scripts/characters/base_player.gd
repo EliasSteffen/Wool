@@ -22,6 +22,12 @@ var current_anim_state: PlayerState = PlayerState.IDLE
 # === PUBLIC VARIABLES ===
 var acceleration: float
 var friction: float
+## Deliberately separate from ground friction: air has nothing to brake against,
+## and reusing the ground value is what used to scrub the speed won from a jump
+## or a grapple swing within a fraction of a second.
+var air_friction: float
+## Floor that friction may not drag a forward-rolling player below.
+var min_move_speed: float
 var jump_velocity: float
 var camera_zoom: float
 var fall_gravity_multiplier: float = 1.0
@@ -136,6 +142,8 @@ func _setup_tweakables() -> void:
 	# Initial load
 	acceleration = CharacterConstants.get_value("Player", "acceleration")
 	friction = CharacterConstants.get_value("Player", "friction")
+	air_friction = CharacterConstants.get_value("Player", "air_friction")
+	min_move_speed = CharacterConstants.get_value("Player", "min_move_speed")
 	jump_velocity = CharacterConstants.get_value("Player", "jump_velocity")
 	fall_gravity_multiplier = CharacterConstants.get_value("Player", "fall_gravity_multiplier")
 	camera_zoom = CharacterConstants.get_value("Player", "camera_zoom")
@@ -154,6 +162,8 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 		match key:
 			"acceleration": acceleration = float(value)
 			"friction": friction = float(value)
+			"air_friction": air_friction = float(value)
+			"min_move_speed": min_move_speed = float(value)
 			"jump_velocity": jump_velocity = float(value)
 			"fall_gravity_multiplier": fall_gravity_multiplier = float(value)
 			"camera_zoom":
@@ -412,14 +422,26 @@ func _handle_movement(delta: float) -> void:
 			if tangent.x < 0: tangent = -tangent
 
 			var current_speed = velocity.dot(tangent)
-			var new_speed = move_toward(current_speed, 0, friction * delta)
+			var new_speed = move_toward(current_speed, _coast_target(current_speed), friction * delta)
 			velocity = tangent * new_speed
 
 			# Apply downward force to keep on floor (same as moving state)
 			velocity.y += 2.0
 		elif not is_grappling:
-			# Air friction
-			velocity.x = move_toward(velocity.x, 0, friction * delta)
+			# Air friction, on its own far gentler value - see air_friction.
+			velocity.x = move_toward(velocity.x, _coast_target(velocity.x), air_friction * delta)
+
+## Speed that friction is allowed to brake a coasting player down to.
+##
+## Anyone still rolling forward keeps at least min_move_speed: letting go costs
+## speed but never decays into a crawl, which is what keeps the game feeling
+## fast. Below that floor - or moving backwards, where no floor applies in a
+## right-running game - it brakes to a standstill as before, so coming to rest
+## is still possible.
+func _coast_target(current_speed: float) -> float:
+	if current_speed > min_move_speed:
+		return min_move_speed
+	return 0.0
 
 # Underwater movement support removed
 

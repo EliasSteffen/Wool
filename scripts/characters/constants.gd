@@ -10,7 +10,9 @@ func _ready() -> void:
 			"jump_velocity": { "value": 1000.0, "min": 100.0, "max": 5000.0, "step": 10.0, "description": "Stärke des Sprungs" },
 			"fall_gravity_multiplier": { "value": 1.5, "min": 1.0, "max": 5.0, "step": 0.1, "description": "Multiplikator für die Schwerkraft beim Fallen (schnelleres Fallen)" },
 			"acceleration": { "value": 5000.0, "min": 1000.0, "max": 10000.0, "step": 50.0, "description": "Wie schnell Wool auf Höchstgeschwindigkeit kommt" },
-			"friction": { "value": 2500.0, "min": 100.0, "max": 5000.0, "step": 50.0, "description": "Bremskraft am Boden" },
+			"friction": { "value": 500.0, "min": 100.0, "max": 5000.0, "step": 50.0, "description": "Bremskraft am Boden" },
+			"air_friction": { "value": 100.0, "min": 100.0, "max": 5000.0, "step": 25.0, "description": "Bremskraft in der Luft - klein halten, sonst frisst sie den Schwung aus Sprung und Grapple" },
+			"min_move_speed": { "value": 10000.0, "min": 10000.0, "max": 1000.0, "step": 10.0, "description": "Mindest-Tempo: so weit darf Reibung Wool herunterbremsen, solange er vorwärts rollt" },
 			"camera_zoom": { "value": 1.0, "min": 0.1, "max": 10.0, "step": 0.1, "description": "Zoom-Faktor der Kamera (kleiner ist näher)" }
 		},
 		"Enemy": {

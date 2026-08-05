@@ -1,6 +1,6 @@
 extends BaseConstants
 
-const DEFAULT_GRAVITY: float = 980.0
+const DEFAULT_GRAVITY: float = 1000.0
 
 func _ready() -> void:
 	settings = {
