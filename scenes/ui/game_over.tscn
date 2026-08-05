@@ -145,6 +145,45 @@ theme_override_font_sizes/font_size = 40
 text = "Highscore"
 horizontal_alignment = 2
 
+[node name="NamePrompt" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PromptLabel" type="Label" parent="MarginContainer/VBoxContainer/NamePrompt"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "Name für die Bestenliste"
+horizontal_alignment = 1
+
+[node name="NameEdit" type="LineEdit" parent="MarginContainer/VBoxContainer/NamePrompt"]
+custom_minimum_size = Vector2(420, 84)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 44
+placeholder_text = "Dein Name"
+alignment = 1
+max_length = 16
+caret_blink = true
+
+[node name="Buttons" type="HBoxContainer" parent="MarginContainer/VBoxContainer/NamePrompt"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 24
+
+[node name="SubmitButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/Buttons"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Speichern"
+
+[node name="SkipButton" type="Button" parent="MarginContainer/VBoxContainer/NamePrompt/Buttons"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+text = "Überspringen"
+
 [node name="InstructionLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1877545117]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.15, 0.1, 1)

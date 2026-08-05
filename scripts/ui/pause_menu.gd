@@ -1,6 +1,9 @@
 extends BaseMenu
 
+const LEADERBOARD_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_window.tscn")
+
 @onready var settings_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/SettingsButton
+@onready var leaderboard_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/LeaderboardButton
 @onready var credits_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/CreditsButton
 @onready var menu_panel: Control = $Control/OuterMargin/CenterContainer/MenuPanel
 @onready var pause_close_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/MenuBackground/CloseButton
@@ -9,6 +12,7 @@ extends BaseMenu
 @onready var title_label: Label = $Control/OuterMargin/CenterContainer/MenuPanel/Content/Label
 
 var _credits_instance: Node = null
+var _leaderboard_instance: Node = null
 
 func _ready() -> void:
 	super._ready()
@@ -21,10 +25,12 @@ func _ready() -> void:
 
 	settings_button.text = "Settings"
 
-	register_buttons([settings_button, credits_button], false, true)
+	register_buttons([settings_button, leaderboard_button, credits_button], false, true)
 
+	leaderboard_button.pressed.connect(_on_leaderboard_pressed)
 	credits_button.pressed.connect(_on_credits_pressed)
 
+	leaderboard_button.text = "Leaderboard"
 	credits_button.text = "Credits"
 	call_deferred("_update_layout")
 
@@ -51,6 +57,9 @@ func _update_layout() -> void:
 	if settings_button:
 		settings_button.custom_minimum_size = Vector2(clampf(panel_available_width * 0.72, 180.0, 360.0), clampf(base_size * 0.12, 56.0, 96.0))
 		settings_button.add_theme_font_size_override("font_size", int(clampf(base_size * 0.07, 36.0, 80.0)))
+	if leaderboard_button:
+		leaderboard_button.custom_minimum_size = Vector2(clampf(panel_available_width * 0.72, 180.0, 360.0), clampf(base_size * 0.12, 56.0, 96.0))
+		leaderboard_button.add_theme_font_size_override("font_size", int(clampf(base_size * 0.07, 36.0, 80.0)))
 	if credits_button:
 		credits_button.custom_minimum_size = Vector2(clampf(panel_available_width * 0.72, 180.0, 360.0), clampf(base_size * 0.12, 56.0, 96.0))
 		credits_button.add_theme_font_size_override("font_size", int(clampf(base_size * 0.07, 36.0, 80.0)))
@@ -67,6 +76,14 @@ func _on_overlay_gui_input(event: InputEvent) -> void:
 		var st := event as InputEventScreenTouch
 		if menu_panel and not menu_panel.get_global_rect().has_point(st.position):
 			_on_resume_pressed()
+
+func _on_leaderboard_pressed() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	if not _leaderboard_instance or not is_instance_valid(_leaderboard_instance):
+		_leaderboard_instance = LEADERBOARD_SCENE.instantiate()
+		get_tree().root.add_child(_leaderboard_instance)
+
+	_leaderboard_instance.open()
 
 func _on_credits_pressed() -> void:
 	if _credits_instance and is_instance_valid(_credits_instance):

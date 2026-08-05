@@ -56,7 +56,9 @@ var current_state: GameState = GameState.PLAYING
 var current_seed: int = 0
 var is_first_game_start: bool = true  # Track if this is the first time starting the game
 var highscore: int = 0
+var highscore_time_ms: int = 0
 var max_run_distance: int = 0
+var max_run_time_ms: int = 0
 var new_highscore_reached_this_run: bool = false
 
 # === CONSTANTS ===
@@ -163,12 +165,15 @@ func start_game() -> void:
 	# Always generate a new seed for every session/restart to ensure new level layout
 	current_seed = randi()
 	max_run_distance = 0
+	max_run_time_ms = 0
 	new_highscore_reached_this_run = false
 
 	# Reset tracking state to prevent reading old player position before scene change
 	_player_ref = null
 	_start_initialized = false
 	_start_x = 0.0
+	_run_elapsed_ms = 0
+	_last_tick_ms = 0
 
 	current_state = GameState.PLAYING
 	get_tree().paused = false
@@ -201,32 +206,43 @@ func toggle_pause() -> void:
 # === PRIVATE METHODS ===
 
 
-## Update highscore if new distance is higher
-func update_highscore(new_distance: int, silent: bool = false) -> void:
-	if new_distance > highscore:
-		new_highscore_reached_this_run = true
-		highscore = new_distance
-		_save_highscore()
-		highscore_beaten.emit()
-		if not silent:
-			AudioManager.play_sound(AudioManager.GAME.HIGHSCORE)
+## Update highscore if the run beats the stored one.
+## Ranking rule is shared with the global leaderboard: more distance wins, and
+## equal distance is broken by the faster time.
+func update_highscore(new_distance: int, new_time_ms: int, silent: bool = false) -> void:
+	if not LeaderboardEntry.is_better(new_distance, new_time_ms, highscore, highscore_time_ms):
+		return
+
+	new_highscore_reached_this_run = true
+	highscore = new_distance
+	highscore_time_ms = new_time_ms
+	_save_highscore()
+	highscore_beaten.emit()
+	if not silent:
+		AudioManager.play_sound(AudioManager.GAME.HIGHSCORE)
 
 func _load_highscore() -> void:
 	var config = ConfigFile.new()
 	var err = config.load("user://highscore.cfg")
 	if err == OK:
 		highscore = config.get_value("game", "highscore", 0)
+		# Saves written before run timing existed have no time - 0 reads as
+		# "unknown" and always loses a tie-break.
+		highscore_time_ms = config.get_value("game", "time_ms", 0)
 	else:
 		highscore = 0
+		highscore_time_ms = 0
 
 func _save_highscore() -> void:
 	var config = ConfigFile.new()
 	config.set_value("game", "highscore", highscore)
+	config.set_value("game", "time_ms", highscore_time_ms)
 	config.save("user://highscore.cfg")
 
 ## Reset highscore to 0
 func reset_highscore() -> void:
 	highscore = 0
+	highscore_time_ms = 0
 	_save_highscore()
 
 
@@ -246,6 +262,13 @@ var _start_x: float = 0.0
 var _start_initialized: bool = false
 var _player_ref: Node2D = null
 
+# === RUN TIMING ===
+# Wall-clock, deliberately not _process(delta): delta is scaled by
+# Engine.time_scale, which the game uses for slow-motion. A time-ranked
+# leaderboard must not reward playing in slow-mo.
+var _run_elapsed_ms: int = 0
+var _last_tick_ms: int = 0
+
 func _process(delta: float) -> void:
 	# Keep a reference to player for distance checking
 	if not _player_ref or not is_instance_valid(_player_ref):
@@ -257,13 +280,36 @@ func _process(delta: float) -> void:
 		_start_x = _player_ref.global_position.x
 		_start_initialized = true
 
-	# Update max run distance
+	_accumulate_run_time()
+
+	# Update max run distance, and remember how long it took to get there
 	var current_dist = get_current_distance()
 	if current_dist > max_run_distance:
 		max_run_distance = current_dist
+		max_run_time_ms = _run_elapsed_ms
 
 	# Enforce PC Window Ratio
 	_enforce_aspect_ratio_runtime()
+
+## This autoload runs with PROCESS_MODE_ALWAYS, so paused frames arrive here
+## too and must be excluded explicitly.
+func _accumulate_run_time() -> void:
+	var now_ms: int = Time.get_ticks_msec()
+
+	if current_state != GameState.PLAYING or not _start_initialized:
+		_last_tick_ms = now_ms
+		return
+
+	if _last_tick_ms == 0:
+		_last_tick_ms = now_ms
+		return
+
+	_run_elapsed_ms += now_ms - _last_tick_ms
+	_last_tick_ms = now_ms
+
+## Milliseconds elapsed in the current run (excludes paused time).
+func get_run_time_ms() -> int:
+	return _run_elapsed_ms
 
 func get_current_distance() -> int:
 	if not _player_ref or not is_instance_valid(_player_ref) or not _start_initialized:

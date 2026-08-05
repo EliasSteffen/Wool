@@ -32,6 +32,19 @@ func _ready() -> void:
 	if reset_btn:
 		reset_btn.pressed.connect(_on_reset_highscore_pressed)
 
+	_setup_name_edit()
+
+func _setup_name_edit() -> void:
+	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	if not name_edit:
+		return
+
+	name_edit.text = LeaderboardManager.player_name
+	# Commit on Enter and on losing focus, so the value is never lost to a
+	# tap-outside close.
+	name_edit.text_submitted.connect(func(new_text: String): LeaderboardManager.set_player_name(new_text))
+	name_edit.focus_exited.connect(func(): LeaderboardManager.set_player_name(name_edit.text))
+
 func _on_overlay_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		var mb := event as InputEventMouseButton
@@ -65,10 +78,19 @@ func _update_layout() -> void:
 	var max_h: float = max(220.0, viewport_size.y - 300.0)
 	scroll_container.custom_minimum_size.y = clampf(desired_h, 260.0, max_h)
 
+	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	if name_edit:
+		name_edit.add_theme_font_size_override("font_size", int(clampf(base_size * 0.035, 22.0, 44.0)))
+		name_edit.custom_minimum_size = Vector2(
+			clampf(viewport_size.x * 0.3, 240.0, 480.0),
+			clampf(viewport_size.y * 0.1, 56.0, 96.0)
+		)
+
 	for label_path in [
 		"MasterVolume/VBoxContainer/Label",
 		"MusicVolume/VBoxContainer/Label",
 		"SFXVolume/VBoxContainer/Label",
+		"PlayerName/VBoxContainer/Label",
 	]:
 		var label := container.get_node_or_null(label_path) as Label
 		if label:

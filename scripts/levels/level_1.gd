@@ -145,7 +145,7 @@ func _check_highscore_crossing() -> void:
 		# REMOVED: if _highscore_bar: _highscore_bar.visible = false
 
 		# Trigger the update in GameManager (plays sound)
-		GameManager.update_highscore(current_dist, false)
+		GameManager.update_highscore(current_dist, GameManager.get_run_time_ms(), false)
 
 func _on_highscore_beaten() -> void:
 	# Determine if we should hide the bar (e.g. if beaten by another mechanism)

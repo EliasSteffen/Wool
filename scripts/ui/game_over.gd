@@ -9,6 +9,11 @@ func _ready() -> void:
 	get_tree().root.size_changed.connect(_update_layout)
 	call_deferred("_update_layout")
 
+	name_prompt.visible = false
+	submit_button.pressed.connect(_on_name_submitted)
+	skip_button.pressed.connect(_on_name_skipped)
+	name_edit.text_submitted.connect(_on_name_edit_submitted)
+
 	# Start invisible
 	modulate.a = 0.0
 
@@ -39,8 +44,19 @@ func _ready() -> void:
 @onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
 @onready var instruction_label: Label = $MarginContainer/VBoxContainer/InstructionLabel
 
+# Name prompt
+@onready var name_prompt: VBoxContainer = $MarginContainer/VBoxContainer/NamePrompt
+@onready var prompt_label: Label = $MarginContainer/VBoxContainer/NamePrompt/PromptLabel
+@onready var name_edit: LineEdit = $MarginContainer/VBoxContainer/NamePrompt/NameEdit
+@onready var submit_button: Button = $MarginContainer/VBoxContainer/NamePrompt/Buttons/SubmitButton
+@onready var skip_button: Button = $MarginContainer/VBoxContainer/NamePrompt/Buttons/SkipButton
+
 var _move_tween: Tween = null
 var internal_wool_sprite: AnimatedSprite2D = null
+
+## While the name prompt is up, _input() must not treat taps as "restart" -
+## otherwise the LineEdit can never be focused or typed into.
+var _name_prompt_active: bool = false
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
@@ -73,14 +89,35 @@ func _update_layout() -> void:
 	score_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.03, 18.0, 32.0)))
 	score_display.custom_minimum_size.y = clampf(viewport_size.y * 0.18, 120.0, 200.0)
 
+	_update_name_prompt_layout(viewport_size, base_size)
+
+func _update_name_prompt_layout(viewport_size: Vector2, base_size: float) -> void:
+	if not is_instance_valid(name_prompt):
+		return
+
+	var field_font_size: int = int(clampf(base_size * 0.035, 22.0, 44.0))
+	var field_height: float = clampf(viewport_size.y * 0.11, 56.0, 96.0)
+
+	prompt_label.add_theme_font_size_override("font_size", int(clampf(base_size * 0.032, 20.0, 40.0)))
+	name_edit.add_theme_font_size_override("font_size", field_font_size)
+	name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.36, 260.0, 520.0), field_height)
+
+	for button in [submit_button, skip_button]:
+		button.add_theme_font_size_override("font_size", field_font_size)
+		button.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.18, 150.0, 280.0), field_height)
+
 func _setup_score_display(fade_duration: float) -> void:
 	if not score_display: return
 
 	var current_score = GameManager.max_run_distance
+	var current_time_ms = GameManager.max_run_time_ms
 
-	# Save highscore (silently) if we beat it
-	if current_score > GameManager.highscore:
-		GameManager.update_highscore(current_score, true)
+	# Save highscore (silently) if we beat it - update_highscore applies the
+	# distance-then-time rule itself.
+	GameManager.update_highscore(current_score, current_time_ms, true)
+
+	# Queue the run for the global leaderboard (held locally until a name exists).
+	LeaderboardManager.submit_run(current_score, current_time_ms)
 
 	var highscore = GameManager.highscore
 
@@ -152,6 +189,7 @@ func _setup_score_display(fade_duration: float) -> void:
 	_move_tween.finished.connect(func():
 		_move_tween = null
 		_can_interact = true
+		_maybe_show_name_prompt()
 	)
 	_move_tween.tween_interval(fade_duration * 0.5)
 
@@ -218,6 +256,16 @@ func _input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
 
+	# The name prompt owns input while it is open - without this, the LineEdit
+	# below would be unusable because every tap would restart the game.
+	if _name_prompt_active:
+		return
+
+	# Covers the brief window after dismissing the prompt, so the same tap does
+	# not fall through and restart.
+	if GameManager.is_input_ignored():
+		return
+
 	if (event is InputEventKey and event.pressed) or \
 	   (event is InputEventMouseButton and event.pressed) or \
 	   (event is InputEventScreenTouch and event.pressed) or \
@@ -250,6 +298,50 @@ func _skip_to_end() -> void:
 	if internal_wool_sprite: internal_wool_sprite.play("idle")
 
 	_can_interact = true
+	_maybe_show_name_prompt()
+
+## Ask for a name only when the run actually earned a leaderboard spot and the
+## player has neither set nor refused one before.
+func _maybe_show_name_prompt() -> void:
+	if _name_prompt_active or not is_instance_valid(name_prompt):
+		return
+	if GameManager.max_run_distance <= 0:
+		return
+	if not LeaderboardManager.should_prompt_for_name():
+		return
+
+	_name_prompt_active = true
+	name_prompt.visible = true
+	instruction_label.visible = false
+	name_edit.text = ""
+	name_edit.grab_focus()
+	_update_layout()
+
+func _close_name_prompt() -> void:
+	_name_prompt_active = false
+	name_prompt.visible = false
+	instruction_label.visible = true
+	# Swallow the tap that dismissed the prompt so it cannot also restart.
+	GameManager.ignore_input_for(0.3)
+	_can_interact = true
+
+func _on_name_edit_submitted(_text: String) -> void:
+	_on_name_submitted()
+
+func _on_name_submitted() -> void:
+	var entered: String = LeaderboardEntry.sanitize_name(name_edit.text)
+	if entered.is_empty():
+		return
+
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	LeaderboardManager.set_player_name(entered)
+	LeaderboardManager.submit_run(GameManager.max_run_distance, GameManager.max_run_time_ms)
+	_close_name_prompt()
+
+func _on_name_skipped() -> void:
+	AudioManager.play_sound(AudioManager.GAME.CLICK)
+	LeaderboardManager.decline_name_prompt()
+	_close_name_prompt()
 
 func _restart_game() -> void:
 	_can_interact = false
