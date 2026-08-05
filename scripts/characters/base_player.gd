@@ -31,6 +31,10 @@ var min_move_speed: float
 var jump_velocity: float
 var camera_zoom: float
 var fall_gravity_multiplier: float = 1.0
+## Terminal velocity. Once reached, the descent is constant instead of forever
+## steepening, which is what makes a fall read as a straight diagonal rather
+## than a curve. 0 disables the cap.
+var max_fall_speed: float = 0.0
 
 # === PRIVATE VARIABLES ===
 var _direction: float = 0.0
@@ -146,6 +150,7 @@ func _setup_tweakables() -> void:
 	min_move_speed = CharacterConstants.get_value("Player", "min_move_speed")
 	jump_velocity = CharacterConstants.get_value("Player", "jump_velocity")
 	fall_gravity_multiplier = CharacterConstants.get_value("Player", "fall_gravity_multiplier")
+	max_fall_speed = CharacterConstants.get_value("Player", "max_fall_speed")
 	camera_zoom = CharacterConstants.get_value("Player", "camera_zoom")
 
 	if camera:
@@ -166,6 +171,7 @@ func _on_tweakable_changed(category: String, key: String, value: Variant) -> voi
 			"min_move_speed": min_move_speed = float(value)
 			"jump_velocity": jump_velocity = float(value)
 			"fall_gravity_multiplier": fall_gravity_multiplier = float(value)
+			"max_fall_speed": max_fall_speed = float(value)
 			"camera_zoom":
 				camera_zoom = float(value)
 				if camera:
@@ -281,7 +287,14 @@ func _calculate_gravity(delta: float) -> float:
 	# (Grappling ignores this to keep swing physics natural)
 	var is_grappling = grappling_feature and grappling_feature.is_active()
 	if velocity.y > 0 and not is_grappling:
-		return g * fall_gravity_multiplier
+		g *= fall_gravity_multiplier
+
+		# Terminal velocity: hand back only the speed still missing to reach the
+		# cap, so descent flattens into a constant rate. Uncapped, gravity keeps
+		# steepening the arc; capped, a fall with steady forward speed traces a
+		# straight diagonal. Horizontal velocity is untouched either way.
+		if max_fall_speed > 0.0:
+			g = clampf(g, 0.0, maxf(max_fall_speed - velocity.y, 0.0))
 
 	return g
 
