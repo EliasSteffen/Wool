@@ -9,9 +9,17 @@ extends LeaderboardBackend
 ## to read in one sitting.
 
 const SAVE_PATH: String = "user://leaderboard_local.json"
-const SEED_NAMES: Array[String] = ["Wollknäuel", "Schafkopf", "Flauschi", "Merino", "Strickliesl"]
-const SEED_SCORES: Array[int] = [820, 610, 455, 300, 175]
-const SEED_TIMES_MS: Array[int] = [96400, 74100, 58900, 41200, 25600]
+## Ten rows rather than a handful: enough to overflow the leaderboard window on
+## every screen size, which is what makes the list actually scroll. Kept in
+## descending score order for readability - fetch_top() sorts anyway.
+const SEED_NAMES: Array[String] = [
+	"Zopfmuster", "Wollknäuel", "Nadelöhr", "Schafkopf", "Bommelbär",
+	"Flauschi", "Maschenwerk", "Merino", "Filzhut", "Strickliesl",
+]
+const SEED_SCORES: Array[int] = [945, 820, 735, 610, 528, 455, 382, 300, 244, 175]
+const SEED_TIMES_MS: Array[int] = [
+	108300, 96400, 88200, 74100, 66700, 58900, 49500, 41200, 33800, 25600,
+]
 
 var _player_id: String = ""
 var _entries: Array[LeaderboardEntry] = []

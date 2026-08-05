@@ -126,6 +126,7 @@ alignment = 1
 
 [node name="MasterVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=1972588900]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/MasterVolume" unique_id=622689372]
@@ -156,6 +157,7 @@ script = ExtResource("7_rolling")
 
 [node name="MusicVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=31125164]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/MusicVolume" unique_id=1671754472]
@@ -186,6 +188,7 @@ script = ExtResource("7_rolling")
 
 [node name="SFXVolume" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer" unique_id=347290260]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/SFXVolume" unique_id=1933693197]
@@ -216,6 +219,7 @@ script = ExtResource("7_rolling")
 
 [node name="PublishScores" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PublishScores"]
@@ -246,6 +250,7 @@ autowrap_mode = 2
 
 [node name="PlayerName" type="PanelContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer/PlayerName"]
