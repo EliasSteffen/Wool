@@ -65,18 +65,17 @@ func _reset_position() -> void:
 		_debug_dump_layout("_reset_position")
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-		var mouse_pos := get_viewport().get_mouse_position()
-		if DEBUG_CREDITS_LAYOUT:
-			print("[credits_debug/input] mouse_down pos=", mouse_pos, " panel_global_rect=", background.get_global_rect())
-		if background and not background.get_global_rect().has_point(mouse_pos):
-			_on_close_button_pressed()
-	elif event is InputEventScreenTouch and event.pressed:
-		var st := event as InputEventScreenTouch
-		if DEBUG_CREDITS_LAYOUT:
-			print("[credits_debug/input] touch_down pos=", st.position, " panel_global_rect=", background.get_global_rect())
-		if background and not background.get_global_rect().has_point(st.position):
-			_on_close_button_pressed()
+	if not PointerInput.is_pointer_press(event):
+		return
+
+	# Was get_viewport().get_mouse_position() for the mouse branch; event.position
+	# is equivalent here (the overlay is a full-rect Control anchored at origin)
+	# and is the only one that is also correct for a touch.
+	var press: Vector2 = PointerInput.press_position(event)
+	if DEBUG_CREDITS_LAYOUT:
+		print("[credits_debug/input] press pos=", press, " panel_global_rect=", background.get_global_rect())
+	if background and not background.get_global_rect().has_point(press):
+		_on_close_button_pressed()
 
 func _update_layout() -> void:
 	var viewport_size := get_viewport_rect().size

@@ -42,6 +42,8 @@ func game_over() -> void:
 	# Defensive: the tree is paused while a modal is up, so physics cannot kill
 	# the player then - but this guarantees no window survives into game over.
 	UIManager.close_all()
+	# Counts completed runs, which is what the review prompt gates on.
+	ReviewManager.notify_game_finished()
 	call_deferred("_show_game_over_screen")
 
 	current_state = GameState.GAME_OVER

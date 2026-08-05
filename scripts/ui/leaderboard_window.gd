@@ -197,11 +197,9 @@ func _on_retry_pressed() -> void:
 	LeaderboardManager.refresh_top(true)
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-		var mouse_event := event as InputEventMouseButton
-		if panel and not panel.get_global_rect().has_point(mouse_event.position):
-			close()
-	elif event is InputEventScreenTouch and event.pressed:
-		var touch_event := event as InputEventScreenTouch
-		if panel and not panel.get_global_rect().has_point(touch_event.position):
-			close()
+	if not PointerInput.is_pointer_press(event):
+		return
+
+	var press: Vector2 = PointerInput.press_position(event)
+	if panel and not panel.get_global_rect().has_point(press):
+		close()

@@ -205,6 +205,7 @@ func _setup_score_display(fade_duration: float) -> void:
 		_move_tween = null
 		_can_interact = true
 		_maybe_show_name_prompt()
+		_maybe_request_review()
 	)
 	_move_tween.tween_interval(fade_duration * 0.5)
 
@@ -276,6 +277,11 @@ func _input(event: InputEvent) -> void:
 	if _name_prompt_active:
 		return
 
+	# Same reasoning for the review popup: it draws above this screen, but
+	# _input() still runs here first, so its buttons would double as "restart".
+	if ReviewManager.is_prompt_open():
+		return
+
 	# Covers the brief window after dismissing the prompt, so the same tap does
 	# not fall through and restart.
 	if GameManager.is_input_ignored():
@@ -286,11 +292,9 @@ func _input(event: InputEvent) -> void:
 	if _is_event_over_controls(event):
 		return
 
-	if (event is InputEventKey and event.pressed) or \
-	   (event is InputEventMouseButton and event.pressed) or \
-	   (event is InputEventScreenTouch and event.pressed) or \
-	   (event is InputEventJoypadButton and event.pressed):
-
+	# is_any_press() counts one physical press once, so a tap cannot both skip
+	# the animation here and fall through to restart on its emulated twin.
+	if PointerInput.is_any_press(event):
 		if _move_tween and _move_tween.is_valid():
 			_move_tween.kill()
 			_move_tween = null
@@ -301,13 +305,11 @@ func _input(event: InputEvent) -> void:
 			_restart_game()
 
 func _is_event_over_controls(event: InputEvent) -> bool:
-	var position: Vector2 = Vector2.ZERO
-	if event is InputEventMouseButton:
-		position = (event as InputEventMouseButton).position
-	elif event is InputEventScreenTouch:
-		position = (event as InputEventScreenTouch).position
-	else:
+	# Keys and gamepad buttons carry no position, so they are never "over" anything.
+	if not (event is InputEventMouseButton or event is InputEventScreenTouch):
 		return false
+
+	var position: Vector2 = PointerInput.press_position(event)
 
 	# Taps inside the name prompt belong to the field and its reroll button, not
 	# to tap-anywhere-to-restart.
@@ -333,6 +335,7 @@ func _skip_to_end() -> void:
 
 	_can_interact = true
 	_maybe_show_name_prompt()
+	_maybe_request_review()
 
 ## Ask for a name only when the run actually earned a leaderboard spot and the
 ## player has neither set nor refused one before. The field arrives pre-filled
@@ -394,6 +397,27 @@ func _close_name_prompt() -> void:
 	name_prompt.visible = false
 	instruction_label.visible = true
 	_can_interact = true
+	# The review ask queues behind the name prompt, never on top of it.
+	_maybe_request_review()
+
+## Offers the rating popup, but only after a beat. ReviewManager owns every
+## "should we?" decision - the delay is this screen's concern: two of the three
+## paths here are reached by a tap, and a dialog appearing under a finger already
+## on its way down would both misfire and read as an interruption.
+func _maybe_request_review() -> void:
+	if _name_prompt_active or not ReviewManager.is_eligible():
+		return
+
+	# ignore_time_scale: this screen runs at Engine.time_scale = 0.5, which would
+	# otherwise stretch the beat to two real seconds.
+	await get_tree().create_timer(1.0, true, false, true).timeout
+
+	# The screen may have been torn down, or the name prompt reopened, while we
+	# waited - re-check rather than trusting the decision made a second ago.
+	if not is_inside_tree() or _name_prompt_active:
+		return
+
+	ReviewManager.maybe_prompt()
 
 func _on_name_edit_submitted(_text: String) -> void:
 	_restart_game()

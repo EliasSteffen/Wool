@@ -56,14 +56,12 @@ func _commit_name(name_edit: LineEdit) -> void:
 	LeaderboardManager.set_player_name(entered)
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-		var mb := event as InputEventMouseButton
-		if panel and not panel.get_global_rect().has_point(mb.position):
-			close()
-	elif event is InputEventScreenTouch and event.pressed:
-		var st := event as InputEventScreenTouch
-		if panel and not panel.get_global_rect().has_point(st.position):
-			close()
+	if not PointerInput.is_pointer_press(event):
+		return
+
+	var press: Vector2 = PointerInput.press_position(event)
+	if panel and not panel.get_global_rect().has_point(press):
+		close()
 
 func _update_layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size

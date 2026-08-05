@@ -4,7 +4,10 @@ class_name RollingSlider
 
 @export var texture: Texture2D
 @export var scale_factor: float = 0.2
-@export var rotation_speed: float = -15.0 # Radians per normalized unit
+## Turns per full sweep of the slider. Positive so the knot rolls the way it
+## travels: +Y is down in 2D, so a positive angle is clockwise on screen, which
+## is what a ball moving right does.
+@export var rotation_speed: float = 15.0
 
 @export var track_height: float = 20.0
 @export var track_color: Color = Color(0.18, 0.18, 0.18, 1.0)

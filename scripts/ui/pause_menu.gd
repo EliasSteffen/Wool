@@ -60,14 +60,12 @@ func _update_layout() -> void:
 		credits_button.add_theme_font_size_override("font_size", int(clampf(base_size * 0.07, 36.0, 80.0)))
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
-		var mb := event as InputEventMouseButton
-		if menu_panel and not menu_panel.get_global_rect().has_point(mb.position):
-			_on_resume_pressed()
-	elif event is InputEventScreenTouch and event.pressed:
-		var st := event as InputEventScreenTouch
-		if menu_panel and not menu_panel.get_global_rect().has_point(st.position):
-			_on_resume_pressed()
+	if not PointerInput.is_pointer_press(event):
+		return
+
+	var press: Vector2 = PointerInput.press_position(event)
+	if menu_panel and not menu_panel.get_global_rect().has_point(press):
+		_on_resume_pressed()
 
 func _on_leaderboard_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
