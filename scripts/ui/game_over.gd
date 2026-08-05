@@ -15,9 +15,6 @@ func _ready() -> void:
 	name_edit.text_changed.connect(_on_name_text_changed)
 	name_edit.text_submitted.connect(_on_name_edit_submitted)
 
-	continue_button.pressed.connect(_on_continue_pressed)
-	leaderboard_button.pressed.connect(_on_leaderboard_pressed)
-
 	# Start invisible
 	modulate.a = 0.0
 
@@ -55,13 +52,6 @@ func _ready() -> void:
 @onready var reroll_button: Button = $MarginContainer/VBoxContainer/NamePrompt/NameRow/RerollButton
 @onready var name_status_label: Label = $MarginContainer/VBoxContainer/NamePrompt/NameStatusLabel
 
-# Bottom action row
-@onready var action_buttons: HBoxContainer = $MarginContainer/VBoxContainer/ActionButtons
-@onready var continue_button: Button = $MarginContainer/VBoxContainer/ActionButtons/ContinueButton
-@onready var leaderboard_button: Button = $MarginContainer/VBoxContainer/ActionButtons/LeaderboardButton
-
-const LEADERBOARD_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_window.tscn")
-
 var _move_tween: Tween = null
 var internal_wool_sprite: AnimatedSprite2D = null
 
@@ -71,7 +61,6 @@ var _name_prompt_active: bool = false
 ## The last generated name, already verified free - lets us skip a second
 ## lookup when the player just accepts it.
 var _generated_name: String = ""
-var _leaderboard_instance: Node = null
 var _committing: bool = false
 
 func _update_layout() -> void:
@@ -122,13 +111,12 @@ func _update_name_prompt_layout(viewport_size: Vector2, base_size: float) -> voi
 	# height here would crop the text.
 	name_edit.custom_minimum_size = Vector2(clampf(viewport_size.x * 0.3, 280.0, 560.0), 0.0)
 
-	# Deliberately no custom_minimum_size on the themed buttons: the button
+	# Deliberately no custom_minimum_size on the themed button: the button
 	# StyleBoxTexture already reserves 60px left/right and 15/40px top/bottom of
 	# content margin, so it sizes itself around the label. Clamping it smaller
 	# is what cropped the texture and overflowed the text.
-	for button in [reroll_button, continue_button, leaderboard_button]:
-		if is_instance_valid(button):
-			button.add_theme_font_size_override("font_size", button_font_size)
+	if is_instance_valid(reroll_button):
+		reroll_button.add_theme_font_size_override("font_size", button_font_size)
 
 func _setup_score_display(fade_duration: float) -> void:
 	if not score_display: return
@@ -318,10 +306,10 @@ func _is_event_over_controls(event: InputEvent) -> bool:
 	else:
 		return false
 
-	for control in [action_buttons, name_prompt]:
-		if is_instance_valid(control) and control.visible and control.get_global_rect().has_point(position):
-			return true
-	return false
+	# Taps inside the name prompt belong to the field and its reroll button, not
+	# to tap-anywhere-to-restart.
+	return is_instance_valid(name_prompt) and name_prompt.visible \
+		and name_prompt.get_global_rect().has_point(position)
 
 func _skip_to_end() -> void:
 	var current_score = GameManager.max_run_distance
@@ -345,7 +333,7 @@ func _skip_to_end() -> void:
 
 ## Ask for a name only when the run actually earned a leaderboard spot and the
 ## player has neither set nor refused one before. The field arrives pre-filled
-## with a generated free name, so the player can simply press Weiter.
+## with a generated free name, so tapping anywhere outside the prompt accepts it.
 func _maybe_show_name_prompt() -> void:
 	if _name_prompt_active or not is_instance_valid(name_prompt):
 		return
@@ -390,7 +378,7 @@ func _on_name_text_changed(_text: String) -> void:
 	name_status_label.visible = false
 
 func _on_name_edit_submitted(_text: String) -> void:
-	_on_continue_pressed()
+	_restart_game()
 
 func _on_reroll_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
@@ -417,15 +405,8 @@ func _commit_name() -> bool:
 	# The generated name was already checked; only verify player edits.
 	if entered != _generated_name:
 		_committing = true
-		continue_button.disabled = true
-		leaderboard_button.disabled = true
-
 		var available: bool = await LeaderboardManager.is_name_available(entered)
-
 		_committing = false
-		if is_instance_valid(continue_button):
-			continue_button.disabled = false
-			leaderboard_button.disabled = false
 
 		if not available:
 			if is_instance_valid(name_status_label):
@@ -437,24 +418,14 @@ func _commit_name() -> bool:
 	_close_name_prompt()
 	return true
 
-func _on_continue_pressed() -> void:
-	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	if not await _commit_name():
-		return
-	_restart_game()
-
-func _on_leaderboard_pressed() -> void:
-	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	if not await _commit_name():
-		return
-
-	if not _leaderboard_instance or not is_instance_valid(_leaderboard_instance):
-		_leaderboard_instance = LEADERBOARD_SCENE.instantiate()
-		get_tree().root.add_child(_leaderboard_instance)
-
-	_leaderboard_instance.open()
 
 func _restart_game() -> void:
+	# With no buttons on this screen, leaving is what confirms the name. A taken
+	# name aborts the restart so the player can fix it.
+	if _name_prompt_active:
+		if not await _commit_name():
+			return
+
 	_can_interact = false
 	Engine.time_scale = 1.0
 	if get_parent() is CanvasLayer: get_parent().queue_free()
