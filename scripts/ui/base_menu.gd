@@ -1,7 +1,6 @@
 class_name BaseMenu
 extends Node
 
-const SETTINGS_SCENE = preload("res://scenes/ui/settings_window.tscn")
 const MIN_BUTTON_WIDTH := 220.0
 const MAX_BUTTON_WIDTH := 800.0
 const MIN_BUTTON_HEIGHT := 72.0
@@ -9,7 +8,6 @@ const MAX_BUTTON_HEIGHT := 150.0
 const MIN_BUTTON_FONT_SIZE := 28
 const MAX_BUTTON_FONT_SIZE := 80
 
-var _settings_instance: Node = null
 var _buttons_to_resize: Array[Control] = []
 var _auto_resize_buttons: bool = true
 
@@ -65,11 +63,4 @@ func _get_responsive_metrics() -> Dictionary:
 
 func _on_settings_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	if not _settings_instance:
-		_settings_instance = SETTINGS_SCENE.instantiate()
-		get_tree().root.add_child(_settings_instance)
-
-	if _settings_instance.has_method("open"):
-		_settings_instance.open()
-	else:
-		_settings_instance.show()
+	UIManager.open(&"settings")

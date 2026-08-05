@@ -1,5 +1,9 @@
 extends CanvasLayer
 
+## Emitted when the user dismisses this window. UIManager listens and does the
+## actual closing - see the "windows never close themselves" rule in ui_manager.gd.
+signal close_requested
+
 @onready var container: VBoxContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer/VBoxContainer
 @onready var content_margin: MarginContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin
 @onready var scroll_container: ScrollContainer = $Control/OuterMargin/CenterContainer/Panel/ContentMargin/ScrollContainer
@@ -132,12 +136,14 @@ func _setup_slider(slider: HSlider, bus_name: String) -> void:
 			AudioServer.set_bus_volume_db(b_idx, linear_to_db(val))
 	)
 
-func open() -> void:
-	show()
-	get_tree().paused = true
-
+## Asks UIManager to close this window. Nothing here hides itself or touches
+## get_tree().paused - the manager owns both.
 func close() -> void:
-	hide()
-	# Unpause if we are not in the PAUSED state (i.e. unpause for MENU and PLAYING)
-	if GameManager.current_state != GameManager.GameState.PAUSED:
-		get_tree().paused = false
+	close_requested.emit()
+
+## The name field commits on focus_exited; hiding a CanvasLayer does not drop
+## focus, so a name typed and then dismissed by tap-outside would be lost.
+func on_closed() -> void:
+	var name_edit := container.get_node_or_null("PlayerName/VBoxContainer/NameEdit") as LineEdit
+	if name_edit and name_edit.has_focus():
+		name_edit.release_focus()

@@ -1,7 +1,5 @@
 extends BaseMenu
 
-const LEADERBOARD_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_window.tscn")
-
 @onready var settings_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/SettingsButton
 @onready var leaderboard_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/LeaderboardButton
 @onready var credits_button: Button = $Control/OuterMargin/CenterContainer/MenuPanel/Content/VBoxContainer/CreditsButton
@@ -10,9 +8,6 @@ const LEADERBOARD_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_wind
 @onready var root_control: Control = $Control
 @onready var outer_margin: MarginContainer = $Control/OuterMargin
 @onready var title_label: Label = $Control/OuterMargin/CenterContainer/MenuPanel/Content/Label
-
-var _credits_instance: Node = null
-var _leaderboard_instance: Node = null
 
 func _ready() -> void:
 	super._ready()
@@ -65,9 +60,6 @@ func _update_layout() -> void:
 		credits_button.add_theme_font_size_override("font_size", int(clampf(base_size * 0.07, 36.0, 80.0)))
 
 func _on_overlay_gui_input(event: InputEvent) -> void:
-	if _credits_instance and is_instance_valid(_credits_instance):
-		return
-
 	if event is InputEventMouseButton and event.pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		var mb := event as InputEventMouseButton
 		if menu_panel and not menu_panel.get_global_rect().has_point(mb.position):
@@ -79,29 +71,13 @@ func _on_overlay_gui_input(event: InputEvent) -> void:
 
 func _on_leaderboard_pressed() -> void:
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	if not _leaderboard_instance or not is_instance_valid(_leaderboard_instance):
-		_leaderboard_instance = LEADERBOARD_SCENE.instantiate()
-		get_tree().root.add_child(_leaderboard_instance)
-
-	_leaderboard_instance.open()
+	UIManager.open(&"leaderboard")
 
 func _on_credits_pressed() -> void:
-	if _credits_instance and is_instance_valid(_credits_instance):
-		return
-
 	AudioManager.play_sound(AudioManager.GAME.CLICK)
-	_credits_instance = preload("res://scenes/ui/credits.tscn").instantiate()
-	pause_close_button.visible = false
-	add_child(_credits_instance)
-	if _credits_instance.has_signal("closed"):
-		_credits_instance.closed.connect(_on_credits_closed)
-	_credits_instance.tree_exited.connect(_on_credits_closed)
+	UIManager.open(&"credits")
 
-func _on_credits_closed() -> void:
-	if pause_close_button:
-		pause_close_button.visible = true
-	_credits_instance = null
-
-
+## Dismissing the pause menu empties the stack, which is what resumes the game -
+## GameManager listens to UIManager.stack_changed for that.
 func _on_resume_pressed() -> void:
-	GameManager.toggle_pause()
+	UIManager.close_all()

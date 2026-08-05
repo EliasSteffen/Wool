@@ -1,5 +1,9 @@
 extends Control
-signal closed
+
+## Emitted when the user dismisses this window. UIManager listens, frees this
+## instance along with the CanvasLayer it wrapped it in, and restores the window
+## underneath - see the "windows never close themselves" rule in ui_manager.gd.
+signal close_requested
 
 var content: Control = null
 var background: Control = null
@@ -110,9 +114,6 @@ func _update_layout() -> void:
 		_debug_dump_layout("_update_layout")
 	call_deferred("_reset_position")
 
-func _exit_tree() -> void:
-	pass
-
 func _process(delta: float) -> void:
 	if content:
 		var current_speed = scroll_speed
@@ -136,8 +137,7 @@ func _process(delta: float) -> void:
 				_debug_last_layout_dump_ms = now_ms
 
 func _on_close_button_pressed() -> void:
-	closed.emit()
-	queue_free()
+	close_requested.emit()
 
 func _debug_dump_layout(tag: String) -> void:
 	if not DEBUG_CREDITS_LAYOUT:

@@ -1,9 +1,12 @@
 extends CanvasLayer
 
-## Global leaderboard overlay, opened from the pause menu.
+## Global leaderboard overlay, opened from the pause menu via UIManager.
 ##
-## Follows settings_window.gd: same pause semantics in open()/close(), same
-## tap-outside-to-close overlay, same clampf-based responsive layout.
+## Follows settings_window.gd: same close_requested handshake with the manager,
+## same tap-outside-to-close overlay, same clampf-based responsive layout.
+
+## Emitted when the user dismisses this window; UIManager does the closing.
+signal close_requested
 
 const ROW_SCENE: PackedScene = preload("res://scenes/ui/leaderboard_row.tscn")
 const OWN_ROW_COLOR: Color = Color(0.44, 0.41, 0.53, 1)
@@ -36,17 +39,16 @@ func _ready() -> void:
 	get_tree().root.size_changed.connect(_update_layout)
 	_update_layout.call_deferred()
 
-func open() -> void:
-	show()
-	get_tree().paused = true
+## Called by UIManager when this window is pushed onto the stack - not when it
+## is revealed again after a window above it closed, so a sub-window does not
+## trigger a redundant refetch.
+func on_opened() -> void:
 	_show_loading()
 	LeaderboardManager.refresh_top()
 
+## Asks UIManager to close this window; the manager owns visibility and pause.
 func close() -> void:
-	hide()
-	# Match settings_window: only release the pause we did not inherit.
-	if GameManager.current_state != GameManager.GameState.PAUSED:
-		get_tree().paused = false
+	close_requested.emit()
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size

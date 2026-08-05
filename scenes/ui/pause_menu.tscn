@@ -19,15 +19,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_theme")
 
-[node name="ColorRect" type="ColorRect" parent="Control" unique_id=1649902132]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.4392157, 0.40784314, 0.5294118, 0.6862745)
-
 [node name="OuterMargin" type="MarginContainer" parent="Control" unique_id=175500010]
 layout_mode = 1
 anchors_preset = 15

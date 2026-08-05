@@ -22,9 +22,10 @@ func _show_game_over_screen() -> void:
 	# Show Game Over Screen immediately as overlay
 	var game_over_scene = load("res://scenes/ui/game_over.tscn")
 	if game_over_scene:
-		# Create a temporary CanvasLayer to ensure UI is drawn on top of the paused game
+		# Create a temporary CanvasLayer to ensure UI is drawn on top of the paused game.
+		# Above UIManager.BASE_LAYER (100) so no stray modal can cover it.
 		var canvas_layer = CanvasLayer.new()
-		canvas_layer.layer = 100 # High layer priority
+		canvas_layer.layer = 200
 		get_tree().root.add_child(canvas_layer)
 
 		var game_over_instance = game_over_scene.instantiate()
@@ -38,6 +39,9 @@ func game_over() -> void:
 	if current_state == GameState.GAME_OVER:
 		return
 
+	# Defensive: the tree is paused while a modal is up, so physics cannot kill
+	# the player then - but this guarantees no window survives into game over.
+	UIManager.close_all()
 	call_deferred("_show_game_over_screen")
 
 	current_state = GameState.GAME_OVER
@@ -46,8 +50,7 @@ func game_over() -> void:
 ## Return to main menu
 func return_to_menu() -> void:
 	current_state = GameState.MENU
-	get_tree().paused = false
-	_hide_pause_menu()
+	UIManager.close_all()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 	state_changed.emit(current_state)
 
@@ -64,7 +67,6 @@ var new_highscore_reached_this_run: bool = false
 # === CONSTANTS ===
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const LEVEL_1_SCENE: String = "res://scenes/levels/level_1.tscn"
-const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 
 const PLAYABLE_HEIGHT_MULTIPLIER: float = 1.5
 var PLAYABLE_HEIGHT_TOP: float = -1755.0
@@ -73,8 +75,6 @@ const WATER_LEVEL: float = 300.0
 const SIDE_MARGIN: float = 300.0
 
 # === PRIVATE VARIABLES ===
-var _pause_menu_instance: Node = null
-
 # Short-lived input ignore window (ms) used to prevent taps on UI from also triggering gameplay actions
 var _ignore_input_until_ms: int = 0
 
@@ -88,6 +88,7 @@ func is_input_ignored() -> bool:
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	UIManager.stack_changed.connect(_on_ui_stack_changed)
 
 	# Calculate playable height based on actual viewport (screen-dependent)
 	var viewport_height: float = get_viewport().get_visible_rect().size.y
@@ -152,11 +153,19 @@ func _enforce_aspect_ratio_runtime() -> void:
 			_last_window_size = current_size
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		if current_state == GameState.PLAYING:
-			toggle_pause()
-		elif current_state == GameState.PAUSED:
-			toggle_pause()
+	if not event.is_action_pressed("ui_cancel"):
+		return
+
+	# Escape backs out one window at a time. Only the last one resumes the game,
+	# so Escape in Settings returns to the pause menu rather than to gameplay.
+	if UIManager.get_depth() > 1:
+		UIManager.close_top()
+		get_viewport().set_input_as_handled()
+		return
+
+	if current_state == GameState.PLAYING or current_state == GameState.PAUSED:
+		toggle_pause()
+		get_viewport().set_input_as_handled()
 
 # === PUBLIC METHODS ===
 
@@ -177,7 +186,9 @@ func start_game() -> void:
 	_run_active = false
 
 	current_state = GameState.PLAYING
-	get_tree().paused = false
+	# Set the state first: emptying the stack unpauses the tree, and the
+	# depth-0 callback is then a no-op instead of re-emitting state_changed.
+	UIManager.close_all()
 	get_tree().change_scene_to_file(LEVEL_1_SCENE)
 	state_changed.emit(current_state)
 
@@ -193,14 +204,18 @@ func quit_game() -> void:
 func toggle_pause() -> void:
 	if current_state == GameState.PLAYING:
 		current_state = GameState.PAUSED
-		get_tree().paused = true
-		_show_pause_menu()
+		state_changed.emit(current_state)
+		UIManager.open(&"pause")
 	elif current_state == GameState.PAUSED:
-		current_state = GameState.PLAYING
-		get_tree().paused = false
-		_hide_pause_menu()
+		# Emptying the stack puts the state back to PLAYING via _on_ui_stack_changed.
+		UIManager.close_all()
 
-	state_changed.emit(current_state)
+## UIManager owns get_tree().paused; the game state follows the stack. Closing
+## the last window - by button, by tap-outside or by Escape - always resumes.
+func _on_ui_stack_changed(depth: int) -> void:
+	if depth == 0 and current_state == GameState.PAUSED:
+		current_state = GameState.PLAYING
+		state_changed.emit(current_state)
 
 
 
@@ -246,16 +261,6 @@ func reset_highscore() -> void:
 	highscore_time_ms = 0
 	_save_highscore()
 
-
-
-func _show_pause_menu() -> void:
-	if not _pause_menu_instance:
-		_pause_menu_instance = PAUSE_MENU_SCENE.instantiate()
-		get_tree().root.add_child(_pause_menu_instance)
-	_pause_menu_instance.show()
-func _hide_pause_menu() -> void:
-	if _pause_menu_instance:
-		_pause_menu_instance.hide()
 
 
 # === DISTANCE TRACKING ===
