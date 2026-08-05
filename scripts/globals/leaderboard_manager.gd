@@ -30,6 +30,15 @@ const NAME_NOUNS: Array[String] = [
 ]
 const NAME_ATTEMPTS: int = 6
 
+## Backoff between reconnect attempts, in seconds; the last value repeats forever.
+## Godot exposes no connectivity API, so polling is the only way to notice the
+## radio came back - the long tail keeps that from costing battery all session.
+const RETRY_DELAYS_SECONDS: Array[int] = [5, 15, 60, 180, 600]
+
+## Floor between manual retries. Dying over and over with no signal should not
+## turn into one auth round-trip per death.
+const MANUAL_RETRY_COOLDOWN_SECONDS: int = 20
+
 # === PUBLIC VARIABLES ===
 var player_name: String = ""
 var is_available: bool = false
@@ -47,12 +56,24 @@ var _pending_time_ms: int = 0
 var _fetching: bool = false
 var _submitting: bool = false
 var _renaming: bool = false
+var _connecting: bool = false
+var _availability_settled: bool = false
+var _retry_index: int = 0
+var _retry_timer: Timer = null
+var _last_attempt_unix: int = 0
 
 # === BUILT-IN METHODS ===
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_player_state()
+	_build_retry_timer()
 	_initialize.call_deferred()
+
+func _notification(what: int) -> void:
+	# Returning from the background is the likeliest moment for connectivity to
+	# have changed, and it is the closest thing to a connection event we get.
+	if what == NOTIFICATION_APPLICATION_RESUMED:
+		retry_now()
 
 # === PUBLIC METHODS ===
 
@@ -93,12 +114,44 @@ func submit_run(score: int, duration_ms: int) -> void:
 	if not has_player_name():
 		return
 
+	if not is_available:
+		# Already banked to disk. A run just ended, so this is a natural moment
+		# to check whether the connection came back; the queued score goes up as
+		# soon as it does.
+		retry_now()
+		return
+
 	_submit_pending()
+
+## Drop the backoff and try to reach the backend right now, flushing anything
+## queued if it works. Rate-limited by MANUAL_RETRY_COOLDOWN_SECONDS.
+func retry_now() -> void:
+	if is_available:
+		_flush_pending()
+		return
+
+	# An attempt is already running and will arm the next backoff itself. Bailing
+	# out here matters: the reset below would otherwise cancel a scheduled retry
+	# on behalf of an attempt that never starts, killing the loop entirely.
+	if _connecting:
+		return
+
+	var now: int = int(Time.get_unix_time_from_system())
+	if now - _last_attempt_unix < MANUAL_RETRY_COOLDOWN_SECONDS:
+		return
+
+	_retry_index = 0
+	if _retry_timer:
+		_retry_timer.stop()
+	_try_connect()
 
 func refresh_top(force: bool = false) -> void:
 	if _fetching:
 		return
 	if not is_available:
+		# Opening the window is a deliberate "show me the board" - worth probing
+		# the connection. The result arrives via availability_changed.
+		retry_now()
 		top_updated.emit(_cached_top)
 		return
 
@@ -210,17 +263,74 @@ func _initialize() -> void:
 	_config = _load_config()
 	_backend = _create_backend()
 	add_child(_backend)
+	_try_connect()
 
+## Brings the backend online and flushes anything queued. Safe to call
+## repeatedly - initialize() is idempotent on every backend, so this doubles as
+## the reconnect path.
+func _try_connect() -> void:
+	if _connecting or is_available or _backend == null:
+		return
+
+	_connecting = true
+	_last_attempt_unix = int(Time.get_unix_time_from_system())
 	var result: LeaderboardResult = await _backend.initialize(_config)
-	is_available = result.ok
+	_connecting = false
 
 	if not result.ok:
 		push_warning("LeaderboardManager: backend unavailable (%s)" % result.message)
-	elif _pending_score > 0 and has_player_name():
-		# A run from a previous session never made it up - retry now.
+		_set_available(false)
+		# A missing API key is not going to appear by waiting - only retry the
+		# failures that a working connection would actually fix.
+		if result.code != LeaderboardResult.Code.NOT_CONFIGURED:
+			_schedule_retry()
+		return
+
+	_retry_index = 0
+	# Our standing may have moved while we were offline; do not serve stale data.
+	_last_fetch_unix = 0
+	_set_available(true)
+	_flush_pending()
+
+## Emits availability_changed on every flip, and once when the first connection
+## attempt resolves so listeners get an initial value either way.
+func _set_available(value: bool) -> void:
+	if is_available == value and _availability_settled:
+		return
+	is_available = value
+	_availability_settled = true
+	availability_changed.emit(is_available)
+
+func _build_retry_timer() -> void:
+	_retry_timer = Timer.new()
+	_retry_timer.one_shot = true
+	# Modal windows pause the tree, so a plain Timer would stall while the
+	# leaderboard or pause menu is open - exactly when a retry matters most.
+	_retry_timer.process_mode = Node.PROCESS_MODE_ALWAYS
+	_retry_timer.timeout.connect(_try_connect)
+	add_child(_retry_timer)
+
+func _schedule_retry() -> void:
+	if is_available or _retry_timer == null:
+		return
+
+	var index: int = mini(_retry_index, RETRY_DELAYS_SECONDS.size() - 1)
+	_retry_index += 1
+	_retry_timer.start(float(RETRY_DELAYS_SECONDS[index]))
+
+## Push a queued run, if there is one and it has a name to travel under.
+func _flush_pending() -> void:
+	if _pending_score > 0 and has_player_name():
 		_submit_pending()
 
-	availability_changed.emit(is_available)
+## A failed call is the only connectivity signal available. Drop back to offline
+## on the codes a returning connection would fix, so the backoff loop takes over
+## and the queued run gets retried; a rejected write is not a network problem.
+func _handle_connectivity_failure(result: LeaderboardResult) -> void:
+	match result.code:
+		LeaderboardResult.Code.NETWORK, LeaderboardResult.Code.TIMEOUT, LeaderboardResult.Code.AUTH:
+			_set_available(false)
+			_schedule_retry()
 
 func _load_config() -> LeaderboardConfig:
 	if ResourceLoader.exists(CONFIG_PATH):
@@ -248,6 +358,7 @@ func _fetch_top_async() -> void:
 		await _refresh_player_entry()
 	else:
 		push_warning("LeaderboardManager: fetch_top failed (%s)" % result.message)
+		_handle_connectivity_failure(result)
 
 	_fetching = false
 	top_updated.emit(_cached_top)
@@ -285,7 +396,9 @@ func _submit_pending() -> void:
 		# Our standing changed; next open should re-read rather than show stale data.
 		_last_fetch_unix = 0
 	else:
+		# Stays queued in player.cfg, so it survives even if the app is killed.
 		push_warning("LeaderboardManager: submit deferred (%s)" % result.message)
+		_handle_connectivity_failure(result)
 
 	submit_finished.emit(result)
 

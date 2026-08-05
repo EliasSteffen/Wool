@@ -35,6 +35,7 @@ func _ready() -> void:
 	scroll_container.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
 	LeaderboardManager.top_updated.connect(_on_top_updated)
+	LeaderboardManager.availability_changed.connect(_on_availability_changed)
 
 	get_tree().root.size_changed.connect(_update_layout)
 	_update_layout.call_deferred()
@@ -49,6 +50,13 @@ func on_opened() -> void:
 ## Asks UIManager to close this window; the manager owns visibility and pause.
 func close() -> void:
 	close_requested.emit()
+
+## The connection came back while this window was open - fetch instead of
+## leaving "Leaderboard unavailable" on screen until the player reopens it.
+func _on_availability_changed(available: bool) -> void:
+	if available and visible:
+		_show_loading()
+		LeaderboardManager.refresh_top(true)
 
 func _update_layout() -> void:
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size

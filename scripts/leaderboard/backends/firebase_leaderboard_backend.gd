@@ -31,8 +31,11 @@ func initialize(config: LeaderboardConfig) -> LeaderboardResult:
 	if _config == null or not _config.is_valid():
 		return LeaderboardResult.failure(LeaderboardResult.Code.NOT_CONFIGURED, "missing project_id/api_key")
 
-	_client = HttpJsonClient.new()
-	add_child(_client)
+	# initialize() doubles as reconnect, so it must be safe to call repeatedly:
+	# creating a client per attempt would parent a new HTTPRequest every time.
+	if _client == null or not is_instance_valid(_client):
+		_client = HttpJsonClient.new()
+		add_child(_client)
 
 	_load_auth()
 	return await _ensure_token()
