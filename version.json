@@ -1,0 +1,11 @@
+{
+    "version": "1.0.0",
+    "build_status": {
+        "web": "success",
+        "android": "skipped",
+        "windows": "success",
+        "linux": "skipped",
+        "macos": "skipped",
+        "ios": "skipped"
+    }
+}
