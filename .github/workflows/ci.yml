@@ -2,11 +2,7 @@ name: CI/CD
 
 on:
   push:
-    # The default branch owns the live site at /. Every other branch publishes
-    # only through a pull request, so building its pushes too would run the same
-    # export twice for as long as that pull request is open.
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -96,32 +92,12 @@ jobs:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: [export-web, generate-badges]
-    # A pull request from a fork gets a read-only token, so it could neither
-    # push the site branch nor deploy - it would only ever fail the run.
-    if: github.event.pull_request.head.repo.fork != true
     permissions:
-      contents: write
       pages: write
       id-token: write
-      # Read-only: the prune below needs to know which pull requests are open.
-      pull-requests: read
-    # Every run republishes the whole site, so two of them must never assemble
-    # it at once - the second would publish a tree built from a stale branch.
-    concurrency:
-      group: github-pages
-      cancel-in-progress: false
-    env:
-      # Pages is served from a workflow artifact, which replaces the entire site
-      # on every deploy. This branch is where the published tree lives between
-      # runs, so a preview can be added without dropping the rest of the site.
-      SITE_BRANCH: gh-pages
-      DEFAULT_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
-      # On a pull request the ref is the synthetic refs/pull/<n>/merge, which
-      # would name every preview after a number; head_ref is the real branch.
-      BRANCH: ${{ github.head_ref || github.ref_name }}
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}${{ steps.target.outputs.url_path }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -147,104 +123,10 @@ jobs:
             -o public/demo/coi-serviceworker.js
           sed -i 's|<head>|<head><script src="coi-serviceworker.js"></script>|' public/demo/index.html
 
-      # The pages link /fonts.css, which only exists once this has run - so a
-      # visitor's browser never resolves a Google host to render the site.
-      - name: Self-host webfonts
-        run: python3 .github/scripts/vendor_fonts.py public
-
-      - name: Verify no Google Fonts requests survive
-        run: |
-          if grep -rIn --include='*.html' --include='*.css' \
-              -e fonts.googleapis.com -e fonts.gstatic.com public; then
-            echo "::error::deployed site would still contact Google Fonts"
-            exit 1
-          fi
-
-      - name: Restore the published site
-        env:
-          REMOTE: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
-        run: |
-          if git ls-remote --exit-code --heads "$REMOTE" "$SITE_BRANCH" >/dev/null 2>&1; then
-            git clone --depth 1 --branch "$SITE_BRANCH" "$REMOTE" site
-          elif [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then
-            git init -q -b "$SITE_BRANCH" site
-            git -C site remote add origin "$REMOTE"
-          else
-            # Deploying now would publish a site holding nothing but this
-            # preview, taking the live pages down until the next default-branch
-            # build restores them.
-            echo "::error::$SITE_BRANCH does not exist yet; deploy $DEFAULT_BRANCH once before publishing previews"
-            exit 1
-          fi
-
-      - name: Place this build in the published tree
-        id: target
-        run: |
-          # Branch names may carry characters a URL path should not, and
-          # /previews/ has to stay a flat directory: version/1.2.0 would
-          # otherwise nest its preview inside a "version" folder.
-          slug() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed 's![^a-z0-9._-]!-!g'; }
-
-          if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then
-            find site -mindepth 1 -maxdepth 1 \
-              ! -name .git ! -name previews -exec rm -rf {} +
-            cp -R public/. site/
-            echo "url_path=" >> "$GITHUB_OUTPUT"
-          else
-            path="previews/$(slug "$BRANCH")"
-            rm -rf "site/$path"
-            mkdir -p "site/$path"
-            cp -R public/. "site/$path/"
-            echo "url_path=$path/" >> "$GITHUB_OUTPUT"
-          fi
-
-          # A preview outlives the pull request that asked for it unless it is
-          # deleted here; nothing else ever touches the previews directory.
-          if [ -d site/previews ]; then
-            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open" \
-              --jq '.[].head.ref' \
-              | while read -r branch; do slug "$branch"; echo; done > keep-slugs
-            slug "$BRANCH" >> keep-slugs
-            echo >> keep-slugs
-            for dir in site/previews/*/; do
-              [ -d "$dir" ] || continue
-              if ! grep -qxF "$(basename "$dir")" keep-slugs; then
-                echo "pruning preview of closed pull request $(basename "$dir")"
-                rm -rf "$dir"
-              fi
-            done
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Publish the site branch
-        working-directory: site
-        run: |
-          # The tree is regenerated from scratch every deploy, so keeping its
-          # history would only grow the repo by one web export per push.
-          git checkout -q --orphan deploy
-          git add -A
-          git -c user.name='github-actions[bot]' \
-              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-              commit -q -m "deploy ${BRANCH} (${GITHUB_SHA:0:7})"
-          git push -q --force origin "deploy:$SITE_BRANCH"
-
-      - name: Stage the full site for Pages
-        run: rsync -a --exclude .git site/ pages-root/
-
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: pages-root
+          path: public
 
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Summarise deployment
-        run: |
-          url="${{ steps.deployment.outputs.page_url }}${{ steps.target.outputs.url_path }}"
-          if [ "$BRANCH" = "$DEFAULT_BRANCH" ]; then
-            echo "Deployed **$BRANCH** to $url" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "Deployed preview of **$BRANCH** to $url" >> "$GITHUB_STEP_SUMMARY"
-          fi
