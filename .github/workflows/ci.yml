@@ -123,6 +123,19 @@ jobs:
             -o public/demo/coi-serviceworker.js
           sed -i 's|<head>|<head><script src="coi-serviceworker.js"></script>|' public/demo/index.html
 
+      # The pages link /fonts.css, which only exists once this has run - so a
+      # visitor's browser never resolves a Google host to render the site.
+      - name: Self-host webfonts
+        run: python3 .github/scripts/vendor_fonts.py public
+
+      - name: Verify no Google Fonts requests survive
+        run: |
+          if grep -rIn --include='*.html' --include='*.css' \
+              -e fonts.googleapis.com -e fonts.gstatic.com public; then
+            echo "::error::deployed site would still contact Google Fonts"
+            exit 1
+          fi
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public

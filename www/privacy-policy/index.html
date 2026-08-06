@@ -70,9 +70,12 @@
           <h1>Datenschutz</h1>
           <p class="legal-lead">
             Wool kommt ohne Werbung, ohne Tracking und ohne Analyse-SDKs aus.
-            Personenbezogene Daten verlassen dein Gerät an genau einer Stelle:
-            wenn du dich mit einem Namen in die globale Bestenliste einträgst.
-            Diese Erklärung beschreibt, was dabei passiert.
+            Daten verlassen dein Gerät an genau zwei Stellen: Das Spiel meldet
+            sich bei jedem Start automatisch am Bestenlisten-Server an, damit
+            die Bestenliste überhaupt geladen werden kann. Und es veröffentlicht
+            dein Ergebnis, sobald du in den Einstellungen den Schalter
+            <strong>„Scores veröffentlichen“</strong> einschaltest. Diese
+            Erklärung beschreibt beides.
           </p>
 
           <div class="legal-panel">
@@ -89,20 +92,52 @@
             </div>
           </div>
 
-          <h2>1. Wenn du die Bestenliste nicht nutzt</h2>
+          <h2>1. Was bereits beim Start des Spiels passiert</h2>
           <p class="legal-prose">
-            Ohne Eintrag in die Bestenliste werden keine personenbezogenen Daten
-            an uns oder an Dritte übertragen. Einstellungen, Lautstärke und dein
-            persönlicher Highscore bleiben ausschließlich lokal auf deinem
-            Gerät. Die Bestenliste ist freiwillig: Erst wenn du nach einem Lauf
-            einen Namen eingibst, wird überhaupt etwas hochgeladen. Lehnst du
-            die Abfrage ab, bleibt dein Ergebnis auf dem Gerät.
+            Damit die Bestenliste angezeigt und ein späterer Eintrag
+            zugeordnet werden kann, meldet sich das Spiel bei jedem Start
+            automatisch bei Firebase an – auch dann, wenn du nie etwas
+            veröffentlichst. Verwendet wird dafür die sogenannte
+            <em>anonyme Anmeldung</em> (Firebase Anonymous Authentication).
+            „Anonym“ ist dabei der Produktname des Verfahrens und bedeutet nur,
+            dass du kein Konto, keine E-Mail-Adresse und kein Passwort angeben
+            musst. Dabei werden verarbeitet:
+          </p>
+          <ul class="legal-list">
+            <li>
+              <strong>Pseudonyme Nutzerkennung (UID)</strong> – eine zufällige
+              Zeichenkette, die Firebase bei dieser Anmeldung vergibt. Sie
+              enthält keine Namens-, Geräte- oder Kontodaten und wird aus keiner
+              Geräte-Kennung abgeleitet. Sie wird aber lokal gespeichert und
+              bleibt dauerhaft mit deiner Installation verknüpft: Sie kann dich
+              also von anderen Spielenden unterscheiden und deine Ergebnisse
+              über Sitzungen hinweg zusammenführen. Damit ist sie
+              <strong>nicht anonym</strong> im Sinne des Erwägungsgrundes 26
+              DSGVO, sondern ein Pseudonym nach Art. 4 Nr. 5 DSGVO – und
+              unterliegt als personenbezogenes Datum in vollem Umfang dieser
+              Datenschutzerklärung.
+            </li>
+            <li>
+              <strong>IP-Adresse</strong> – technisch bei jeder Verbindung an
+              den Server übermittelt und dort von Google protokolliert. Wir
+              speichern sie nicht gesondert und werten sie nicht aus.
+            </li>
+          </ul>
+          <p class="legal-prose">
+            Mehr passiert an dieser Stelle nicht: Solange der Schalter „Scores
+            veröffentlichen“ aus ist, verlassen weder dein Name noch deine
+            Ergebnisse das Gerät. Einstellungen, Lautstärke, dein persönlicher
+            Highscore und der beim ersten Start abgefragte Name bleiben
+            ausschließlich lokal. Auch die Namensabfrage beim ersten Start ist
+            keine Einwilligung in die Veröffentlichung – sie vergibt nur ein
+            lokales Etikett.
           </p>
 
-          <h2>2. Welche Daten die Bestenliste verarbeitet</h2>
+          <h2>2. Wenn du „Scores veröffentlichen“ einschaltest</h2>
           <p class="legal-prose">
-            Trägst du dich ein, speichern wir pro Installation genau einen
-            Datensatz:
+            Der Schalter in den Einstellungen ist standardmäßig aus. Schaltest
+            du ihn ein, speichern wir pro Installation genau einen Datensatz,
+            der unter deiner pseudonymen Nutzerkennung abgelegt wird:
           </p>
           <ul class="legal-list">
             <li>
@@ -119,19 +154,15 @@
               <strong>Zeitstempel</strong> der letzten Aktualisierung deines
               Eintrags.
             </li>
-            <li>
-              <strong>Anonyme Nutzerkennung (UID)</strong> – eine zufällige
-              Zeichenkette aus der anonymen Anmeldung bei Firebase. Sie enthält
-              keine Namens-, Geräte- oder Kontodaten, ist aber dauerhaft mit
-              deiner Installation verknüpft und gilt deshalb als
-              personenbezogenes Datum.
-            </li>
-            <li>
-              <strong>IP-Adresse</strong> – technisch bei jeder Verbindung an
-              den Server übermittelt und dort protokolliert. Wir speichern sie
-              nicht gesondert und werten sie nicht aus.
-            </li>
           </ul>
+          <p class="legal-prose">
+            Solange der Schalter an ist, wird jeder Lauf, der deinen bisherigen
+            Eintrag verbessert, automatisch übertragen. Läufe, die du bei
+            ausgeschaltetem Schalter gespielt hast, werden nur lokal
+            vorgemerkt und gehen erst hoch, wenn du ihn einschaltest. Änderst du
+            deinen Namen, während der Schalter an ist, wird der bereits
+            veröffentlichte Eintrag umbenannt.
+          </p>
           <p class="legal-prose">
             Name, Ergebnis und Zeit sind für alle Spielerinnen und Spieler
             weltweit sichtbar – das ist der Zweck einer globalen Bestenliste.
@@ -140,11 +171,20 @@
 
           <h2>3. Zweck und Rechtsgrundlage</h2>
           <p class="legal-prose">
-            Die Verarbeitung dient allein dem Betrieb der Bestenliste, also der
-            Anzeige und Sortierung von Ergebnissen. Rechtsgrundlage ist deine
-            Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO, die du durch die
-            Eingabe eines Namens erteilst. Du kannst sie jederzeit mit Wirkung
-            für die Zukunft widerrufen, indem du deinen Eintrag im Spiel löschst
+            Die Anmeldung und die damit verbundene Verarbeitung von UID
+            und IP-Adresse (Abschnitt 1) dienen allein dem technischen Betrieb
+            der Bestenliste: Ohne sie lässt sich die Liste weder abrufen noch
+            ein Eintrag eindeutig einer Installation zuordnen und gegen fremde
+            Änderungen schützen. Rechtsgrundlage ist unser berechtigtes
+            Interesse an einer funktionsfähigen und manipulationssicheren
+            Bestenliste (Art. 6 Abs. 1 lit. f DSGVO).
+          </p>
+          <p class="legal-prose">
+            Die Veröffentlichung von Name, Ergebnis und Zeitstempel
+            (Abschnitt 2) beruht auf deiner Einwilligung nach Art. 6 Abs. 1
+            lit. a DSGVO, die du durch das Einschalten des Schalters „Scores
+            veröffentlichen“ erteilst. Du kannst sie jederzeit mit Wirkung für
+            die Zukunft widerrufen, indem du den Schalter wieder ausschaltest
             (siehe Abschnitt 6).
           </p>
 
@@ -175,20 +215,34 @@
             Dein Bestenlisten-Eintrag bleibt gespeichert, bis du ihn löschst.
             Eine automatische Löschung nach Ablauf einer Frist findet nicht
             statt, weil eine Bestenliste ihren Sinn verlöre, wenn Einträge von
-            selbst verschwinden. Serverseitige Protokolle von Google
-            unterliegen den dortigen Löschfristen.
+            selbst verschwinden. Dasselbe gilt für die pseudonyme Nutzerkennung:
+            Sie besteht fort, bis du sie über den in Abschnitt 6 beschriebenen
+            Weg löschst. Serverseitige Protokolle von Google unterliegen den
+            dortigen Löschfristen.
           </p>
 
-          <h2>6. Eintrag selbst löschen</h2>
+          <h2>6. Eintrag und Kennung selbst löschen</h2>
           <p class="legal-prose">
-            In der Bestenliste im Spiel findest du unter deinem eigenen Rang die
-            Schaltfläche <strong>„Eintrag löschen“</strong>. Nach einer
-            Sicherheitsabfrage werden dein Datensatz und die dazugehörige
-            anonyme Nutzerkennung endgültig gelöscht – auf dem Server und auf
-            deinem Gerät. Auch dein gespeicherter Spielername wird dabei
-            entfernt. Der Vorgang lässt sich nicht rückgängig machen. Spielst du
-            danach erneut, wirst du wie beim ersten Start nach einem Namen
-            gefragt und erhältst eine neue Kennung.
+            Schalte in den Einstellungen den Schalter <strong>„Scores
+            veröffentlichen“</strong> wieder aus. Damit werden dein
+            veröffentlichter Datensatz und die dazugehörige pseudonyme
+            Nutzerkennung endgültig gelöscht – auf dem Server und auf deinem
+            Gerät. Ein noch nicht hochgeladener, lokal vorgemerkter Lauf wird
+            dabei ebenfalls verworfen, damit er nicht später wieder auf der
+            Liste auftaucht. Der Vorgang lässt sich nicht rückgängig machen.
+          </p>
+          <p class="legal-prose">
+            Dein <em>lokal</em> gespeicherter Spielername bleibt dabei
+            absichtlich erhalten – er gehört dir, nicht der Bestenliste, und du
+            kannst ihn in den Einstellungen jederzeit ändern. Schaltest du
+            später wieder ein, wird eine neue pseudonyme Kennung vergeben und unter
+            diesem Namen neu veröffentlicht.
+          </p>
+          <p class="legal-prose">
+            Die Löschung braucht eine Internetverbindung, weil sie serverseitig
+            bestätigt werden muss. Bist du offline, bleibt der Schalter an und
+            das Spiel meldet dies – dein Eintrag steht dann noch. Wiederhole den
+            Vorgang, sobald du wieder verbunden bist.
           </p>
 
           <h2>7. Deine Rechte</h2>
@@ -223,15 +277,21 @@
             >.
           </p>
           <p class="legal-prose">
-            Schriftarten werden vollständig von diesem Server ausgeliefert. Es
-            werden keine Google Fonts nachgeladen, deine IP-Adresse wird dafür
-            also an keinen Dritten übermittelt. Cookies setzt diese Seite nicht,
-            und es findet keine Reichweitenmessung statt.
+            Schriftarten werden vollständig von diesem Server ausgeliefert: Die
+            verwendete Schrift wird beim Erstellen der Seite einmalig
+            heruntergeladen und mit ausgeliefert. Es werden keine Google Fonts
+            und keine sonstigen externen Skript- oder CDN-Dienste nachgeladen,
+            deine IP-Adresse wird dafür also an keinen Dritten übermittelt.
+            Cookies setzt diese Seite nicht, und es findet keine
+            Reichweitenmessung statt.
           </p>
           <p class="legal-prose">
             Die unter <a href="../demo/">/demo/</a> eingebundene Web-Version des
-            Spiels verhält sich wie die App: Auch dort wird nur dann etwas
-            übertragen, wenn du dich in die Bestenliste einträgst.
+            Spiels verhält sich wie die App: Auch dort erfolgt beim Start die in
+            Abschnitt 1 beschriebene Anmeldung, und Name und Ergebnis
+            werden nur bei eingeschaltetem Schalter „Scores veröffentlichen“
+            übertragen. Die dafür nötigen Daten werden im Browser-Speicher
+            deines Geräts abgelegt.
           </p>
 
           <h2>9. Kinder</h2>
