@@ -88,16 +88,14 @@ jobs:
           path: public
           retention-days: 7
 
-  deploy:
-    name: Deploy to GitHub Pages
+  # Kept separate from deploy so that re-running a failed deploy does not upload
+  # a second artifact. Artifacts belong to the run, not to the attempt, so a
+  # job that both uploads and deploys leaves two named github-pages behind on
+  # the retry - and deploy-pages refuses to pick between them.
+  build-site:
+    name: Build Pages site
     runs-on: ubuntu-latest
     needs: [export-web, generate-badges]
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -140,6 +138,19 @@ jobs:
         with:
           path: public
 
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-site
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # No checkout and no artifact upload: this job consumes what build-site
+      # produced, so retrying it is always safe.
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
