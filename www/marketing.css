@@ -224,6 +224,124 @@ body {
   padding: 0 !important;
 }
 
+/* ── Burger nav (narrow viewports) ── */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid rgba(107, 94, 86, 0.16);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--deep);
+  cursor: pointer;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  outline: none;
+}
+
+.nav-toggle__bar {
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: currentColor;
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+/* Two bars, so the open state folds them into a cross rather than needing a
+   third that would have to disappear. */
+.site-header.nav-open .nav-toggle__bar:first-child {
+  transform: translateY(calc(0.35rem / 2 + 1px)) rotate(45deg);
+}
+
+.site-header.nav-open .nav-toggle__bar:last-child {
+  transform: translateY(calc(-0.35rem / 2 - 1px)) rotate(-45deg);
+}
+
+@media (max-width: 33.99rem) {
+  .site-header {
+    position: relative;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  /* The links leave the flow entirely: wrapping them onto a second row is what
+     made the header look broken at this width. */
+  .nav-mini {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 5;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    min-width: 11rem;
+    padding: 0.5rem;
+    border: 1px solid rgba(107, 94, 86, 0.14);
+    border-radius: 14px;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+  }
+
+  .site-header.nav-open .nav-mini {
+    display: flex;
+  }
+
+  .nav-mini a {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .nav-icon-link {
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    justify-content: flex-start;
+    padding: 0.6rem 0.75rem !important;
+  }
+}
+
+/* Icon-only in the inline header; the dropdown gives it a label, because a
+   lone circle in a list of words reads as an unfinished row. */
+.nav-icon-link__label {
+  display: none;
+}
+
+@media (max-width: 33.99rem) {
+  .nav-icon-link__label {
+    display: inline;
+    margin-left: 0.55rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav-toggle {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+@media (prefers-color-scheme: dark) and (max-width: 33.99rem) {
+  .nav-mini {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
 /* ── Hero content grid ── */
 .hero-content {
   display: grid;
@@ -934,6 +1052,20 @@ main .legal-card {
   max-width: 28rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* The support card holds a handful of lines, so a card width suits it. The
+   policy is a long document and wants a reading measure instead - expressed in
+   ch so the cap tracks the text rather than a guessed pixel count. It is a
+   max, not a width: on a narrow device the card just shrinks to what fits. */
+main .legal-card--policy {
+  max-width: 68ch;
+}
+
+@media (min-width: 48rem) {
+  .legal-card--policy {
+    padding: 2.75rem 2.5rem;
+  }
 }
 
 .legal-card {

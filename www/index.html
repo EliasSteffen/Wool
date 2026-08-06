@@ -152,7 +152,17 @@
       <div class="hero-inner">
         <header class="site-header">
           <a href="./" class="brand">Wool</a>
-          <nav class="nav-mini" aria-label="Kurznavigation">
+          <button
+            type="button"
+            class="nav-toggle"
+            aria-label="Menü"
+            aria-controls="site-nav"
+            aria-expanded="false"
+          >
+            <span class="nav-toggle__bar"></span>
+            <span class="nav-toggle__bar"></span>
+          </button>
+          <nav class="nav-mini" id="site-nav" aria-label="Kurznavigation">
             <a href="release-notes/">Release Notes</a>
             <a href="support-info/">Support</a>
             <a href="privacy-policy/">Datenschutz</a>
@@ -171,6 +181,7 @@
               >
                 <use href="#sym-github" />
               </svg>
+              <span class="nav-icon-link__label">GitHub</span>
             </a>
           </nav>
         </header>
@@ -494,6 +505,7 @@
       </form>
     </dialog>
 
+    <script src="nav.js" defer></script>
     <script>
       (function () {
         var dlg = document.getElementById("play-soon-pop");
