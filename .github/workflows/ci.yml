@@ -6,6 +6,20 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Guards the rules that decide whether a leaderboard identity is discarded.
+  # Getting those wrong strands a player's row on the board permanently, and
+  # nothing downstream would notice - the exports succeed either way.
+  test-auth:
+    name: Test auth classification
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.5.1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run headless checks
+        run: godot --headless --script tests/test_auth_classification.gd
+
   export-web:
     name: Export Web
     runs-on: ubuntu-latest
