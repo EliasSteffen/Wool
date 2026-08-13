@@ -17,6 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Import project
+        run: godot --headless --import
+
       - name: Run headless checks
         run: godot --headless --script tests/test_auth_classification.gd
 
